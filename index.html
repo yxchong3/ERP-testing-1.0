@@ -129,6 +129,8 @@
   .bar-row .fill{height:100%;border-radius:5px;}
   .bar-row .val{width:80px;text-align:right;flex-shrink:0;font-weight:700;font-size:11px;}
 </style>
+<!-- Supabase 云端 SDK（未配置 key 时不影响运行，自动回退本地存储）-->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 <div class="top">
@@ -339,14 +341,57 @@ function seed(outletId){
   return {items,recipes,subRecipes,moves,vendors,payables,stocktakes,opex,staff,attendance,schedule,leaves,sales,fin,audit,purchases,grn,transfers,staffLoans,wasteLog,offers,monthEnd};
 }
 
+/* ================= 数据持久化：Supabase 云端 ⇄ 本地存储 自动切换 =================
+   ★ 多分店云端同步设置 ★
+   填上下面两行你的 Supabase 项目资料，即可点亮跨分店 / 跨设备的实时云端同步；
+   两行留空则自动使用浏览器本地存储（localStorage），打开即用、无需任何授权。
+   一次性建表 SQL 见仓库根目录 supabase-schema.sql（在 Supabase SQL Editor 跑一次）。 */
+const SUPABASE_URL = "";        // ← 例如 https://xxxxxxxx.supabase.co
+const SUPABASE_ANON_KEY = "";   // ← anon public key
+const CLOUD_TABLE = "erp_store";
+
+let _sb=null, CLOUD=false;
+function initCloud(){
+  try{
+    if(SUPABASE_URL&&SUPABASE_ANON_KEY&&window.supabase&&window.supabase.createClient){
+      _sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+      CLOUD=true;
+    }
+  }catch(e){CLOUD=false;}
+  return CLOUD;
+}
+/* 统一存储接口：优先云端，永远在本地留一份（离线可用），云端失败自动回退 */
+const Store={
+  async get(key){
+    if(CLOUD){
+      try{const {data,error}=await _sb.from(CLOUD_TABLE).select('value').eq('key',key).maybeSingle();
+        if(error)throw error;
+        if(data){try{localStorage.setItem(key,JSON.stringify(data.value));}catch(_){}return {value:JSON.stringify(data.value)};}
+      }catch(e){/* 落到本地读取 */}
+    }
+    try{const v=localStorage.getItem(key);return v?{value:v}:null;}catch(e){return null;}
+  },
+  async set(key,val){
+    let ok=false;
+    if(CLOUD){
+      try{const {error}=await _sb.from(CLOUD_TABLE).upsert({key,value:JSON.parse(val),updated_at:new Date().toISOString()},{onConflict:'key'});
+        if(error)throw error; ok=true;
+      }catch(e){ok=false;}
+    }
+    try{localStorage.setItem(key,val);}catch(e){}
+    return ok;
+  }
+};
+
 let DB={};
 async function loadDB(){
   for(const o of OUTLETS){
-    try{const r=await window.storage.get('erpv2:'+o.id);DB[o.id]=r?JSON.parse(r.value):seed(o.id);}
+    try{const r=await Store.get('erpv2:'+o.id);DB[o.id]=r?JSON.parse(r.value):seed(o.id);}
     catch(e){DB[o.id]=seed(o.id);}
   }
 }
-async function save(oid){try{await window.storage.set('erpv2:'+(oid||curOutlet),JSON.stringify(DB[oid||curOutlet]));}catch(e){}}
+async function save(oid){try{await Store.set('erpv2:'+(oid||curOutlet),JSON.stringify(DB[oid||curOutlet]));}catch(e){}}
+async function reloadOutlet(oid){try{const r=await Store.get('erpv2:'+oid);if(r)DB[oid]=JSON.parse(r.value);}catch(e){}}
 const ALL_ID="ALL"; // 全部分店总和（不含中央厨房）
 function branchIds(){return OUTLETS.filter(o=>!o.ck).map(o=>o.id);}
 function isAgg(){return curOutlet===ALL_ID;}
@@ -437,7 +482,9 @@ function renderSidebar(){
   document.getElementById('sidebar').innerHTML=html;
 }
 function toggleSide(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('backdrop').classList.toggle('show');}
-function switchOutlet(){curOutlet=document.getElementById('outletSel').value;_aggCache=null;render();}
+async function switchOutlet(){curOutlet=document.getElementById('outletSel').value;_aggCache=null;
+  if(CLOUD){try{if(curOutlet===ALL_ID){for(const id of branchIds())await reloadOutlet(id);}else if(curOutlet!==ALL_ID)await reloadOutlet(curOutlet);}catch(e){}}
+  render();}
 function switchRole(){curRole=document.getElementById('roleSel').value;if(!can(curPage)&&!subCan(curPage))curPage="dash";render();}
 function toggleLang(){LANG=LANG==="zh"?"en":"zh";render();}
 function nav(p){curPage=p;if(!['purchase','grn','monthend'].includes(p))selSupplier=null;const sb=document.getElementById('sidebar');if(sb)sb.classList.remove('open');const bd=document.getElementById('backdrop');if(bd)bd.classList.remove('show');render();window.scrollTo(0,0);}
@@ -951,8 +998,13 @@ function pgSettings(){
     <div class="mini">${LANG==="zh"?"切换角色请用右上角选单。老板/人事经理：全权含个人薪资。区域副经理：全权但薪资只看总数、不看个人。店长：本店。厨师长：生产。员工：只读+限额。":"Switch role top-right. Area A.M. sees salary total only."}</div>
   </div>
   <div class="card" style="padding:12px;margin-bottom:12px;">
-    <div class="fr" style="margin:0;"><label>🔐 ${LANG==="zh"?"登录与白名单 (需 Supabase 后端)":"Login & Whitelist"}</label>
-    <div class="mini">${LANG==="zh"?"此原型为演示。正式版用 Supabase Auth + Google 登录 + 邮箱白名单：未登录强制跳转登录页，无法读取任何数据。相关代码已另附给你。":"Prototype only. Production uses Supabase Auth + Google + email whitelist."}</div></div>
+    <div class="fr" style="margin:0 0 8px;"><label>☁️ ${LANG==="zh"?"数据存储状态":"Storage Status"}</label>
+    <div class="al ${CLOUD?'al-b':'al-a'}" style="margin:0;"><div class="t">${CLOUD?("🟢 "+(LANG==="zh"?"Supabase 云端同步 已启用":"Cloud sync ON")):("🟡 "+(LANG==="zh"?"本地存储模式（localStorage）":"Local storage mode"))}</div>
+    ${CLOUD?(LANG==="zh"?"各分店数据实时保存到云端，跨设备/跨分店共享。":"Branch data syncs to the cloud across devices."):(LANG==="zh"?"数据保存在此浏览器本地，打开即用、无需授权；但不跨设备同步。填入 SUPABASE_URL / ANON_KEY 即可点亮云端。":"Saved in this browser only. Add SUPABASE_URL / ANON_KEY to enable cloud.")}</div></div>
+  </div>
+  <div class="card" style="padding:12px;margin-bottom:12px;">
+    <div class="fr" style="margin:0;"><label>🔐 ${LANG==="zh"?"登录与白名单 (需 Supabase Auth)":"Login & Whitelist"}</label>
+    <div class="mini">${LANG==="zh"?"此原型登录为演示选角色。若要强制身份验证，可再启用 Supabase Auth + Google 登录 + 邮箱白名单：未登录无法读取任何数据。":"Demo role-picker login. Optional: enable Supabase Auth + Google + email whitelist."}</div></div>
   </div>
   <h2 class="h">📜 ${LANG==="zh"?"审计轨迹 Audit Log":"Audit Trail"} <span class="tag">${LANG==="zh"?"只增不改":"Append-only"}</span></h2>
   <div class="card tbl"><table><thead><tr><th>${LANG==="zh"?"时间":"Time"}</th><th>${LANG==="zh"?"操作人":"User"}</th><th>${LANG==="zh"?"动作":"Action"}</th><th>${LANG==="zh"?"明细":"Detail"}</th><th>${LANG==="zh"?"旧→新":"Old→New"}</th></tr></thead><tbody>
@@ -1532,7 +1584,7 @@ function doLogin(){
 function logout(){showLogin();}
 
 /* ---------- init ---------- */
-(async()=>{await loadDB();showLogin();})();
+(async()=>{initCloud();await loadDB();showLogin();})();
 
 </script>
 </body>
