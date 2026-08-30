@@ -139,6 +139,7 @@
     <button class="lang" onclick="toggleLang()" id="langBtn">EN</button>
     <select class="sel" id="roleSel" onchange="switchRole()"></select>
     <select class="sel" id="outletSel" onchange="switchOutlet()"></select>
+    <button class="lang" onclick="confirmLogout()" id="logoutBtn" title="登出 Log Out">🚪</button>
   </div>
 </div>
 
@@ -1179,12 +1180,7 @@ function pgSettings(){
   <div class="card" style="padding:12px;margin-bottom:12px;">
     <div class="fr" style="margin:0;"><label>🔐 ${LANG==="zh"?"登录方式":"Login Mode"}</label>
     <div class="mini">${CLOUD?(curUser?(LANG==="zh"?`已启用真实登录：当前 ${curUser.name}（${curUser.email}）· 岗位与分店由白名单锁定。未登录无法读取任何数据。`:`Real auth on: ${curUser.email}.`):(LANG==="zh"?"已启用 Supabase 真实邮箱登录 + 白名单。":"Supabase auth + whitelist enabled.")):(LANG==="zh"?"当前为演示登录（未连云端）。填入 Supabase 后自动切换为真实邮箱登录 + 白名单。":"Demo login. Configure Supabase for real auth.")}</div></div>
-  </div>
-  <h2 class="h">📜 ${LANG==="zh"?"审计轨迹 Audit Log":"Audit Trail"} <span class="tag">${LANG==="zh"?"只增不改":"Append-only"}</span></h2>
-  <div class="card tbl"><table><thead><tr><th>${LANG==="zh"?"时间":"Time"}</th><th>${LANG==="zh"?"操作人":"User"}</th><th>${LANG==="zh"?"动作":"Action"}</th><th>${LANG==="zh"?"明细":"Detail"}</th><th>${LANG==="zh"?"旧→新":"Old→New"}</th></tr></thead><tbody>
-  ${x.audit.map(a=>`<tr><td class="mini">${a.date}</td><td>${a.user}</td><td><span class="pill p-b">${a.act}</span></td><td>${a.detail}</td><td class="mini">${a.old}→${a.new}</td></tr>`).join('')}
-  </tbody></table></div>
-  <button class="btn ghost block" style="margin-top:14px;" onclick="logout()">🚪 ${LANG==="zh"?"登出":"Sign Out"}</button>`;
+  </div>`;
 }
 
 /* ================= 弹窗表单 ================= */
@@ -1833,6 +1829,11 @@ function doLogin(){
   curPage=firstAllowedPage();render();
 }
 function logout(){if(AUTH())authLogout();else showLogin();}
+function confirmLogout(){
+  if(!confirm(LANG==="zh"?"确定要登出吗？":"Log out?"))return;
+  if(!confirm(LANG==="zh"?"再次确认：登出后需重新登录，确定登出？":"Confirm again: you'll need to sign in again. Log out?"))return;
+  logout();
+}
 
 /* ---------- init ---------- */
 (async()=>{
