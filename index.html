@@ -196,6 +196,8 @@ function canApproveLeave(){return ROLES[curRole].approveLeave;}
 function currentEmpId(){return 1;}
 const TODAY="2026-08-27";
 let curOutlet="b1", curRole="owner", LANG="zh", moveFilter="all", curPage="dash";
+let curUser=null;   // 真实登录用户 {email,name,role,outlet}；演示模式为 null
+let USERS=[];       // 白名单/用户目录缓存（erp_users）
 
 /* ---------- i18n ---------- */
 const T={
@@ -454,7 +456,8 @@ function recipeCost(r){ // 支持多级 BOM
   },0);
 }
 function auditLog(act,detail,oldv,newv){
-  d().audit.unshift({date:TODAY+" "+new Date().toTimeString().slice(0,5),user:ROLES[curRole].name,roleKey:curRole,act,detail,old:oldv||"",new:newv||""});
+  const who=curUser?(curUser.name+" ("+curUser.email+")"):ROLES[curRole].name;
+  d().audit.unshift({date:TODAY+" "+new Date().toTimeString().slice(0,5),user:who,roleKey:curRole,act,detail,old:oldv||"",new:newv||""});
 }
 
 /* ================= 渲染框架 ================= */
@@ -467,12 +470,29 @@ function canW(p){return can(p)&&!isAgg();} // 汇总视图为只读
 function renderTop(){
   document.getElementById('appTitle').textContent=t('appTitle');
   document.getElementById('langBtn').textContent=LANG==="zh"?"EN":"中";
-  document.getElementById('roleSel').innerHTML=Object.entries(ROLES).map(([k,v])=>`<option value="${k}" ${k===curRole?'selected':''}>${LANG==="zh"?v.name:v.en}</option>`).join('');
+  const roleSel=document.getElementById('roleSel');
+  if(curUser){ // 真实登录：岗位由白名单锁定，不可自选
+    roleSel.innerHTML=`<option>${LANG==="zh"?ROLES[curRole].name:ROLES[curRole].en}</option>`;roleSel.disabled=true;
+  }else{
+    roleSel.disabled=false;
+    roleSel.innerHTML=Object.entries(ROLES).map(([k,v])=>`<option value="${k}" ${k===curRole?'selected':''}>${LANG==="zh"?v.name:v.en}</option>`).join('');
+  }
   const ck=OUTLETS.find(o=>o.ck);const branches=OUTLETS.filter(o=>!o.ck);
-  document.getElementById('outletSel').innerHTML=
-    `<option value="${ck.id}" ${ck.id===curOutlet?'selected':''}>🏭 ${nm(ck)}</option>`+
-    `<option value="${ALL_ID}" ${curOutlet===ALL_ID?'selected':''}>📊 ${LANG==="zh"?"全部分店（总和）":"All Branches (Total)"}</option>`+
-    branches.map(o=>`<option value="${o.id}" ${o.id===curOutlet?'selected':''}>${nm(o)}</option>`).join('');
+  const outletSel=document.getElementById('outletSel');
+  const allBranch=ROLES[curRole].allBranch;
+  if(allBranch){ // 全分店角色：中央厨房 + 总和 + 各分店
+    outletSel.disabled=false;
+    outletSel.innerHTML=
+      `<option value="${ck.id}" ${ck.id===curOutlet?'selected':''}>🏭 ${nm(ck)}</option>`+
+      `<option value="${ALL_ID}" ${curOutlet===ALL_ID?'selected':''}>📊 ${LANG==="zh"?"全部分店（总和）":"All Branches (Total)"}</option>`+
+      branches.map(o=>`<option value="${o.id}" ${o.id===curOutlet?'selected':''}>${nm(o)}</option>`).join('');
+  }else if(curUser){ // 真实登录的本店角色：锁定白名单分配的分店
+    const ho=OUTLETS.find(o=>o.id===curOutlet)||branches[0];
+    outletSel.innerHTML=`<option value="${ho.id}" selected>${nm(ho)}</option>`;outletSel.disabled=true;
+  }else{ // 演示模式的本店角色：可在各分店间浏览（无中央厨房/总和）
+    outletSel.disabled=false;
+    outletSel.innerHTML=branches.map(o=>`<option value="${o.id}" ${o.id===curOutlet?'selected':''}>${nm(o)}</option>`).join('');
+  }
 }
 // 侧边栏菜单分组（ERP 结构，方便日后扩充）
 const MENU=[
@@ -1087,6 +1107,55 @@ function auditMonitorHTML(){
     ${rows.map(a=>{const k=auditKind(a.act);return `<tr><td class="mini">${a.date}</td><td>${a._outletName}</td><td><span class="pill ${rolePill[a._role]||'p-n'}">${roleName[a._role]||a._role}</span></td><td><span class="pill ${k.c}">${k.t}</span></td><td>${a.act}</td><td>${a.detail||''}</td><td class="mini">${(a.old||'')}${a.old||a.new?'→':''}${(a.new||'')}</td></tr>`;}).join('')||`<tr><td colspan="7" class="empty">${LANG==="zh"?"暂无符合条件的记录":"No records"}</td></tr>`}
   </tbody></table></div>`;
 }
+/* ---- 白名单 / 用户管理（仅 老板/区域副经理，需云端）---- */
+function roleShort(rk){return LANG==="zh"?(ROLES[rk]?ROLES[rk].name.split(' ')[0].split('/')[0]:rk):(ROLES[rk]?ROLES[rk].en:rk);}
+function whitelistHTML(){
+  if(!canEditPerms())return '';
+  if(!CLOUD)return `<div class="fb" style="margin-top:4px;"><h2 class="h" style="margin:0;">👥 ${LANG==="zh"?"白名单 / 用户管理":"Whitelist / Users"}</h2></div>
+    <div class="al al-a"><div class="t">🟡 ${LANG==="zh"?"需先启用 Supabase 云端":"Requires Supabase cloud"}</div>${LANG==="zh"?"白名单用户存放在云端，请先配置 Supabase 才能管理。":"Configure Supabase to manage users."}</div>`;
+  const outName=id=>{const o=OUTLETS.find(x=>x.id===id);return o?nm(o):(id||'—');};
+  return `<div class="fb" style="margin-top:4px;"><h2 class="h" style="margin:0;">👥 ${LANG==="zh"?"白名单 / 用户管理":"Whitelist / Users"} <span class="tag">${USERS.length}</span></h2>
+    <button class="btn gold sm" onclick="formUser()">+ ${LANG==="zh"?"添加用户":"Add User"}</button></div>
+  <div class="hint">${LANG==="zh"?"只有在此名单且『启用』的邮箱才能登录。岗位与所属分店由你分配；员工首次用该邮箱注册密码即可登录。":"Only listed & active emails can sign in. You assign role & branch."}</div>
+  <div class="card tbl"><table><thead><tr><th>${LANG==="zh"?"邮箱":"Email"}</th><th>${LANG==="zh"?"姓名":"Name"}</th><th>${LANG==="zh"?"岗位":"Role"}</th><th>${LANG==="zh"?"分店":"Branch"}</th><th>${LANG==="zh"?"状态":"Status"}</th><th></th></tr></thead><tbody>
+  ${USERS.map(u=>`<tr>
+    <td><b>${u.email}</b>${curUser&&u.email===curUser.email?` <span class="pill p-b">${LANG==="zh"?"你":"you"}</span>`:''}</td>
+    <td>${u.name||'—'}</td>
+    <td><span class="pill p-p">${roleShort(u.role)}</span></td>
+    <td class="mini">${ROLES[u.role]&&ROLES[u.role].allBranch?(LANG==="zh"?"全部":"All"):outName(u.outlet)}</td>
+    <td>${u.active===false?`<span class="pill p-r">${LANG==="zh"?"停用":"Off"}</span>`:`<span class="pill p-g">${LANG==="zh"?"启用":"On"}</span>`}</td>
+    <td style="white-space:nowrap;"><button class="ib" onclick="formUser('${(u.email||'').replace(/'/g,"\\'")}')">✏️</button> <button class="ib" onclick="delUser('${(u.email||'').replace(/'/g,"\\'")}')">🗑️</button></td>
+  </tr>`).join('')||`<tr><td colspan="6" class="empty">${LANG==="zh"?"暂无用户，点『添加用户』或让员工自行注册后再分配。":"No users yet."}</td></tr>`}
+  </tbody></table></div>`;
+}
+function formUser(email){
+  const u=email?USERS.find(x=>x.email===email):null;const isEdit=!!u;
+  const roleOpts=Object.entries(ROLES).map(([k,v])=>`<option value="${k}" ${u&&u.role===k?'selected':(!u&&k==='staff'?'selected':'')}>${LANG==="zh"?v.name:v.en}</option>`).join('');
+  const outOpts=OUTLETS.map(o=>`<option value="${o.id}" ${u&&u.outlet===o.id?'selected':(!u&&o.id==='b1'?'selected':'')}>${nm(o)}</option>`).join('');
+  openForm(`<h3>👤 ${isEdit?(LANG==="zh"?"编辑用户":"Edit User"):(LANG==="zh"?"添加用户":"Add User")} <span class="x" onclick="closeM()">×</span></h3>
+    <div class="fr"><label>${LANG==="zh"?"邮箱":"Email"}</label><input id="u_email" type="email" value="${u?u.email:''}" ${isEdit?'disabled':''} placeholder="staff@example.com"></div>
+    <div class="fr"><label>${LANG==="zh"?"姓名":"Name"}</label><input id="u_name" value="${u?(u.name||''):''}" placeholder="${LANG==="zh"?"如 陈志强":"Full name"}"></div>
+    <div class="fg2"><div class="fr"><label>${LANG==="zh"?"岗位":"Role"}</label><select id="u_role">${roleOpts}</select></div>
+      <div class="fr"><label>${LANG==="zh"?"所属分店":"Home Branch"}</label><select id="u_outlet">${outOpts}</select></div></div>
+    <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin:6px 0 12px;"><input type="checkbox" id="u_active" ${!u||u.active!==false?'checked':''}> ${LANG==="zh"?"启用（允许登录）":"Active (can sign in)"}</label>
+    <button class="btn block brand" onclick="saveUser('${email||''}')">${LANG==="zh"?"保存":"Save"}</button>`);
+}
+async function saveUser(orig){
+  const email=(fv('u_email')||orig||'').toLowerCase();const name=fv('u_name');const role=fv('u_role');const outlet=fv('u_outlet');
+  const active=document.getElementById('u_active').checked;
+  if(!email){alert(LANG==="zh"?"邮箱必填":"Email required");return;}
+  if(orig&&curUser&&orig===curUser.email&&(role!=='owner'&&role!=='area')&&!active){alert(LANG==="zh"?"不能停用或降低自己的管理权限。":"Can't disable/demote yourself.");return;}
+  try{const {error}=await _sb.from('erp_users').upsert({email,name,role,outlet,active},{onConflict:'email'});if(error)throw error;
+    auditLog("白名单变更",email+" · "+role+" · "+(active?"启用":"停用"),"","");await loadUsers();closeM();render();
+  }catch(e){alert((LANG==="zh"?"保存失败：":"Save failed: ")+(e.message||e));}
+}
+async function delUser(email){
+  if(curUser&&email===curUser.email){alert(LANG==="zh"?"不能删除当前登录账号。":"Can't delete yourself.");return;}
+  if(!confirm(LANG==="zh"?`确定从白名单移除 ${email}？该账号将无法再登录。`:`Remove ${email}?`))return;
+  try{const {error}=await _sb.from('erp_users').delete().eq('email',email);if(error)throw error;
+    auditLog("白名单删除",email,"","");await loadUsers();render();
+  }catch(e){alert((LANG==="zh"?"删除失败：":"Delete failed: ")+(e.message||e));}
+}
 function pgSettings(){
   const x=d();
   return `<h2 class="h" style="margin-top:2px;">⚙️ ${LANG==="zh"?"系统设置":"Settings"}</h2>
@@ -1096,6 +1165,7 @@ function pgSettings(){
     <div class="mini">${LANG==="zh"?"切换角色请用右上角选单。老板/人事经理：全权含个人薪资。区域副经理：全权但薪资只看总数、不看个人。店长：本店采购/盘点/损耗/OpEx+报表。厨师长：生产/成品入库/配送调拨。员工：打卡/请假/查看自己薪资。":"Switch role top-right."}</div>
   </div>
   ${permEditorHTML()}
+  ${whitelistHTML()}
   ${auditMonitorHTML()}
   <div class="card" style="padding:12px;margin-bottom:12px;">
     <div class="fr" style="margin:0 0 8px;"><label>☁️ ${LANG==="zh"?"数据存储状态":"Storage Status"}</label>
@@ -1103,8 +1173,8 @@ function pgSettings(){
     ${CLOUD?(LANG==="zh"?"各分店数据实时保存到云端，跨设备/跨分店共享。":"Branch data syncs to the cloud across devices."):(LANG==="zh"?"数据保存在此浏览器本地，打开即用、无需授权；但不跨设备同步。填入 SUPABASE_URL / ANON_KEY 即可点亮云端。":"Saved in this browser only. Add SUPABASE_URL / ANON_KEY to enable cloud.")}</div></div>
   </div>
   <div class="card" style="padding:12px;margin-bottom:12px;">
-    <div class="fr" style="margin:0;"><label>🔐 ${LANG==="zh"?"登录与白名单 (需 Supabase Auth)":"Login & Whitelist"}</label>
-    <div class="mini">${LANG==="zh"?"此原型登录为演示选角色。若要强制身份验证，可再启用 Supabase Auth + Google 登录 + 邮箱白名单：未登录无法读取任何数据。":"Demo role-picker login. Optional: enable Supabase Auth + Google + email whitelist."}</div></div>
+    <div class="fr" style="margin:0;"><label>🔐 ${LANG==="zh"?"登录方式":"Login Mode"}</label>
+    <div class="mini">${CLOUD?(curUser?(LANG==="zh"?`已启用真实登录：当前 ${curUser.name}（${curUser.email}）· 岗位与分店由白名单锁定。未登录无法读取任何数据。`:`Real auth on: ${curUser.email}.`):(LANG==="zh"?"已启用 Supabase 真实邮箱登录 + 白名单。":"Supabase auth + whitelist enabled.")):(LANG==="zh"?"当前为演示登录（未连云端）。填入 Supabase 后自动切换为真实邮箱登录 + 白名单。":"Demo login. Configure Supabase for real auth.")}</div></div>
   </div>
   <h2 class="h">📜 ${LANG==="zh"?"审计轨迹 Audit Log":"Audit Trail"} <span class="tag">${LANG==="zh"?"只增不改":"Append-only"}</span></h2>
   <div class="card tbl"><table><thead><tr><th>${LANG==="zh"?"时间":"Time"}</th><th>${LANG==="zh"?"操作人":"User"}</th><th>${LANG==="zh"?"动作":"Action"}</th><th>${LANG==="zh"?"明细":"Detail"}</th><th>${LANG==="zh"?"旧→新":"Old→New"}</th></tr></thead><tbody>
@@ -1655,37 +1725,122 @@ function render(){
   document.getElementById('pageHost').innerHTML=`<div class="page active">${banner}${(_pages[curPage]||pgDash)()}</div>`;
 }
 
-/* ================= 登录界面（演示）================= */
-/* 注意：这是前端演示登录。真正的安全登录需 Supabase Auth（代码另附）。*/
-const WHITELIST=["boss@mengkee.com","hr@mengkee.com","area@mengkee.com"]; // 白名单示范
+/* ================= 登录 / 身份验证 =================
+   云端(Supabase)已配置 → 真实 Email 登录 + 白名单(erp_users)；
+   未配置云端 → 回退到演示「选角色」登录。 */
+function AUTH(){return CLOUD && _sb && _sb.auth;}
+function fv(id){const e=document.getElementById(id);return e?e.value.trim():'';}
+
+/* ---- 白名单/用户目录 ---- */
+async function loadUsers(){
+  if(!CLOUD){USERS=[];return {ok:true};}
+  try{const {data,error}=await _sb.from('erp_users').select('*');if(error)throw error;USERS=data||[];return {ok:true};}
+  catch(e){USERS=[];return {ok:false,err:e};}
+}
+function findUser(email){email=(email||'').toLowerCase().trim();return USERS.find(u=>(u.email||'').toLowerCase()===email);}
+
+/* ---- 登录界面（真实 Email）---- */
+function showAuthLogin(msg){
+  document.querySelector('.top').style.display='none';
+  const sb=document.getElementById('sidebar');if(sb)sb.style.display='none';
+  document.getElementById('pageHost').innerHTML=`
+  <div style="max-width:380px;margin:7vh auto;padding:28px 22px;background:#fff;border:1px solid var(--line);border-radius:16px;text-align:center;">
+    <div style="font-size:30px;margin-bottom:6px;">🍜</div>
+    <div style="font-weight:800;font-size:19px;color:var(--ink);">明记餐饮 ERP</div>
+    <div class="mini" style="margin:4px 0 16px;">${LANG==="zh"?"多分店进销存系统 · 请登录":"Please sign in"}</div>
+    ${msg?`<div class="al al-r" style="text-align:left;">${msg}</div>`:''}
+    <div class="fr" style="text-align:left;margin-bottom:8px;"><label>${LANG==="zh"?"邮箱":"Email"}</label><input id="au_email" type="email" placeholder="you@example.com" autocomplete="username"></div>
+    <div class="fr" style="text-align:left;"><label>${LANG==="zh"?"密码":"Password"}</label><input id="au_pw" type="password" placeholder="••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doAuthLogin()"></div>
+    <button class="btn block brand" style="margin-top:6px;" onclick="doAuthLogin()">🔓 ${LANG==="zh"?"登录":"Sign In"}</button>
+    <button class="btn block ghost" style="margin-top:8px;" onclick="doAuthSignup()">🆕 ${LANG==="zh"?"首次使用？注册账号":"First time? Sign Up"}</button>
+    <div id="au_msg" class="mini" style="margin-top:10px;min-height:16px;"></div>
+    <div class="mini" style="margin-top:8px;line-height:1.5;">🔒 ${LANG==="zh"?"仅白名单邮箱可进入；未登录无法读取任何数据。岗位与分店由管理员分配。":"Whitelist-only. Role & branch assigned by admin."}</div>
+  </div>`;
+}
+async function doAuthLogin(){
+  const email=fv('au_email'),pw=fv('au_pw');const m=document.getElementById('au_msg');
+  if(!email||!pw){if(m)m.innerHTML='⚠️ '+(LANG==="zh"?"请输入邮箱和密码":"Enter email & password");return;}
+  if(m)m.textContent=LANG==="zh"?"登录中…":"Signing in…";
+  try{const {data,error}=await _sb.auth.signInWithPassword({email,password:pw});
+    if(error){if(m)m.innerHTML='❌ '+error.message;return;}
+    await afterAuth(data.user);
+  }catch(e){if(m)m.innerHTML='❌ '+(e.message||e);}
+}
+async function doAuthSignup(){
+  const email=fv('au_email'),pw=fv('au_pw');const m=document.getElementById('au_msg');
+  if(!email||!pw){if(m)m.innerHTML='⚠️ '+(LANG==="zh"?"请输入邮箱和密码（至少6位）":"Enter email & password (≥6)");return;}
+  if(m)m.textContent=LANG==="zh"?"注册中…":"Signing up…";
+  try{const {data,error}=await _sb.auth.signUp({email,password:pw});
+    if(error){if(m)m.innerHTML='❌ '+error.message;return;}
+    if(data.session&&data.user){await afterAuth(data.user);}
+    else{if(m)m.innerHTML='✅ '+(LANG==="zh"?"注册成功。若开启了邮箱确认，请查收邮件确认后再登录。":"Signed up. Confirm email if required, then sign in.");}
+  }catch(e){if(m)m.innerHTML='❌ '+(e.message||e);}
+}
+async function afterAuth(user){
+  // 已通过 Supabase 验证 → 白名单检查
+  const r=await loadUsers();
+  if(!r.ok){
+    showAuthLogin(LANG==="zh"?"白名单表 erp_users 尚未建立。请先在 Supabase SQL Editor 运行建表脚本（supabase-schema.sql），再登录。":"Whitelist table erp_users not found — run supabase-schema.sql first.");
+    try{await _sb.auth.signOut();}catch(e){}return;
+  }
+  let wu=findUser(user.email);
+  // 引导：白名单为空时，首位登录者自动成为老板
+  if(!wu && USERS.length===0){
+    try{const {error}=await _sb.from('erp_users').upsert({email:(user.email||'').toLowerCase(),name:(user.email||'').split('@')[0],role:'owner',outlet:'b1',active:true},{onConflict:'email'});
+      if(error)throw error;await loadUsers();wu=findUser(user.email);
+    }catch(e){showAuthLogin(LANG==="zh"?"无法初始化白名单，请确认已运行 erp_users 建表脚本。":"Failed to bootstrap whitelist.");try{await _sb.auth.signOut();}catch(_){}return;}
+  }
+  if(!wu||wu.active===false){
+    showAuthLogin((LANG==="zh"?`账号 ${user.email} 不在白名单或已停用，请联系管理员。`:`${user.email} is not whitelisted or is disabled. Contact your admin.`));
+    try{await _sb.auth.signOut();}catch(e){}return;
+  }
+  curUser={email:(wu.email||user.email),name:wu.name||user.email,role:ROLES[wu.role]?wu.role:'staff',outlet:wu.outlet||'b1'};
+  curRole=curUser.role;
+  curOutlet=ROLES[curRole].allBranch?(curOutlet||'b1'):(curUser.outlet||'b1'); // 非全分店角色锁定本店
+  await loadDB();await loadRolePerms();
+  document.querySelector('.top').style.display='';
+  const sb=document.getElementById('sidebar');if(sb)sb.style.display='';
+  curPage=firstAllowedPage();render();
+}
+async function authLogout(){try{if(AUTH())await _sb.auth.signOut();}catch(e){}curUser=null;showAuthLogin();}
+
+/* ================= 演示登录（无云端时回退）================= */
 function showLogin(){
+  if(AUTH()){showAuthLogin();return;}   // 有云端 → 走真实登录
   document.querySelector('.top').style.display='none';
   const sb=document.getElementById('sidebar');if(sb)sb.style.display='none';
   document.getElementById('pageHost').innerHTML=`
   <div style="max-width:380px;margin:8vh auto;padding:28px 22px;background:#fff;border:1px solid var(--line);border-radius:16px;text-align:center;">
     <div style="font-size:30px;margin-bottom:6px;">🍜</div>
     <div style="font-weight:800;font-size:19px;color:var(--ink);">明记餐饮 ERP</div>
-    <div class="mini" style="margin:4px 0 20px;">${LANG==="zh"?"多分店进销存系统 · 请登录":"Please sign in"}</div>
+    <div class="mini" style="margin:4px 0 20px;">${LANG==="zh"?"多分店进销存系统 · 演示登录（未连云端）":"Demo login (no cloud)"}</div>
     <div class="fr" style="text-align:left;"><label>${LANG==="zh"?"选择登录角色（演示）":"Login as (demo)"}</label>
       <select id="loginRole">${Object.entries(ROLES).map(([k,v])=>`<option value="${k}">${LANG==="zh"?v.name:v.en}</option>`).join('')}</select></div>
-    <button class="btn block brand" style="margin-top:6px;" onclick="doLogin()">
-      🔓 ${LANG==="zh"?"登录进入系统":"Sign In"}</button>
-    <div style="margin:16px 0;border-top:1px solid var(--line);"></div>
-    <button class="btn block ghost" onclick="alert('${LANG==="zh"?"正式版会用真正的 Google 登录（Supabase Auth）。此为演示。":"Real version uses Google via Supabase Auth."}')">
-      <span style="color:#4285F4;font-weight:800;">G</span>&nbsp; ${LANG==="zh"?"用 Google 登录（正式版）":"Sign in with Google"}</button>
-    <div class="mini" style="margin-top:16px;line-height:1.5;">🔒 ${LANG==="zh"?"正式版：仅白名单邮箱可登录，未登录无法读取任何数据。":"Whitelist-only in production."}</div>
+    <button class="btn block brand" style="margin-top:6px;" onclick="doLogin()">🔓 ${LANG==="zh"?"登录进入系统":"Sign In"}</button>
+    <div class="mini" style="margin-top:16px;line-height:1.5;">🔒 ${LANG==="zh"?"填入 Supabase 后即启用真实邮箱登录 + 白名单。":"Configure Supabase to enable real login + whitelist."}</div>
   </div>`;
 }
 function doLogin(){
   const lr=document.getElementById('loginRole');if(lr)curRole=lr.value;
+  curUser=null;
   document.querySelector('.top').style.display='';
   const sb=document.getElementById('sidebar');if(sb)sb.style.display='';
   curPage=firstAllowedPage();render();
 }
-function logout(){showLogin();}
+function logout(){if(AUTH())authLogout();else showLogin();}
 
 /* ---------- init ---------- */
-(async()=>{initCloud();await loadDB();await loadRolePerms();showLogin();})();
+(async()=>{
+  initCloud();
+  if(AUTH()){
+    try{const {data}=await _sb.auth.getSession();
+      if(data&&data.session&&data.session.user){await afterAuth(data.session.user);}
+      else{showAuthLogin();}
+    }catch(e){showAuthLogin();}
+  }else{
+    await loadDB();await loadRolePerms();showLogin();
+  }
+})();
 
 </script>
 </body>
