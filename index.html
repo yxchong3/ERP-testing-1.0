@@ -1785,7 +1785,7 @@ async function doAuthSignup(){
   const email=fv('au_email'),pw=fv('au_pw');const m=document.getElementById('au_msg');
   if(!email||!pw){if(m)m.innerHTML='⚠️ '+(LANG==="zh"?"请输入邮箱和密码（至少6位）":"Enter email & password (≥6)");return;}
   if(m)m.textContent=LANG==="zh"?"注册中…":"Signing up…";
-  try{const {data,error}=await _sb.auth.signUp({email,password:pw});
+  try{const {data,error}=await _sb.auth.signUp({email,password:pw,options:{emailRedirectTo:'https://yxchong3.github.io/ERP-testing-1.0/'}});
     if(error){if(m)m.innerHTML='❌ '+error.message;return;}
     if(data.session&&data.user){await afterAuth(data.user);}
     else{if(m)m.innerHTML='✅ '+(LANG==="zh"?"注册成功。若开启了邮箱确认，请查收邮件确认后再登录。":"Signed up. Confirm email if required, then sign in.");}
