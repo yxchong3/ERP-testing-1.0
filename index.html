@@ -1093,6 +1093,7 @@ function inferRole(user){user=user||'';
   return 'staff';
 }
 function auditKind(act){act=act||'';
+  if(/修改|编辑|更新|调整|edit|update/i.test(act))return {t:LANG==="zh"?"修改":"Edit",c:'p-a'};
   if(/删除|作废|移除|delete|remove/i.test(act))return {t:LANG==="zh"?"删除":"Delete",c:'p-r'};
   if(/新增|添加|入库|申请|排班|进货|生产|借调|调拨|add|new|apply/i.test(act))return {t:LANG==="zh"?"新增":"Add",c:'p-g'};
   return {t:LANG==="zh"?"修改":"Edit",c:'p-a'};
@@ -1561,7 +1562,7 @@ function pgLedger(mod){
         <td>${money(r.price)}</td>
         ${cfg.hasSettle?`<td><span class="pill ${settlePill(r.settle)}">${settleTxt(r.settle)}</span></td>`:''}
         <td class="mini">${r.note||''}</td>
-        ${writable?`<td><button class="ib" onclick="delLedger('${mod}',${gi})">🗑️</button></td>`:''}
+        ${writable?`<td style="white-space:nowrap;"><button class="ib" onclick="formLedger('${mod}',${gi})">✏️</button> <button class="ib" onclick="delLedger('${mod}',${gi})">🗑️</button></td>`:''}
       </tr>`;}).join('');
       return `<div class="mini" style="margin:10px 0 3px;font-weight:700;color:var(--ink2);">📆 ${dk}</div>
       <div class="card tbl"><table><thead><tr>
@@ -1586,33 +1587,41 @@ function pgLedger(mod){
     ${monthsHtml}${summHtml}`;
 }
 
-/* ---- 采购/验收/月末 共用表单 ---- */
-function formLedger(mod){
+/* ---- 采购/验收/月末 共用表单（支持新增与编辑）---- */
+function formLedger(mod,editIdx){
   const cfg=ledgerCfg(mod);
-  openForm(`<h3>${cfg.icon} ${LANG==="zh"?"新增单据":"New Record"} · ${cfg.title} <span class="x" onclick="closeM()">×</span></h3>
-    <div class="fr"><label>${LANG==="zh"?"供应商":"Supplier"}</label><select id="l_sup">${supplierSelOpts(selSupplier)}</select></div>
-    <div class="fg2"><div class="fr"><label>${LANG==="zh"?"日期":"Date"}</label><input id="l_date" type="date" value="${TODAY}"></div>
-      <div class="fr"><label>Invoice No.</label><input id="l_inv" placeholder="INV-..."></div></div>
-    <div class="fg2"><div class="fr"><label>${LANG==="zh"?"货物Code":"Goods Code"}</label><input id="l_code" placeholder="FSH-01"></div>
-      <div class="fr"><label>${LANG==="zh"?"品名":"Item"}</label><select id="l_item">${itemSelOpts()}</select></div></div>
-    <div class="fg3"><div class="fr"><label>${LANG==="zh"?"数量":"Qty"}</label><input id="l_qty" type="number" step="0.01"></div>
-      <div class="fr"><label>${LANG==="zh"?"重量kg":"Weight"}</label><input id="l_wt" type="number" step="0.01"></div>
-      <div class="fr"><label>${LANG==="zh"?"价钱RM":"Price"}</label><input id="l_price" type="number" step="0.01"></div></div>
-    ${cfg.hasSettle?`<div class="fr"><label>${LANG==="zh"?"处理方式":"Settlement"}</label><select id="l_settle"><option value="补货">${LANG==="zh"?"补货":"Restock"}</option><option value="不收费">${LANG==="zh"?"不收取费用":"No Charge"}</option><option value="取消订单">${LANG==="zh"?"取消订单":"Cancel Order"}</option></select></div>`:''}
-    <div class="fr"><label>${LANG==="zh"?"备注":"Note"}</label><input id="l_note" placeholder="${LANG==="zh"?"选填":"optional"}"></div>
-    <button class="btn block brand" onclick="saveLedger('${mod}')">${LANG==="zh"?"保存":"Save"}</button>`);
+  const isEdit=(editIdx!=null);const r=isEdit?(d()[cfg.arr]||[])[editIdx]:null;
+  const settleOpt=(v)=>`<option value="补货" ${r&&r.settle==='补货'?'selected':''}>${LANG==="zh"?"补货":"Restock"}</option><option value="不收费" ${r&&r.settle==='不收费'?'selected':''}>${LANG==="zh"?"不收取费用":"No Charge"}</option><option value="取消订单" ${r&&r.settle==='取消订单'?'selected':''}>${LANG==="zh"?"取消订单":"Cancel Order"}</option>`;
+  openForm(`<h3>${cfg.icon} ${isEdit?(LANG==="zh"?"编辑单据":"Edit Record"):(LANG==="zh"?"新增单据":"New Record")} · ${cfg.title} <span class="x" onclick="closeM()">×</span></h3>
+    <div class="fr"><label>${LANG==="zh"?"供应商":"Supplier"}</label><select id="l_sup">${supplierSelOpts(r?r.supplier:selSupplier)}</select></div>
+    <div class="fg2"><div class="fr"><label>${LANG==="zh"?"日期":"Date"}</label><input id="l_date" type="date" value="${r?r.date:TODAY}"></div>
+      <div class="fr"><label>Invoice No.</label><input id="l_inv" placeholder="INV-..." value="${r?(r.invoice||''):''}"></div></div>
+    <div class="fg2"><div class="fr"><label>${LANG==="zh"?"货物Code":"Goods Code"}</label><input id="l_code" placeholder="FSH-01" value="${r?(r.code||''):''}"></div>
+      <div class="fr"><label>${LANG==="zh"?"品名":"Item"}</label><select id="l_item">${itemSelOpts(r?r.item:'')}</select></div></div>
+    <div class="fg3"><div class="fr"><label>${LANG==="zh"?"数量":"Qty"}</label><input id="l_qty" type="number" step="0.01" value="${r?r.qty:''}"></div>
+      <div class="fr"><label>${LANG==="zh"?"重量kg":"Weight"}</label><input id="l_wt" type="number" step="0.01" value="${r?r.weight:''}"></div>
+      <div class="fr"><label>${LANG==="zh"?"价钱RM":"Price"}</label><input id="l_price" type="number" step="0.01" value="${r?r.price:''}"></div></div>
+    ${cfg.hasSettle?`<div class="fr"><label>${LANG==="zh"?"处理方式":"Settlement"}</label><select id="l_settle">${settleOpt()}</select></div>`:''}
+    <div class="fr"><label>${LANG==="zh"?"备注":"Note"}</label><input id="l_note" placeholder="${LANG==="zh"?"选填":"optional"}" value="${r?(r.note||''):''}"></div>
+    <button class="btn block brand" onclick="saveLedger('${mod}',${isEdit?editIdx:'null'})">${LANG==="zh"?"保存":"Save"}</button>`);
 }
-async function saveLedger(mod){
+async function saveLedger(mod,editIdx){
   const cfg=ledgerCfg(mod);const g=id=>document.getElementById(id);
   const sup=g('l_sup').value;
   const rec={supplier:sup,date:g('l_date').value||TODAY,invoice:g('l_inv').value.trim(),code:g('l_code').value.trim(),item:g('l_item').value,qty:+g('l_qty').value||0,weight:+g('l_wt').value||0,price:+g('l_price').value||0,note:g('l_note').value.trim()};
   if(cfg.hasSettle)rec.settle=g('l_settle').value;
   if(!d()[cfg.arr])d()[cfg.arr]=[];
-  d()[cfg.arr].push(rec);
-  auditLog(cfg.title,sup+" "+rec.item+" "+money(rec.price),"",rec.invoice);
+  if(editIdx!=null&&d()[cfg.arr][editIdx]){
+    const old=d()[cfg.arr][editIdx];
+    auditLog("编辑单据",cfg.title+" "+sup+" "+rec.item, old.item+" "+money(old.price)+"×"+num(old.qty,2), rec.item+" "+money(rec.price)+"×"+num(rec.qty,2));
+    d()[cfg.arr][editIdx]=rec;
+  }else{
+    d()[cfg.arr].push(rec);
+    auditLog(cfg.title,sup+" "+rec.item+" "+money(rec.price),"",rec.invoice);
+  }
   await save();selSupplier=sup;closeM();render();
 }
-async function delLedger(mod,gi){if(!confirm(LANG==="zh"?"删除此单据？":"Delete record?"))return;const cfg=ledgerCfg(mod);d()[cfg.arr].splice(gi,1);auditLog("删除单据",cfg.title,"","");await save();render();}
+async function delLedger(mod,gi){if(!confirm(LANG==="zh"?"删除此单据？":"Delete record?"))return;const cfg=ledgerCfg(mod);const old=d()[cfg.arr][gi]||{};d()[cfg.arr].splice(gi,1);auditLog("删除单据",cfg.title+" "+(old.item||'')+" "+(old.invoice||''),money(old.price),"");await save();render();}
 
 /* ================= 跨店调拨（物品 + 人力）================= */
 function pgTransfer(){
@@ -1623,46 +1632,55 @@ function pgTransfer(){
   <div class="hint">${LANG==="zh"?"记录物品被借走/直接调拨（标注归还或直接Transfer），以及人力资源借调其他店面。":"Track item transfers (return or direct) and staff loans between branches."}</div>
   <div class="fb"><h2 class="h" style="margin:0;">📦 ${LANG==="zh"?"物品调拨":"Item Transfer"}</h2>${writable?`<button class="btn gold sm" onclick="formTransferItem()">+ ${LANG==="zh"?"物品":"Item"}</button>`:''}</div>
   <div class="card tbl"><table><thead><tr><th>${LANG==="zh"?"日期":"Date"}</th><th>${LANG==="zh"?"品名":"Item"}</th><th>Code</th><th>${LANG==="zh"?"数量":"Qty"}</th><th>${LANG==="zh"?"去向":"To"}</th><th>${LANG==="zh"?"方式":"Mode"}</th><th>${LANG==="zh"?"金额":"Amt"}</th><th>${LANG==="zh"?"备注":"Note"}</th>${writable?'<th></th>':''}</tr></thead><tbody>
-  ${items.map((r,i)=>`<tr><td class="mini">${r.date.slice(5)}</td><td>${r.item}</td><td class="mini">${r.code||'—'}</td><td>${num(r.qty)} ${r.unit||''}</td><td>${r.to}</td><td><span class="pill ${modePill(r.mode)}">${modeTxt(r.mode)}</span></td><td>${money(r.amt)}</td><td class="mini">${r.note||''}</td>${writable?`<td><button class="ib" onclick="delTransfer(${i})">🗑️</button></td>`:''}</tr>`).join('')||`<tr><td colspan="9" class="empty">${LANG==="zh"?"暂无调拨":"None"}</td></tr>`}
+  ${items.map((r,i)=>`<tr><td class="mini">${r.date.slice(5)}</td><td>${r.item}</td><td class="mini">${r.code||'—'}</td><td>${num(r.qty)} ${r.unit||''}</td><td>${r.to}</td><td><span class="pill ${modePill(r.mode)}">${modeTxt(r.mode)}</span></td><td>${money(r.amt)}</td><td class="mini">${r.note||''}</td>${writable?`<td style="white-space:nowrap;"><button class="ib" onclick="formTransferItem(${i})">✏️</button> <button class="ib" onclick="delTransfer(${i})">🗑️</button></td>`:''}</tr>`).join('')||`<tr><td colspan="9" class="empty">${LANG==="zh"?"暂无调拨":"None"}</td></tr>`}
   </tbody></table></div>
   <div class="fb" style="margin-top:16px;"><h2 class="h" style="margin:0;">🧑‍🍳 ${LANG==="zh"?"人力资源借调":"Staff Loan"}</h2>${writable?`<button class="btn gold sm" onclick="formStaffLoan()">+ ${LANG==="zh"?"借调":"Loan"}</button>`:''}</div>
   <div class="card tbl"><table><thead><tr><th>${LANG==="zh"?"日期":"Date"}</th><th>${LANG==="zh"?"员工":"Staff"}</th><th>${LANG==="zh"?"职位":"Role"}</th><th>${LANG==="zh"?"支援店面":"To Branch"}</th><th>${LANG==="zh"?"方式":"Mode"}</th><th>${LANG==="zh"?"备注":"Note"}</th>${writable?'<th></th>':''}</tr></thead><tbody>
-  ${loans.map((r,i)=>`<tr><td class="mini">${r.date.slice(5)}</td><td><b>${r.staff}</b></td><td class="mini">${r.role||'—'}</td><td>${r.to}</td><td><span class="pill ${modePill(r.mode)}">${modeTxt(r.mode)}</span></td><td class="mini">${r.note||''}</td>${writable?`<td><button class="ib" onclick="delStaffLoan(${i})">🗑️</button></td>`:''}</tr>`).join('')||`<tr><td colspan="7" class="empty">${LANG==="zh"?"暂无借调":"None"}</td></tr>`}
+  ${loans.map((r,i)=>`<tr><td class="mini">${r.date.slice(5)}</td><td><b>${r.staff}</b></td><td class="mini">${r.role||'—'}</td><td>${r.to}</td><td><span class="pill ${modePill(r.mode)}">${modeTxt(r.mode)}</span></td><td class="mini">${r.note||''}</td>${writable?`<td style="white-space:nowrap;"><button class="ib" onclick="formStaffLoan(${i})">✏️</button> <button class="ib" onclick="delStaffLoan(${i})">🗑️</button></td>`:''}</tr>`).join('')||`<tr><td colspan="7" class="empty">${LANG==="zh"?"暂无借调":"None"}</td></tr>`}
   </tbody></table></div>`;
 }
-function formTransferItem(){
-  openForm(`<h3>📦 ${LANG==="zh"?"物品调拨":"Item Transfer"} <span class="x" onclick="closeM()">×</span></h3>
-    <div class="fg2"><div class="fr"><label>${LANG==="zh"?"日期":"Date"}</label><input id="t_date" type="date" value="${TODAY}"></div>
-      <div class="fr"><label>${LANG==="zh"?"品名":"Item"}</label><select id="t_item" onchange="tItemAuto()">${itemSelOpts()}</select></div></div>
-    <div class="fg3"><div class="fr"><label>Code</label><input id="t_code" placeholder="TOF-01"></div>
-      <div class="fr"><label>${LANG==="zh"?"数量":"Qty"}</label><input id="t_qty" type="number" step="0.01"></div>
-      <div class="fr"><label>${LANG==="zh"?"单位":"Unit"}</label><input id="t_unit" placeholder="pcs"></div></div>
-    <div class="fg2"><div class="fr"><label>${LANG==="zh"?"去向分店":"To Branch"}</label><select id="t_to">${outletNames().map(n=>`<option>${n}</option>`).join('')}</select></div>
-      <div class="fr"><label>${LANG==="zh"?"方式":"Mode"}</label><select id="t_mode"><option value="transfer">${LANG==="zh"?"直接调拨 Transfer":"Direct Transfer"}</option><option value="return">${LANG==="zh"?"借用归还 Return":"Borrow/Return"}</option></select></div></div>
-    <div class="fg2"><div class="fr"><label>${LANG==="zh"?"金额RM":"Amount"}</label><input id="t_amt" type="number" step="0.01"></div>
-      <div class="fr"><label>${LANG==="zh"?"备注":"Note"}</label><input id="t_note"></div></div>
-    <button class="btn block brand" onclick="saveTransferItem()">${LANG==="zh"?"保存":"Save"}</button>`);
+function formTransferItem(editIdx){
+  const r=(editIdx!=null)?(d().transfers||[])[editIdx]:null;const isEdit=!!r;
+  const toOpts=outletNames().map(n=>`<option ${r&&r.to===n?'selected':''}>${n}</option>`).join('');
+  openForm(`<h3>📦 ${isEdit?(LANG==="zh"?"编辑物品调拨":"Edit Transfer"):(LANG==="zh"?"物品调拨":"Item Transfer")} <span class="x" onclick="closeM()">×</span></h3>
+    <div class="fg2"><div class="fr"><label>${LANG==="zh"?"日期":"Date"}</label><input id="t_date" type="date" value="${r?r.date:TODAY}"></div>
+      <div class="fr"><label>${LANG==="zh"?"品名":"Item"}</label><select id="t_item" onchange="tItemAuto()">${itemSelOpts(r?r.item:'')}</select></div></div>
+    <div class="fg3"><div class="fr"><label>Code</label><input id="t_code" placeholder="TOF-01" value="${r?(r.code||''):''}"></div>
+      <div class="fr"><label>${LANG==="zh"?"数量":"Qty"}</label><input id="t_qty" type="number" step="0.01" value="${r?r.qty:''}"></div>
+      <div class="fr"><label>${LANG==="zh"?"单位":"Unit"}</label><input id="t_unit" placeholder="pcs" value="${r?(r.unit||''):''}"></div></div>
+    <div class="fg2"><div class="fr"><label>${LANG==="zh"?"去向分店":"To Branch"}</label><select id="t_to">${toOpts}</select></div>
+      <div class="fr"><label>${LANG==="zh"?"方式":"Mode"}</label><select id="t_mode"><option value="transfer" ${r&&r.mode==='transfer'?'selected':''}>${LANG==="zh"?"直接调拨 Transfer":"Direct Transfer"}</option><option value="return" ${r&&r.mode==='return'?'selected':''}>${LANG==="zh"?"借用归还 Return":"Borrow/Return"}</option></select></div></div>
+    <div class="fg2"><div class="fr"><label>${LANG==="zh"?"金额RM":"Amount"}</label><input id="t_amt" type="number" step="0.01" value="${r?r.amt:''}"></div>
+      <div class="fr"><label>${LANG==="zh"?"备注":"Note"}</label><input id="t_note" value="${r?(r.note||''):''}"></div></div>
+    <button class="btn block brand" onclick="saveTransferItem(${isEdit?editIdx:'null'})">${LANG==="zh"?"保存":"Save"}</button>`);
 }
 function tItemAuto(){const it=(d().items||[]).find(i=>i.name===document.getElementById('t_item').value);if(it){document.getElementById('t_unit').value=it.unit;}}
-async function saveTransferItem(){const g=id=>document.getElementById(id);
+async function saveTransferItem(editIdx){const g=id=>document.getElementById(id);
   const rec={date:g('t_date').value||TODAY,item:g('t_item').value,code:g('t_code').value.trim(),qty:+g('t_qty').value||0,unit:g('t_unit').value.trim(),to:g('t_to').value,mode:g('t_mode').value,amt:+g('t_amt').value||0,note:g('t_note').value.trim()};
-  if(!d().transfers)d().transfers=[];d().transfers.unshift(rec);
-  auditLog("跨店调拨",rec.item+" →"+rec.to,"",modeTxt(rec.mode));await save();closeM();render();}
-async function delTransfer(i){if(!confirm(LANG==="zh"?"删除此调拨？":"Delete?"))return;d().transfers.splice(i,1);await save();render();}
-function formStaffLoan(){
-  openForm(`<h3>🧑‍🍳 ${LANG==="zh"?"人力借调":"Staff Loan"} <span class="x" onclick="closeM()">×</span></h3>
-    <div class="fg2"><div class="fr"><label>${LANG==="zh"?"日期":"Date"}</label><input id="s_date" type="date" value="${TODAY}"></div>
-      <div class="fr"><label>${LANG==="zh"?"员工":"Staff"}</label><select id="s_staff">${(d().staff||[]).map(e=>`<option value="${e.name}" data-role="${e.role}">${e.name}</option>`).join('')}</select></div></div>
-    <div class="fg2"><div class="fr"><label>${LANG==="zh"?"支援分店":"To Branch"}</label><select id="s_to">${outletNames().map(n=>`<option>${n}</option>`).join('')}</select></div>
-      <div class="fr"><label>${LANG==="zh"?"方式":"Mode"}</label><select id="s_mode"><option value="loan">${LANG==="zh"?"借出支援 Loan":"Loan Out"}</option><option value="return">${LANG==="zh"?"支援结束返回 Return":"Return"}</option></select></div></div>
-    <div class="fr"><label>${LANG==="zh"?"备注":"Note"}</label><input id="s_note"></div>
-    <button class="btn block brand" onclick="saveStaffLoan()">${LANG==="zh"?"保存":"Save"}</button>`);
+  if(!d().transfers)d().transfers=[];
+  if(editIdx!=null&&d().transfers[editIdx]){const old=d().transfers[editIdx];auditLog("编辑调拨",rec.item+" →"+rec.to,old.item+" "+num(old.qty)+" "+modeTxt(old.mode),rec.item+" "+num(rec.qty)+" "+modeTxt(rec.mode));d().transfers[editIdx]=rec;}
+  else{d().transfers.unshift(rec);auditLog("跨店调拨",rec.item+" →"+rec.to,"",modeTxt(rec.mode));}
+  await save();closeM();render();}
+async function delTransfer(i){if(!confirm(LANG==="zh"?"删除此调拨？":"Delete?"))return;const old=d().transfers[i]||{};d().transfers.splice(i,1);auditLog("删除调拨",(old.item||'')+" →"+(old.to||''),"","");await save();render();}
+function formStaffLoan(editIdx){
+  const r=(editIdx!=null)?(d().staffLoans||[])[editIdx]:null;const isEdit=!!r;
+  const staffOpts=(d().staff||[]).map(e=>`<option value="${e.name}" data-role="${e.role}" ${r&&r.staff===e.name?'selected':''}>${e.name}</option>`).join('');
+  const toOpts=outletNames().map(n=>`<option ${r&&r.to===n?'selected':''}>${n}</option>`).join('');
+  openForm(`<h3>🧑‍🍳 ${isEdit?(LANG==="zh"?"编辑人力借调":"Edit Staff Loan"):(LANG==="zh"?"人力借调":"Staff Loan")} <span class="x" onclick="closeM()">×</span></h3>
+    <div class="fg2"><div class="fr"><label>${LANG==="zh"?"日期":"Date"}</label><input id="s_date" type="date" value="${r?r.date:TODAY}"></div>
+      <div class="fr"><label>${LANG==="zh"?"员工":"Staff"}</label><select id="s_staff">${staffOpts}</select></div></div>
+    <div class="fg2"><div class="fr"><label>${LANG==="zh"?"支援分店":"To Branch"}</label><select id="s_to">${toOpts}</select></div>
+      <div class="fr"><label>${LANG==="zh"?"方式":"Mode"}</label><select id="s_mode"><option value="loan" ${r&&r.mode==='loan'?'selected':''}>${LANG==="zh"?"借出支援 Loan":"Loan Out"}</option><option value="return" ${r&&r.mode==='return'?'selected':''}>${LANG==="zh"?"支援结束返回 Return":"Return"}</option></select></div></div>
+    <div class="fr"><label>${LANG==="zh"?"备注":"Note"}</label><input id="s_note" value="${r?(r.note||''):''}"></div>
+    <button class="btn block brand" onclick="saveStaffLoan(${isEdit?editIdx:'null'})">${LANG==="zh"?"保存":"Save"}</button>`);
 }
-async function saveStaffLoan(){const g=id=>document.getElementById(id);const sel=g('s_staff');const role=sel.options[sel.selectedIndex]?.dataset.role||'';
+async function saveStaffLoan(editIdx){const g=id=>document.getElementById(id);const sel=g('s_staff');const role=sel.options[sel.selectedIndex]?.dataset.role||'';
   const rec={date:g('s_date').value||TODAY,staff:sel.value,role,to:g('s_to').value,mode:g('s_mode').value,note:g('s_note').value.trim()};
-  if(!d().staffLoans)d().staffLoans=[];d().staffLoans.unshift(rec);
-  auditLog("人力借调",rec.staff+" →"+rec.to,"",modeTxt(rec.mode));await save();closeM();render();}
-async function delStaffLoan(i){if(!confirm(LANG==="zh"?"删除此借调？":"Delete?"))return;d().staffLoans.splice(i,1);await save();render();}
+  if(!d().staffLoans)d().staffLoans=[];
+  if(editIdx!=null&&d().staffLoans[editIdx]){const old=d().staffLoans[editIdx];auditLog("编辑借调",rec.staff+" →"+rec.to,old.staff+" "+modeTxt(old.mode),rec.staff+" "+modeTxt(rec.mode));d().staffLoans[editIdx]=rec;}
+  else{d().staffLoans.unshift(rec);auditLog("人力借调",rec.staff+" →"+rec.to,"",modeTxt(rec.mode));}
+  await save();closeM();render();}
+async function delStaffLoan(i){if(!confirm(LANG==="zh"?"删除此借调？":"Delete?"))return;const old=d().staffLoans[i]||{};d().staffLoans.splice(i,1);auditLog("删除借调",(old.staff||'')+" →"+(old.to||''),"","");await save();render();}
 
 /* ================= 报废损耗（独立）================= */
 function pgWaste2(){
@@ -1673,26 +1691,31 @@ function pgWaste2(){
   ${writable?`<button class="btn brand sm" style="margin-bottom:8px;" onclick="formWaste2()">+ ${LANG==="zh"?"新增报废":"Add"}</button>`:''}
   <div class="grid g2" style="margin-bottom:10px;"><div class="kpi"><div class="k">${LANG==="zh"?"报废笔数":"Records"}</div><div class="v sm">${rs.length}</div></div><div class="kpi"><div class="k">${LANG==="zh"?"损耗总额":"Total Loss"}</div><div class="v sm neg">${money(tot)}</div></div></div>
   <div class="card tbl"><table><thead><tr><th>${LANG==="zh"?"日期":"Date"}</th><th>${LANG==="zh"?"物品名称":"Item"}</th><th>Code</th><th>${LANG==="zh"?"成本价":"Cost"}</th><th>${LANG==="zh"?"数量":"Qty"}</th><th>Total</th><th>${LANG==="zh"?"原因":"Reason"}</th><th>${LANG==="zh"?"备注":"Note"}</th>${writable?'<th></th>':''}</tr></thead><tbody>
-  ${rs.map(r=>{const gi=x.wasteLog.indexOf(r);const line=(+r.cost||0)*(+r.qty||0);return `<tr><td class="mini">${r.date}</td><td><b>${r.item}</b></td><td class="mini">${r.code||'—'}</td><td>${money(r.cost)}</td><td>${num(r.qty,2)}</td><td class="neg">${money(line)}</td><td>${r.reason||'—'}</td><td class="mini">${r.note||''}</td>${writable?`<td><button class="ib" onclick="delWaste2(${gi})">🗑️</button></td>`:''}</tr>`;}).join('')||`<tr><td colspan="9" class="empty">${LANG==="zh"?"暂无报废":"None"}</td></tr>`}
+  ${rs.map(r=>{const gi=x.wasteLog.indexOf(r);const line=(+r.cost||0)*(+r.qty||0);return `<tr><td class="mini">${r.date}</td><td><b>${r.item}</b></td><td class="mini">${r.code||'—'}</td><td>${money(r.cost)}</td><td>${num(r.qty,2)}</td><td class="neg">${money(line)}</td><td>${r.reason||'—'}</td><td class="mini">${r.note||''}</td>${writable?`<td style="white-space:nowrap;"><button class="ib" onclick="formWaste2(${gi})">✏️</button> <button class="ib" onclick="delWaste2(${gi})">🗑️</button></td>`:''}</tr>`;}).join('')||`<tr><td colspan="9" class="empty">${LANG==="zh"?"暂无报废":"None"}</td></tr>`}
   </tbody><tfoot><tr style="background:#FAFBFC;font-weight:800;"><td colspan="5">${LANG==="zh"?"合计":"Total"}</td><td class="neg">${money(tot)}</td><td colspan="${writable?3:2}"></td></tr></tfoot></table></div>`;
 }
-function formWaste2(){
-  openForm(`<h3>🗑 ${LANG==="zh"?"新增报废":"New Wastage"} <span class="x" onclick="closeM()">×</span></h3>
-    <div class="fg2"><div class="fr"><label>${LANG==="zh"?"日期":"Date"}</label><input id="w_date" type="date" value="${TODAY}"></div>
-      <div class="fr"><label>${LANG==="zh"?"物品名称":"Item"}</label><select id="w_item" onchange="wItemAuto()">${itemSelOpts()}</select></div></div>
-    <div class="fg3"><div class="fr"><label>Code</label><input id="w_code"></div>
-      <div class="fr"><label>${LANG==="zh"?"成本价RM":"Cost"}</label><input id="w_cost" type="number" step="0.01"></div>
-      <div class="fr"><label>${LANG==="zh"?"数量":"Qty"}</label><input id="w_qty" type="number" step="0.01"></div></div>
-    <div class="fr"><label>${LANG==="zh"?"原因":"Reason"}</label><select id="w_reason"><option>过期变质</option><option>打翻/损坏</option><option>变色发臭</option><option>烹调失误</option><option>其他</option></select></div>
-    <div class="fr"><label>${LANG==="zh"?"备注":"Note"}</label><input id="w_note"></div>
-    <button class="btn block brand" onclick="saveWaste2()">${LANG==="zh"?"保存":"Save"}</button>`);
+function formWaste2(editIdx){
+  const r=(editIdx!=null)?(d().wasteLog||[])[editIdx]:null;const isEdit=!!r;
+  const reasons=["过期变质","打翻/损坏","变色发臭","烹调失误","其他"];
+  const reasonOpts=reasons.map(x=>`<option ${r&&r.reason===x?'selected':''}>${x}</option>`).join('');
+  openForm(`<h3>🗑 ${isEdit?(LANG==="zh"?"编辑报废":"Edit Wastage"):(LANG==="zh"?"新增报废":"New Wastage")} <span class="x" onclick="closeM()">×</span></h3>
+    <div class="fg2"><div class="fr"><label>${LANG==="zh"?"日期":"Date"}</label><input id="w_date" type="date" value="${r?r.date:TODAY}"></div>
+      <div class="fr"><label>${LANG==="zh"?"物品名称":"Item"}</label><select id="w_item" onchange="wItemAuto()">${itemSelOpts(r?r.item:'')}</select></div></div>
+    <div class="fg3"><div class="fr"><label>Code</label><input id="w_code" value="${r?(r.code||''):''}"></div>
+      <div class="fr"><label>${LANG==="zh"?"成本价RM":"Cost"}</label><input id="w_cost" type="number" step="0.01" value="${r?r.cost:''}"></div>
+      <div class="fr"><label>${LANG==="zh"?"数量":"Qty"}</label><input id="w_qty" type="number" step="0.01" value="${r?r.qty:''}"></div></div>
+    <div class="fr"><label>${LANG==="zh"?"原因":"Reason"}</label><select id="w_reason">${reasonOpts}</select></div>
+    <div class="fr"><label>${LANG==="zh"?"备注":"Note"}</label><input id="w_note" value="${r?(r.note||''):''}"></div>
+    <button class="btn block brand" onclick="saveWaste2(${isEdit?editIdx:'null'})">${LANG==="zh"?"保存":"Save"}</button>`);
 }
 function wItemAuto(){const it=(d().items||[]).find(i=>i.name===document.getElementById('w_item').value);if(it){document.getElementById('w_cost').value=it.cost;}}
-async function saveWaste2(){const g=id=>document.getElementById(id);
+async function saveWaste2(editIdx){const g=id=>document.getElementById(id);
   const rec={date:g('w_date').value||TODAY,item:g('w_item').value,code:g('w_code').value.trim(),cost:+g('w_cost').value||0,qty:+g('w_qty').value||0,reason:g('w_reason').value,note:g('w_note').value.trim()};
-  if(!d().wasteLog)d().wasteLog=[];d().wasteLog.unshift(rec);
-  auditLog("报废损耗",rec.item+" ×"+rec.qty,"",money(rec.cost*rec.qty));await save();closeM();render();}
-async function delWaste2(gi){if(!confirm(LANG==="zh"?"删除此报废？":"Delete?"))return;d().wasteLog.splice(gi,1);await save();render();}
+  if(!d().wasteLog)d().wasteLog=[];
+  if(editIdx!=null&&d().wasteLog[editIdx]){const old=d().wasteLog[editIdx];auditLog("编辑报废",rec.item+" ×"+rec.qty,money(old.cost*old.qty),money(rec.cost*rec.qty));d().wasteLog[editIdx]=rec;}
+  else{d().wasteLog.unshift(rec);auditLog("报废损耗",rec.item+" ×"+rec.qty,"",money(rec.cost*rec.qty));}
+  await save();closeM();render();}
+async function delWaste2(gi){if(!confirm(LANG==="zh"?"删除此报废？":"Delete?"))return;const old=d().wasteLog[gi]||{};d().wasteLog.splice(gi,1);auditLog("删除报废",(old.item||'')+" ×"+(old.qty||''),money((old.cost||0)*(old.qty||0)),"");await save();render();}
 
 /* ================= 招待 / 赠送（独立）================= */
 function pgOffer(){
@@ -1703,25 +1726,28 @@ function pgOffer(){
   ${writable?`<button class="btn brand sm" style="margin-bottom:8px;" onclick="formOffer()">+ ${LANG==="zh"?"新增招待":"Add"}</button>`:''}
   <div class="grid g2" style="margin-bottom:10px;"><div class="kpi"><div class="k">${LANG==="zh"?"招待笔数":"Records"}</div><div class="v sm">${rs.length}</div></div><div class="kpi"><div class="k">${LANG==="zh"?"招待总额":"Total"}</div><div class="v sm warnc">${money(tot)}</div></div></div>
   <div class="card tbl"><table><thead><tr><th>${LANG==="zh"?"日期":"Date"}</th><th>${LANG==="zh"?"类型":"Type"}</th><th>${LANG==="zh"?"物品名称":"Item"}</th><th>${LANG==="zh"?"负责人":"In Charge"}</th><th>${LANG==="zh"?"数量":"Qty"}</th><th>${LANG==="zh"?"总数":"Total"}</th><th>${LANG==="zh"?"备注":"Note"}</th>${writable?'<th></th>':''}</tr></thead><tbody>
-  ${rs.map(r=>{const gi=x.offers.indexOf(r);return `<tr><td class="mini">${r.date}</td><td><span class="pill ${r.type==='ENT'?'p-a':'p-b'}">${r.type}</span></td><td><b>${r.item}</b></td><td>${r.person||'—'}</td><td>${num(r.qty)}</td><td>${money(r.total)}</td><td class="mini">${r.note||''}</td>${writable?`<td><button class="ib" onclick="delOffer(${gi})">🗑️</button></td>`:''}</tr>`;}).join('')||`<tr><td colspan="8" class="empty">${LANG==="zh"?"暂无招待":"None"}</td></tr>`}
+  ${rs.map(r=>{const gi=x.offers.indexOf(r);return `<tr><td class="mini">${r.date}</td><td><span class="pill ${r.type==='ENT'?'p-a':'p-b'}">${r.type}</span></td><td><b>${r.item}</b></td><td>${r.person||'—'}</td><td>${num(r.qty)}</td><td>${money(r.total)}</td><td class="mini">${r.note||''}</td>${writable?`<td style="white-space:nowrap;"><button class="ib" onclick="formOffer(${gi})">✏️</button> <button class="ib" onclick="delOffer(${gi})">🗑️</button></td>`:''}</tr>`;}).join('')||`<tr><td colspan="8" class="empty">${LANG==="zh"?"暂无招待":"None"}</td></tr>`}
   </tbody><tfoot><tr style="background:#FAFBFC;font-weight:800;"><td colspan="5">${LANG==="zh"?"合计":"Total"}</td><td class="warnc">${money(tot)}</td><td colspan="${writable?2:1}"></td></tr></tfoot></table></div>`;
 }
-function formOffer(){
-  openForm(`<h3>🎁 ${LANG==="zh"?"新增招待/赠送":"New Offer"} <span class="x" onclick="closeM()">×</span></h3>
-    <div class="fg2"><div class="fr"><label>${LANG==="zh"?"日期":"Date"}</label><input id="o_date" type="date" value="${TODAY}"></div>
-      <div class="fr"><label>${LANG==="zh"?"类型":"Type"}</label><select id="o_type"><option value="ENT">ENT ${LANG==="zh"?"招待":""}</option><option value="Offer">Offer ${LANG==="zh"?"赠送":""}</option></select></div></div>
-    <div class="fr"><label>${LANG==="zh"?"物品名称 / 菜品":"Item / Dish"}</label><input id="o_item" placeholder="${LANG==="zh"?"如 南乳炸鸡":"e.g. Fried Chicken"}"></div>
-    <div class="fg3"><div class="fr"><label>${LANG==="zh"?"负责人":"In Charge"}</label><input id="o_person"></div>
-      <div class="fr"><label>${LANG==="zh"?"数量":"Qty"}</label><input id="o_qty" type="number" step="1"></div>
-      <div class="fr"><label>${LANG==="zh"?"总数RM":"Total"}</label><input id="o_total" type="number" step="0.01"></div></div>
-    <div class="fr"><label>${LANG==="zh"?"备注":"Note"}</label><input id="o_note"></div>
-    <button class="btn block brand" onclick="saveOffer()">${LANG==="zh"?"保存":"Save"}</button>`);
+function formOffer(editIdx){
+  const r=(editIdx!=null)?(d().offers||[])[editIdx]:null;const isEdit=!!r;
+  openForm(`<h3>🎁 ${isEdit?(LANG==="zh"?"编辑招待/赠送":"Edit Offer"):(LANG==="zh"?"新增招待/赠送":"New Offer")} <span class="x" onclick="closeM()">×</span></h3>
+    <div class="fg2"><div class="fr"><label>${LANG==="zh"?"日期":"Date"}</label><input id="o_date" type="date" value="${r?r.date:TODAY}"></div>
+      <div class="fr"><label>${LANG==="zh"?"类型":"Type"}</label><select id="o_type"><option value="ENT" ${r&&r.type==='ENT'?'selected':''}>ENT ${LANG==="zh"?"招待":""}</option><option value="Offer" ${r&&r.type==='Offer'?'selected':''}>Offer ${LANG==="zh"?"赠送":""}</option></select></div></div>
+    <div class="fr"><label>${LANG==="zh"?"物品名称 / 菜品":"Item / Dish"}</label><input id="o_item" placeholder="${LANG==="zh"?"如 南乳炸鸡":"e.g. Fried Chicken"}" value="${r?(r.item||''):''}"></div>
+    <div class="fg3"><div class="fr"><label>${LANG==="zh"?"负责人":"In Charge"}</label><input id="o_person" value="${r?(r.person||''):''}"></div>
+      <div class="fr"><label>${LANG==="zh"?"数量":"Qty"}</label><input id="o_qty" type="number" step="1" value="${r?r.qty:''}"></div>
+      <div class="fr"><label>${LANG==="zh"?"总数RM":"Total"}</label><input id="o_total" type="number" step="0.01" value="${r?r.total:''}"></div></div>
+    <div class="fr"><label>${LANG==="zh"?"备注":"Note"}</label><input id="o_note" value="${r?(r.note||''):''}"></div>
+    <button class="btn block brand" onclick="saveOffer(${isEdit?editIdx:'null'})">${LANG==="zh"?"保存":"Save"}</button>`);
 }
-async function saveOffer(){const g=id=>document.getElementById(id);
+async function saveOffer(editIdx){const g=id=>document.getElementById(id);
   const rec={date:g('o_date').value||TODAY,type:g('o_type').value,item:g('o_item').value.trim(),person:g('o_person').value.trim(),qty:+g('o_qty').value||0,total:+g('o_total').value||0,note:g('o_note').value.trim()};
-  if(!d().offers)d().offers=[];d().offers.unshift(rec);
-  auditLog("招待赠送",rec.type+" "+rec.item,"",money(rec.total));await save();closeM();render();}
-async function delOffer(gi){if(!confirm(LANG==="zh"?"删除此招待？":"Delete?"))return;d().offers.splice(gi,1);await save();render();}
+  if(!d().offers)d().offers=[];
+  if(editIdx!=null&&d().offers[editIdx]){const old=d().offers[editIdx];auditLog("编辑招待",rec.type+" "+rec.item,money(old.total),money(rec.total));d().offers[editIdx]=rec;}
+  else{d().offers.unshift(rec);auditLog("招待赠送",rec.type+" "+rec.item,"",money(rec.total));}
+  await save();closeM();render();}
+async function delOffer(gi){if(!confirm(LANG==="zh"?"删除此招待？":"Delete?"))return;const old=d().offers[gi]||{};d().offers.splice(gi,1);auditLog("删除招待",(old.type||'')+" "+(old.item||''),money(old.total),"");await save();render();}
 
 /* 路由封装：三个供应商账册 */
 function pgPurchase(){return pgLedger('purchase');}
