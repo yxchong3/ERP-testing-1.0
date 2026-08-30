@@ -1759,7 +1759,7 @@ function showAuthLogin(msg){
   document.querySelector('.top').style.display='none';
   const sb=document.getElementById('sidebar');if(sb)sb.style.display='none';
   document.getElementById('pageHost').innerHTML=`
-  <div style="max-width:380px;margin:7vh auto;padding:28px 22px;background:#fff;border:1px solid var(--line);border-radius:16px;text-align:center;">
+  <div style="width:calc(100% - 32px);max-width:380px;position:fixed;left:50%;top:6vh;transform:translateX(-50%);max-height:88vh;overflow:auto;padding:28px 22px;background:#fff;border:1px solid var(--line);border-radius:16px;text-align:center;">
     <div style="font-size:30px;margin-bottom:6px;">🍜</div>
     <div style="font-weight:800;font-size:19px;color:var(--ink);">明记家乡小食店</div>
     <div class="mini" style="margin:4px 0 16px;">${LANG==="zh"?"多分店进销存系统 · 请登录":"Please sign in"}</div>
@@ -1825,7 +1825,7 @@ function showLogin(){
   document.querySelector('.top').style.display='none';
   const sb=document.getElementById('sidebar');if(sb)sb.style.display='none';
   document.getElementById('pageHost').innerHTML=`
-  <div style="max-width:380px;margin:8vh auto;padding:28px 22px;background:#fff;border:1px solid var(--line);border-radius:16px;text-align:center;">
+  <div style="width:calc(100% - 32px);max-width:380px;position:fixed;left:50%;top:6vh;transform:translateX(-50%);max-height:88vh;overflow:auto;padding:28px 22px;background:#fff;border:1px solid var(--line);border-radius:16px;text-align:center;">
     <div style="font-size:30px;margin-bottom:6px;">🍜</div>
     <div style="font-weight:800;font-size:19px;color:var(--ink);">明记家乡小食店</div>
     <div class="mini" style="margin:4px 0 20px;">${LANG==="zh"?"多分店进销存系统 · 演示登录（未连云端）":"Demo login (no cloud)"}</div>
