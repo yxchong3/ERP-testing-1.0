@@ -1053,13 +1053,17 @@ async function resetPerms(){
   Object.keys(ROLE_DEFAULTS).forEach(k=>{if(ROLES[k])ROLES[k].can=ROLE_DEFAULTS[k].slice();});
   auditLog("重置岗位权限",LANG==="zh"?"恢复默认":"reset to defaults","","");await saveRolePerms();render();
 }
+/* 设置页统一的可折叠功能面板 */
+function settingsPanel(title,body){
+  return `<details class="card" style="padding:0;margin-bottom:12px;">
+    <summary style="padding:13px;font-weight:800;cursor:pointer;font-size:14px;color:var(--ink);">${title}</summary>
+    <div style="padding:2px 12px 12px;">${body}</div>
+  </details>`;
+}
 /* 「账号权限」功能分区：把岗位权限管理收纳其中（仅管理角色可见，可折叠）*/
 function accountPermsSection(){
   if(!canEditPerms())return '';
-  return `<details class="card" style="padding:0;margin-bottom:12px;">
-    <summary style="padding:13px;font-weight:800;cursor:pointer;font-size:14px;color:var(--ink);">🔑 ${LANG==="zh"?"账号权限":"Account Permissions"} <span class="mini" style="font-weight:400;">· ${LANG==="zh"?"点开管理各岗位可访问的模块":"manage role access"}</span></summary>
-    <div style="padding:2px 12px 12px;">${permEditorHTML()}</div>
-  </details>`;
+  return settingsPanel(`🔑 ${LANG==="zh"?"账号权限":"Account Permissions"} <span class="mini" style="font-weight:400;">· ${LANG==="zh"?"管理各岗位可访问的模块":"manage role access"}</span>`, permEditorHTML());
 }
 function permEditorHTML(){
   if(!canEditPerms())return '';
@@ -1111,8 +1115,7 @@ function auditMonitorHTML(){
   const selStyle="padding:7px 9px;border:1.5px solid var(--line);border-radius:8px;font-size:12.5px;background:#fff;color:var(--ink);font-weight:600;";
   const branchOpts=`<option value="all">${LANG==="zh"?"全部分店":"All branches"}</option>`+OUTLETS.map(o=>`<option value="${o.id}" ${auditBranch===o.id?'selected':''}>${nm(o)}</option>`).join('');
   const roleOpts=`<option value="all">${LANG==="zh"?"全部岗位":"All roles"}</option>`+['manager','headchef','staff'].map(r=>`<option value="${r}" ${auditRole===r?'selected':''}>${roleName[r]}</option>`).join('');
-  return `<div class="fb" style="margin-top:4px;"><h2 class="h" style="margin:0;">🔍 ${LANG==="zh"?"员工操作监察（跨分店审计）":"Staff Activity Monitor"} <span class="tag">${rows.length}</span></h2>
-    <button class="btn ghost sm" onclick="refreshAudit()">🔄 ${LANG==="zh"?"刷新":"Refresh"}</button></div>
+  const body=`<div style="margin-bottom:8px;"><button class="btn ghost sm" onclick="refreshAudit()">🔄 ${LANG==="zh"?"刷新":"Refresh"}</button></div>
   <div class="hint">${LANG==="zh"?"老板 / 区域副经理专用：查看各分店 店长、厨师长、员工 的新增 · 修改 · 删除操作。可按分店与岗位筛选。":"Owner / Area only: what Managers, Head Chefs & Staff added, edited or deleted, across all branches."}</div>
   <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
     <select style="${selStyle}" onchange="setAuditBranch(this.value)">${branchOpts}</select>
@@ -1121,16 +1124,16 @@ function auditMonitorHTML(){
   <div class="card tbl"><table><thead><tr><th>${LANG==="zh"?"时间":"Time"}</th><th>${LANG==="zh"?"分店":"Branch"}</th><th>${LANG==="zh"?"岗位":"Role"}</th><th>${LANG==="zh"?"类别":"Kind"}</th><th>${LANG==="zh"?"动作":"Action"}</th><th>${LANG==="zh"?"明细":"Detail"}</th><th>${LANG==="zh"?"旧→新":"Old→New"}</th></tr></thead><tbody>
     ${rows.map(a=>{const k=auditKind(a.act);return `<tr><td class="mini">${a.date}</td><td>${a._outletName}</td><td><span class="pill ${rolePill[a._role]||'p-n'}">${roleName[a._role]||a._role}</span></td><td><span class="pill ${k.c}">${k.t}</span></td><td>${a.act}</td><td>${a.detail||''}</td><td class="mini">${(a.old||'')}${a.old||a.new?'→':''}${(a.new||'')}</td></tr>`;}).join('')||`<tr><td colspan="7" class="empty">${LANG==="zh"?"暂无符合条件的记录":"No records"}</td></tr>`}
   </tbody></table></div>`;
+  return settingsPanel(`🔍 ${LANG==="zh"?"员工操作监察（跨分店审计）":"Staff Activity Monitor"} <span class="mini" style="font-weight:400;">· ${rows.length}</span>`, body);
 }
 /* ---- 白名单 / 用户管理（仅 老板/区域副经理，需云端）---- */
 function roleShort(rk){return LANG==="zh"?(ROLES[rk]?ROLES[rk].name.split(' ')[0].split('/')[0]:rk):(ROLES[rk]?ROLES[rk].en:rk);}
 function whitelistHTML(){
   if(!canEditPerms())return '';
-  if(!CLOUD)return `<div class="fb" style="margin-top:4px;"><h2 class="h" style="margin:0;">👥 ${LANG==="zh"?"白名单 / 用户管理":"Whitelist / Users"}</h2></div>
-    <div class="al al-a"><div class="t">🟡 ${LANG==="zh"?"需先启用 Supabase 云端":"Requires Supabase cloud"}</div>${LANG==="zh"?"白名单用户存放在云端，请先配置 Supabase 才能管理。":"Configure Supabase to manage users."}</div>`;
+  const title=`👥 ${LANG==="zh"?"白名单 / 用户管理":"Whitelist / Users"} <span class="mini" style="font-weight:400;">· ${CLOUD?USERS.length:(LANG==="zh"?"需云端":"cloud")}</span>`;
+  if(!CLOUD)return settingsPanel(title,`<div class="al al-a" style="margin:0;"><div class="t">🟡 ${LANG==="zh"?"需先启用 Supabase 云端":"Requires Supabase cloud"}</div>${LANG==="zh"?"白名单用户存放在云端，请先配置 Supabase 才能管理。":"Configure Supabase to manage users."}</div>`);
   const outName=id=>{const o=OUTLETS.find(x=>x.id===id);return o?nm(o):(id||'—');};
-  return `<div class="fb" style="margin-top:4px;"><h2 class="h" style="margin:0;">👥 ${LANG==="zh"?"白名单 / 用户管理":"Whitelist / Users"} <span class="tag">${USERS.length}</span></h2>
-    <button class="btn gold sm" onclick="formUser()">+ ${LANG==="zh"?"添加用户":"Add User"}</button></div>
+  const body=`<button class="btn gold sm" style="margin-bottom:8px;" onclick="formUser()">+ ${LANG==="zh"?"添加用户":"Add User"}</button>
   <div class="hint">${LANG==="zh"?"只有在此名单且『启用』的邮箱才能登录。岗位与所属分店由你分配；员工首次用该邮箱注册密码即可登录。":"Only listed & active emails can sign in. You assign role & branch."}</div>
   <div class="card tbl"><table><thead><tr><th>${LANG==="zh"?"邮箱":"Email"}</th><th>${LANG==="zh"?"姓名":"Name"}</th><th>${LANG==="zh"?"岗位":"Role"}</th><th>${LANG==="zh"?"分店":"Branch"}</th><th>${LANG==="zh"?"状态":"Status"}</th><th></th></tr></thead><tbody>
   ${USERS.map(u=>`<tr>
@@ -1142,6 +1145,7 @@ function whitelistHTML(){
     <td style="white-space:nowrap;"><button class="ib" onclick="formUser('${(u.email||'').replace(/'/g,"\\'")}')">✏️</button> <button class="ib" onclick="delUser('${(u.email||'').replace(/'/g,"\\'")}')">🗑️</button></td>
   </tr>`).join('')||`<tr><td colspan="6" class="empty">${LANG==="zh"?"暂无用户，点『添加用户』或让员工自行注册后再分配。":"No users yet."}</td></tr>`}
   </tbody></table></div>`;
+  return settingsPanel(title, body);
 }
 function formUser(email){
   const u=email?USERS.find(x=>x.email===email):null;const isEdit=!!u;
