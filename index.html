@@ -170,21 +170,23 @@ const OUTLETS=[
 ];
 const ROLES={
   owner:{name:"老板/人事经理 Owner/HR",en:"Owner / HR Manager",
-    can:["dash","sales","inv","proc","ck","stock","waste","ent","bom","ap","opex","report","hr","attend","schedule","leave","payroll","settings"],
-    allBranch:true, hrScope:"all", salaryView:"full", approveLeave:true},
+    can:["dash","sales","inv","proc","transfer","ck","stock","waste","ent","bom","ap","opex","report","hr","attend","schedule","leave","payroll","settings"],
+    allBranch:true, hrScope:"all", salaryView:"full", approveLeave:true, canEditPerms:true}, // 全权：含财务、人力财务(个人明细)、所有分店、系统设置
   area:{name:"区域副经理 Area A.M.",en:"Area Assistant Manager",
-    can:["dash","sales","inv","proc","ck","stock","waste","ent","bom","ap","opex","report","hr","attend","schedule","leave","payroll","settings"],
-    allBranch:true, hrScope:"all", salaryView:"total", approveLeave:true}, // 人力财务只看总数
+    can:["dash","sales","inv","proc","transfer","ck","stock","waste","ent","bom","ap","opex","report","hr","attend","schedule","leave","payroll","settings"],
+    allBranch:true, hrScope:"all", salaryView:"total", approveLeave:true, canEditPerms:true}, // 全权：人力财务只看总数(不看个人薪水)
   manager:{name:"店长 Manager",en:"Manager",
-    can:["dash","sales","inv","proc","stock","waste","ent","bom","ap","opex","report","hr","attend","schedule","leave","payroll"],
-    allBranch:false, hrScope:"branch", salaryView:"self", approveLeave:true}, // 看本店员工档案，但薪资只看自己
+    can:["dash","inv","proc","stock","waste","opex","report"],
+    allBranch:false, hrScope:"branch", salaryView:"self", approveLeave:true}, // 本店采购/盘点/损耗/OpEx录入 + 本店报表
   headchef:{name:"厨师长 Head Chef",en:"Head Chef",
-    can:["dash","inv","ck","stock","waste","report","hr","attend","schedule","leave","payroll"],
-    allBranch:false, hrScope:"self", salaryView:"self", approveLeave:false},
+    can:["dash","inv","ck","transfer","stock"],
+    allBranch:false, hrScope:"self", salaryView:"self", approveLeave:false}, // 生产工单/成品入库/配送调拨
   staff:{name:"员工 Staff",en:"Staff",
-    can:["dash","inv","waste","report","hr","attend","schedule","leave","payroll"],
-    allBranch:false, hrScope:"self", salaryView:"self", approveLeave:false},
+    can:["attend","leave","payroll"],
+    allBranch:false, hrScope:"self", salaryView:"self", approveLeave:false}, // 只有人事自助：打卡、请假、查看自己薪资/Payslip
 };
+// 可编辑权限的角色（老板/人事经理、区域副经理）
+function canEditPerms(){return ROLES[curRole] && ROLES[curRole].canEditPerms===true;}
 // 薪资可见范围：full=全部个人明细, total=只看总数, self=只看自己
 function canSeeSalary(){return ROLES[curRole].salaryView==="full";}
 function salaryScope(){return ROLES[curRole].salaryView;}
@@ -392,6 +394,12 @@ async function loadDB(){
 }
 async function save(oid){try{await Store.set('erpv2:'+(oid||curOutlet),JSON.stringify(DB[oid||curOutlet]));}catch(e){}}
 async function reloadOutlet(oid){try{const r=await Store.get('erpv2:'+oid);if(r)DB[oid]=JSON.parse(r.value);}catch(e){}}
+/* ---- 角色权限：全局配置，持久化到云端/本地，所有分店同步 ---- */
+const ROLE_DEFAULTS=Object.fromEntries(Object.keys(ROLES).map(k=>[k,ROLES[k].can.slice()]));
+async function loadRolePerms(){
+  try{const r=await Store.get('erpv2:roleperms');if(r){const o=JSON.parse(r.value);Object.keys(o).forEach(k=>{if(ROLES[k]&&Array.isArray(o[k]))ROLES[k].can=o[k].slice();});}}catch(e){}
+}
+async function saveRolePerms(){const o={};Object.keys(ROLES).forEach(k=>o[k]=ROLES[k].can.slice());try{await Store.set('erpv2:roleperms',JSON.stringify(o));}catch(e){}}
 const ALL_ID="ALL"; // 全部分店总和（不含中央厨房）
 function branchIds(){return OUTLETS.filter(o=>!o.ck).map(o=>o.id);}
 function isAgg(){return curOutlet===ALL_ID;}
@@ -451,6 +459,10 @@ function auditLog(act,detail,oldv,newv){
 
 /* ================= 渲染框架 ================= */
 function can(p){return ROLES[curRole].can.includes(p);}
+// 作业中心(proc)只要拥有任一子作业权限即可进入；子页与页面级访问统一由 pageAllowed 判定
+function hasAnyOp(){return ['proc','transfer','waste','ent','stock'].some(p=>can(p));}
+function pageAllowed(p){if(p==='proc')return hasAnyOp();if(typeof PROC_SUB!=='undefined'&&PROC_SUB[p])return can(PROC_SUB[p]);return can(p);}
+function firstAllowedPage(){const order=['dash','attend','leave','payroll','hr','schedule','sales','inv','proc','ck','stock','opex','ap','bom','report','settings'];for(const p of order)if(pageAllowed(p))return p;return 'dash';}
 function canW(p){return can(p)&&!isAgg();} // 汇总视图为只读
 function renderTop(){
   document.getElementById('appTitle').textContent=t('appTitle');
@@ -474,7 +486,7 @@ const MENU_LABELS={sales:{zh:"销售 (POS)",en:"Sales (POS)"},ck:{zh:"中央厨�
 function mlabel(p){if(MENU_LABELS[p])return MENU_LABELS[p][LANG];return t(p);}
 function renderSidebar(){
   const html=MENU.map(([grp,items])=>{
-    const visible=items.filter(([p])=>can(p));
+    const visible=items.filter(([p])=>pageAllowed(p));
     if(!visible.length)return '';
     return `<div class="grp">${grp}</div>`+visible.map(([p,ic])=>
       `<button class="${p===curPage?'active':''}" onclick="nav('${p}')"><span class="si">${ic}</span>${mlabel(p)}</button>`).join('');
@@ -485,7 +497,7 @@ function toggleSide(){document.getElementById('sidebar').classList.toggle('open'
 async function switchOutlet(){curOutlet=document.getElementById('outletSel').value;_aggCache=null;
   if(CLOUD){try{if(curOutlet===ALL_ID){for(const id of branchIds())await reloadOutlet(id);}else if(curOutlet!==ALL_ID)await reloadOutlet(curOutlet);}catch(e){}}
   render();}
-function switchRole(){curRole=document.getElementById('roleSel').value;if(!can(curPage)&&!subCan(curPage))curPage="dash";render();}
+function switchRole(){curRole=document.getElementById('roleSel').value;if(!pageAllowed(curPage))curPage=firstAllowedPage();render();}
 function toggleLang(){LANG=LANG==="zh"?"en":"zh";render();}
 function nav(p){curPage=p;if(!['purchase','grn','monthend'].includes(p))selSupplier=null;const sb=document.getElementById('sidebar');if(sb)sb.classList.remove('open');const bd=document.getElementById('backdrop');if(bd)bd.classList.remove('show');render();window.scrollTo(0,0);}
 
@@ -617,8 +629,8 @@ function pgProc(){
   if(can('proc')){
     cards.push(["purchase","📥",LANG==="zh"?"采购进货":"Purchases",LANG==="zh"?"按供应商 · 每年月日进货单":"By supplier · dated invoices",var_green()]);
     cards.push(["grn","📋",LANG==="zh"?"验收 / 退货折让":"GRN / Returns",LANG==="zh"?"按供应商 · 含补货/免费/取消":"By supplier · settlement",var_blue()]);
-    cards.push(["transfer","🔁",LANG==="zh"?"跨店调拨":"Transfer",LANG==="zh"?"物品调拨 + 人力借调":"Items + staff loans",var_navy()]);
   }
+  if(can('transfer'))cards.push(["transfer","🔁",LANG==="zh"?"跨店调拨":"Transfer",LANG==="zh"?"物品调拨 + 人力借调":"Items + staff loans",var_navy()]);
   if(can('waste'))cards.push(["waste2","🗑",LANG==="zh"?"报废损耗":"Wastage",LANG==="zh"?"成本×数量 · 原因备注":"Cost × qty · reason",var_red()]);
   if(can('ent'))cards.push(["offer","🎁",LANG==="zh"?"招待 / 赠送":"Offers",LANG==="zh"?"ENT/Offer · 负责人":"ENT/Offer · in-charge",var_amber()]);
   if(can('stock'))cards.push(["monthend","🧮",LANG==="zh"?"月末算货":"Month-End",LANG==="zh"?"按供应商 · 月末结存":"Supplier · month-end",var_teal()]);
@@ -989,14 +1001,54 @@ function pgStock(){
   </tbody></table></div>`;
 }
 
+/* ---- 权限编辑器（仅 老板/人事经理、区域副经理 可用）---- */
+const PERM_MODULES=[
+  ["dash","利润大盘","Dashboard"],["sales","销售POS","Sales"],["proc","采购/验收","Purchase/GRN"],["transfer","跨店调拨","Transfer"],
+  ["waste","报废损耗","Wastage"],["ent","招待赠送","Offers"],["ck","中央厨房","Central Kitchen"],["inv","库存","Inventory"],
+  ["bom","配方成本","Recipe"],["stock","盘点/月末","Stock/Month-End"],["ap","应付账款","Payables"],["opex","运营开销","OpEx"],
+  ["report","报表","Reports"],["hr","员工档案","Staff"],["attend","打卡考勤","Attendance"],["schedule","排班","Schedule"],
+  ["leave","请假","Leave"],["payroll","人事薪资","Payroll"],["settings","系统设置","Settings"],
+];
+function permLabel(m){const x=PERM_MODULES.find(p=>p[0]===m);return x?(LANG==="zh"?x[1]:x[2]):m;}
+async function togglePerm(role,mod,checked){
+  if(!canEditPerms()){alert(LANG==="zh"?"你没有权限修改岗位权限。":"No permission to edit roles.");render();return;}
+  const r=ROLES[role];if(!r)return;
+  if(!checked){
+    if(mod==='settings'&&r.canEditPerms){alert(LANG==="zh"?"为避免锁死系统，不能移除管理角色的『系统设置』权限。":"Cannot remove Settings from an admin role.");render();return;}
+    r.can=r.can.filter(x=>x!==mod);
+  }else if(!r.can.includes(mod)){r.can.push(mod);}
+  auditLog("修改岗位权限",(LANG==="zh"?r.name:r.en)+" · "+permLabel(mod)+" "+(checked?(LANG==="zh"?"授予":"grant"):(LANG==="zh"?"移除":"revoke")),"","");
+  await saveRolePerms();render();
+}
+async function resetPerms(){
+  if(!canEditPerms())return;
+  if(!confirm(LANG==="zh"?"恢复所有岗位为默认权限？":"Reset all roles to defaults?"))return;
+  Object.keys(ROLE_DEFAULTS).forEach(k=>{if(ROLES[k])ROLES[k].can=ROLE_DEFAULTS[k].slice();});
+  auditLog("重置岗位权限",LANG==="zh"?"恢复默认":"reset to defaults","","");await saveRolePerms();render();
+}
+function permEditorHTML(){
+  if(!canEditPerms())return '';
+  return `<div class="fb" style="margin-top:4px;"><h2 class="h" style="margin:0;">🛡️ ${LANG==="zh"?"岗位权限管理":"Role Permission Editor"}</h2>
+    <button class="btn ghost sm" onclick="resetPerms()">↩︎ ${LANG==="zh"?"恢复默认":"Reset"}</button></div>
+  <div class="hint">${LANG==="zh"?"勾选=授予该岗位访问对应模块。改动即时保存并（云端启用时）同步到所有分店。管理角色的『系统设置』不可移除，以防锁死。":"Tick to grant a module to a role. Saved & synced instantly."}</div>
+  ${Object.entries(ROLES).map(([rk,rv])=>`
+    <div class="card" style="padding:12px;margin-bottom:10px;">
+      <div style="font-weight:800;margin-bottom:8px;">${LANG==="zh"?rv.name:rv.en}${rv.canEditPerms?` <span class="pill p-b">${LANG==="zh"?"可管理权限":"admin"}</span>`:''} <span class="mini">· ${rv.can.length} ${LANG==="zh"?"模块":"modules"}</span></div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:6px;">
+        ${PERM_MODULES.map(([mk])=>{const on=rv.can.includes(mk);const lock=(mk==='settings'&&rv.canEditPerms);return `<label style="display:flex;align-items:center;gap:6px;font-size:12px;padding:5px 7px;border:1px solid var(--line);border-radius:7px;background:${on?'#E4F2E8':'#fff'};cursor:${lock?'not-allowed':'pointer'};opacity:${lock?.7:1};">
+          <input type="checkbox" ${on?'checked':''} ${lock?'disabled':''} onchange="togglePerm('${rk}','${mk}',this.checked)"> ${permLabel(mk)}</label>`;}).join('')}
+      </div>
+    </div>`).join('')}`;
+}
 function pgSettings(){
   const x=d();
   return `<h2 class="h" style="margin-top:2px;">⚙️ ${LANG==="zh"?"系统设置":"Settings"}</h2>
   <div class="card" style="padding:12px;margin-bottom:12px;">
     <div class="fr"><label>${LANG==="zh"?"当前角色权限 (RBAC)":"Role Permissions"}</label>
     <div class="mini">${Object.entries(ROLES).map(([k,v])=>`<div style="padding:4px 0;">${k===curRole?'▶ ':''}<b>${LANG==="zh"?v.name:v.en}</b>：${v.can.length} ${LANG==="zh"?"个模块":"modules"}</div>`).join('')}</div></div>
-    <div class="mini">${LANG==="zh"?"切换角色请用右上角选单。老板/人事经理：全权含个人薪资。区域副经理：全权但薪资只看总数、不看个人。店长：本店。厨师长：生产。员工：只读+限额。":"Switch role top-right. Area A.M. sees salary total only."}</div>
+    <div class="mini">${LANG==="zh"?"切换角色请用右上角选单。老板/人事经理：全权含个人薪资。区域副经理：全权但薪资只看总数、不看个人。店长：本店采购/盘点/损耗/OpEx+报表。厨师长：生产/成品入库/配送调拨。员工：打卡/请假/查看自己薪资。":"Switch role top-right."}</div>
   </div>
+  ${permEditorHTML()}
   <div class="card" style="padding:12px;margin-bottom:12px;">
     <div class="fr" style="margin:0 0 8px;"><label>☁️ ${LANG==="zh"?"数据存储状态":"Storage Status"}</label>
     <div class="al ${CLOUD?'al-b':'al-a'}" style="margin:0;"><div class="t">${CLOUD?("🟢 "+(LANG==="zh"?"Supabase 云端同步 已启用":"Cloud sync ON")):("🟡 "+(LANG==="zh"?"本地存储模式（localStorage）":"Local storage mode"))}</div>
@@ -1295,7 +1347,7 @@ function exportCSV(){
    waste2 报废损耗 / offer 招待赠送 / monthend 月末算货
    ================================================================ */
 let selSupplier=null;                          // 供应商钻取页共用：当前选中供应商
-const PROC_SUB={purchase:'proc',grn:'proc',transfer:'proc',waste2:'waste',offer:'ent',monthend:'stock'};
+const PROC_SUB={purchase:'proc',grn:'proc',transfer:'transfer',waste2:'waste',offer:'ent',monthend:'stock'};
 function subCan(p){return PROC_SUB[p]?can(PROC_SUB[p]):can(p);}   // 子页读权限
 function subCanW(p){return PROC_SUB[p]?canW(PROC_SUB[p]):canW(p);}// 子页写权限（汇总视图只读）
 function setSupplier(n){selSupplier=n;render();window.scrollTo(0,0);}
@@ -1548,6 +1600,7 @@ function pgMonthEnd(){return pgLedger('monthend');}
 const _pages={dash:pgDash,sales:pgSales,inv:pgInv,proc:pgProc,bom:pgBom,report:pgReport,settings:pgSettings,ap:pgAp,opex:pgOpex,payroll:pgPayroll,hr:pgHR,attend:pgAttend,schedule:pgSchedule,leave:pgLeave,ck:pgCK,stock:pgStock,
   purchase:pgPurchase,grn:pgGRN,transfer:pgTransfer,waste2:pgWaste2,offer:pgOffer,monthend:pgMonthEnd};
 function render(){
+  if(!pageAllowed(curPage)){curPage=firstAllowedPage();selSupplier=null;} // 权限收紧后自动落到可访问页
   renderTop();renderSidebar();
   if(isAgg())_aggCache=null; // 每次渲染刷新汇总，反映最新各店数据
   const banner=isAgg()?`<div class="al al-b" style="margin-bottom:10px;"><div class="t">📊 ${LANG==="zh"?"全部分店总和视图（只读）":"All-Branches Aggregate (read-only)"}</div>${LANG==="zh"?"这是 11 间分店数据的合计，仅供总览；要录入或修改请切换到个别分店。":"Totals of all branches. Switch to a branch to edit."}</div>`:'';
@@ -1579,12 +1632,12 @@ function doLogin(){
   const lr=document.getElementById('loginRole');if(lr)curRole=lr.value;
   document.querySelector('.top').style.display='';
   const sb=document.getElementById('sidebar');if(sb)sb.style.display='';
-  curPage="dash";render();
+  curPage=firstAllowedPage();render();
 }
 function logout(){showLogin();}
 
 /* ---------- init ---------- */
-(async()=>{initCloud();await loadDB();showLogin();})();
+(async()=>{initCloud();await loadDB();await loadRolePerms();showLogin();})();
 
 </script>
 </body>
