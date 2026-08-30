@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>正在跳转进销存系统...</title>
+  <script>
+    // 检测如果跳转到了根目录但带有 hash token，自动重定向到真实仓库路径
+    var currentHash = window.location.hash;
+    var repoPath = '/ERP-testing-1.0/';
+    if (!window.location.pathname.includes('ERP-testing-1.0')) {
+      window.location.replace(window.location.origin + repoPath + currentHash);
+    }
+  </script>
+</head>
+<body>
+  <p style="text-align:center;margin-top:50px;font-family:sans-serif;color:#666;">
+    正在验证并跳转回系统，请稍候...
+  </p>
+</body>
+</html>
