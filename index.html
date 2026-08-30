@@ -346,8 +346,8 @@ function seed(outletId){
    填上下面两行你的 Supabase 项目资料，即可点亮跨分店 / 跨设备的实时云端同步；
    两行留空则自动使用浏览器本地存储（localStorage），打开即用、无需任何授权。
    一次性建表 SQL 见仓库根目录 supabase-schema.sql（在 Supabase SQL Editor 跑一次）。 */
-const SUPABASE_URL = "";        // ← 例如 https://xxxxxxxx.supabase.co
-const SUPABASE_ANON_KEY = "";   // ← anon public key
+const SUPABASE_URL = "https://kmcdokwiyetlmsrdlgqw.supabase.co";        // ← Project URL
+const SUPABASE_ANON_KEY = "sb_publishable_HVJ_hcFmSDU-N2kFUg5CRw_LH-X_phO";   // ← publishable key（浏览器安全，可公开）
 const CLOUD_TABLE = "erp_store";
 
 let _sb=null, CLOUD=false;
