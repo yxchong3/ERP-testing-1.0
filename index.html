@@ -187,6 +187,10 @@ const ROLES={
 };
 // 可编辑权限的角色（老板/人事经理、区域副经理）
 function canEditPerms(){return ROLES[curRole] && ROLES[curRole].canEditPerms===true;}
+// 真实登录时，判断「真实身份」是否为管理员（决定能否预览其它岗位）
+function isAdminUser(){return curUser?!!(ROLES[curUser.role]&&ROLES[curUser.role].canEditPerms):canEditPerms();}
+function isPreviewing(){return !!(curUser&&curRole!==curUser.role);}
+function exitPreview(){if(curUser){curRole=curUser.role;if(!ROLES[curRole].allBranch)curOutlet=curUser.outlet||curOutlet;curPage=firstAllowedPage();render();}}
 // 薪资可见范围：full=全部个人明细, total=只看总数, self=只看自己
 function canSeeSalary(){return ROLES[curRole].salaryView==="full";}
 function salaryScope(){return ROLES[curRole].salaryView;}
@@ -471,15 +475,15 @@ function renderTop(){
   document.getElementById('appTitle').textContent=t('appTitle');
   document.getElementById('langBtn').textContent=LANG==="zh"?"EN":"中";
   const roleSel=document.getElementById('roleSel');
-  if(curUser){ // 真实登录：岗位由白名单锁定，不可自选
+  if(curUser && !isAdminUser()){ // 真实登录的普通用户：岗位由白名单锁定，不可自选
     roleSel.innerHTML=`<option>${LANG==="zh"?ROLES[curRole].name:ROLES[curRole].en}</option>`;roleSel.disabled=true;
-  }else{
+  }else{ // 演示模式 或 管理员（可预览其它岗位）
     roleSel.disabled=false;
-    roleSel.innerHTML=Object.entries(ROLES).map(([k,v])=>`<option value="${k}" ${k===curRole?'selected':''}>${LANG==="zh"?v.name:v.en}</option>`).join('');
+    roleSel.innerHTML=Object.entries(ROLES).map(([k,v])=>`<option value="${k}" ${k===curRole?'selected':''}>${(curUser&&isAdminUser()&&k!==curUser.role)?'👁 ':''}${LANG==="zh"?v.name:v.en}</option>`).join('');
   }
   const ck=OUTLETS.find(o=>o.ck);const branches=OUTLETS.filter(o=>!o.ck);
   const outletSel=document.getElementById('outletSel');
-  const allBranch=ROLES[curRole].allBranch;
+  const allBranch=ROLES[curRole].allBranch || isAdminUser(); // 管理员预览时仍可切换分店
   if(allBranch){ // 全分店角色：中央厨房 + 总和 + 各分店
     outletSel.disabled=false;
     outletSel.innerHTML=
@@ -1722,7 +1726,8 @@ function render(){
   renderTop();renderSidebar();
   if(isAgg())_aggCache=null; // 每次渲染刷新汇总，反映最新各店数据
   const banner=isAgg()?`<div class="al al-b" style="margin-bottom:10px;"><div class="t">📊 ${LANG==="zh"?"全部分店总和视图（只读）":"All-Branches Aggregate (read-only)"}</div>${LANG==="zh"?"这是 11 间分店数据的合计，仅供总览；要录入或修改请切换到个别分店。":"Totals of all branches. Switch to a branch to edit."}</div>`:'';
-  document.getElementById('pageHost').innerHTML=`<div class="page active">${banner}${(_pages[curPage]||pgDash)()}</div>`;
+  const preview=isPreviewing()?`<div class="al al-a" style="margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;"><div><div class="t">👁 ${LANG==="zh"?"岗位预览模式":"Role Preview"}</div>${LANG==="zh"?`你正在以「${ROLES[curRole].name}」身份查看界面（真实身份：${curUser.name} · 老板/管理员）。`:`Previewing as ${ROLES[curRole].en}.`}</div><button class="btn ghost sm" onclick="exitPreview()">↩︎ ${LANG==="zh"?"退出预览":"Exit"}</button></div>`:'';
+  document.getElementById('pageHost').innerHTML=`<div class="page active">${banner}${preview}${(_pages[curPage]||pgDash)()}</div>`;
 }
 
 /* ================= 登录 / 身份验证 =================
