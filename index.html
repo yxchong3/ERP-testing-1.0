@@ -294,7 +294,49 @@ function seed(outletId){
     {id:2,empId:3,type:"病假 Sick",from:"2026-08-20",to:"2026-08-20",days:1,reason:"发烧",status:"已批准"},
     {id:3,empId:6,type:"年假 Annual",from:"2026-09-10",to:"2026-09-12",days:3,reason:"旅行",status:"待批准"},
   ];
-  return {items,recipes,subRecipes,moves,vendors,payables,stocktakes,opex,staff,attendance,schedule,leaves,sales,fin,audit};
+  /* ===== 采购进货明细（按供应商）===== */
+  const purchases=[
+    {supplier:"泰记海鲜 Thye Kee Seafood",date:"2026-08-26",invoice:"INV-2408-001",code:"FSH-01",item:"松鱼头 Fish Head",qty:7,weight:12.5,price:126,note:"新鲜到货"},
+    {supplier:"泰记海鲜 Thye Kee Seafood",date:"2026-08-26",invoice:"INV-2408-001",code:"CLM-01",item:"沙白 Clams",qty:10,weight:10,price:140,note:""},
+    {supplier:"泰记海鲜 Thye Kee Seafood",date:"2026-08-12",invoice:"INV-2408-088",code:"FSH-01",item:"松鱼头 Fish Head",qty:5,weight:9.0,price:90,note:""},
+    {supplier:"合发肉商 Hup Huat Meat",date:"2026-08-25",invoice:"INV-2408-010",code:"CHK-01",item:"鸡腿肉 Chicken Leg",qty:2,weight:20,price:190,note:"2箱"},
+    {supplier:"合发肉商 Hup Huat Meat",date:"2026-08-20",invoice:"INV-2408-011",code:"PRK-01",item:"猪脚 Pork Trotter",qty:16,weight:16,price:192,note:""},
+    {supplier:"永兴杂货 Weng Heng Sundry",date:"2026-08-22",invoice:"INV-2408-020",code:"TOF-01",item:"豆腐 Tofu",qty:50,weight:0,price:60,note:""},
+    {supplier:"永兴杂货 Weng Heng Sundry",date:"2026-08-22",invoice:"INV-2408-020",code:"VEG-01",item:"冬菜 Preserved Veg",qty:14,weight:0,price:49,note:""},
+  ];
+  /* ===== 验收 / 退货折让（按供应商，含处理方式）===== */
+  const grn=[
+    {supplier:"泰记海鲜 Thye Kee Seafood",date:"2026-08-23",invoice:"GRN-2408-001",code:"CLM-01",item:"沙白 Clams",qty:1,weight:1,price:14,settle:"不收费",note:"过期变质"},
+    {supplier:"合发肉商 Hup Huat Meat",date:"2026-08-20",invoice:"GRN-2408-005",code:"CHK-01",item:"鸡腿肉 Chicken Leg",qty:1,weight:10,price:95,settle:"补货",note:"数量不足"},
+    {supplier:"永兴杂货 Weng Heng Sundry",date:"2026-08-18",invoice:"GRN-2408-007",code:"TOF-01",item:"豆腐 Tofu",qty:5,weight:0,price:6,settle:"取消订单",note:"错货"},
+  ];
+  /* ===== 跨店调拨（物品 + 人力）===== */
+  const transfers=[
+    {date:"2026-08-24",item:"豆腐 Tofu",code:"TOF-01",qty:20,unit:"pcs",amt:24,to:"分店 2",mode:"transfer",note:"急用调货"},
+    {date:"2026-08-22",item:"绍兴酒 Shaoxing Wine",code:"WIN-01",qty:3,unit:"btl",amt:45,to:"分店 3",mode:"return",note:"借用后归还"},
+  ];
+  const staffLoans=[
+    {date:"2026-08-25",staff:"阿都拉 Abdullah",role:"厨师 Cook",to:"分店 2",mode:"loan",note:"人手不足支援"},
+    {date:"2026-08-19",staff:"黄丽婷 Wong LT",role:"服务员 Server",to:"分店 3",mode:"return",note:"支援结束返回"},
+  ];
+  /* ===== 报废损耗 ===== */
+  const wasteLog=[
+    {date:"2026-08-26",item:"豆腐 Tofu",code:"TOF-01",cost:1.20,qty:2,reason:"打翻/损坏",note:""},
+    {date:"2026-08-23",item:"沙白 Clams",code:"CLM-01",cost:14.00,qty:1,reason:"过期变质",note:""},
+    {date:"2026-08-15",item:"鸡腿肉 Chicken Leg",code:"CHK-01",cost:9.50,qty:1.5,reason:"变色发臭",note:"冰箱故障"},
+  ];
+  /* ===== 招待 / 赠送 ===== */
+  const offers=[
+    {date:"2026-08-25",type:"ENT",item:"南乳炸鸡 Fried Chicken",person:"店长 Ah Lim",qty:2,total:10.80,note:"熟客招待"},
+    {date:"2026-08-21",type:"Offer",item:"招牌豆腐 Signature Tofu",person:"老板",qty:1,total:14.00,note:"促销赠送"},
+  ];
+  /* ===== 月末算货（按供应商结算）===== */
+  const monthEnd=[
+    {supplier:"泰记海鲜 Thye Kee Seafood",date:"2026-07-31",invoice:"ME-2407-01",code:"FSH-01",item:"松鱼头 Fish Head",qty:3,weight:5,price:54,note:"7月月末结存"},
+    {supplier:"合发肉商 Hup Huat Meat",date:"2026-07-31",invoice:"ME-2407-05",code:"PRK-01",item:"猪脚 Pork Trotter",qty:8,weight:8,price:96,note:"7月月末结存"},
+    {supplier:"合发肉商 Hup Huat Meat",date:"2026-08-31",invoice:"ME-2408-05",code:"CHK-01",item:"鸡腿肉 Chicken Leg",qty:12,weight:12,price:114,note:"8月月末结存"},
+  ];
+  return {items,recipes,subRecipes,moves,vendors,payables,stocktakes,opex,staff,attendance,schedule,leaves,sales,fin,audit,purchases,grn,transfers,staffLoans,wasteLog,offers,monthEnd};
 }
 
 let DB={};
@@ -312,6 +354,7 @@ function buildAggregate(){
   // 把所有分店合并成一个只读的汇总视图
   const ids=branchIds();
   const agg={items:[],recipes:[],subRecipes:[],moves:[],vendors:[],payables:[],stocktakes:[],staff:[],sales:[],
+    purchases:[],grn:[],transfers:[],staffLoans:[],wasteLog:[],offers:[],monthEnd:[],
     opex:{rent:0,commission:0,salaries:0,epf:0,socso:0,levy:0,ot:0,electricity:0,water:0,gas:0,wifi:0,rubbish:0,possaas:0,accounting:0,repair:0},
     fin:{posGross:0},audit:[]};
   // 合并库存：同名品项数量与库存值相加，成本用加权
@@ -324,6 +367,7 @@ function buildAggregate(){
     b.moves.forEach(m=>agg.moves.push({...m}));
     b.staff&&b.staff.forEach(s=>agg.staff.push({...s,_branch:id}));
     b.payables.forEach(p=>agg.payables.push({...p}));
+    ['purchases','grn','transfers','staffLoans','wasteLog','offers','monthEnd'].forEach(k=>{(b[k]||[]).forEach(r=>agg[k].push({...r,_branch:id}));});
     b.items.forEach(it=>{
       if(!itemMap[it.name]){itemMap[it.name]={...it,qty:0,batches:[]};itemMap[it.name]._costQtySum=0;itemMap[it.name]._costSum=0;}
       const a=itemMap[it.name];a.qty+=it.qty;a._costSum+=it.qty*it.cost;a._costQtySum+=it.qty;
@@ -394,9 +438,9 @@ function renderSidebar(){
 }
 function toggleSide(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('backdrop').classList.toggle('show');}
 function switchOutlet(){curOutlet=document.getElementById('outletSel').value;_aggCache=null;render();}
-function switchRole(){curRole=document.getElementById('roleSel').value;if(!can(curPage))curPage="dash";render();}
+function switchRole(){curRole=document.getElementById('roleSel').value;if(!can(curPage)&&!subCan(curPage))curPage="dash";render();}
 function toggleLang(){LANG=LANG==="zh"?"en":"zh";render();}
-function nav(p){curPage=p;const sb=document.getElementById('sidebar');if(sb)sb.classList.remove('open');const bd=document.getElementById('backdrop');if(bd)bd.classList.remove('show');render();window.scrollTo(0,0);}
+function nav(p){curPage=p;if(!['purchase','grn','monthend'].includes(p))selSupplier=null;const sb=document.getElementById('sidebar');if(sb)sb.classList.remove('open');const bd=document.getElementById('backdrop');if(bd)bd.classList.remove('show');render();window.scrollTo(0,0);}
 
 
 /* ================= M1 利润大盘 ================= */
@@ -521,27 +565,30 @@ function pgInv(){
 
 /* ================= M2/M3/M4/M5/M6 作业中心 ================= */
 function pgProc(){
-  const acts=[];
-  if(can('proc')){acts.push(["po","📥",LANG==="zh"?"采购进货 PO":"Purchase",var_green()]);acts.push(["grn","📋",LANG==="zh"?"验收/退货折让":"GRN/Credit",var_blue()]);acts.push(["transfer","🔁",LANG==="zh"?"跨店调拨":"Transfer",var_navy()]);}
-  if(can('waste'))acts.push(["waste","🗑",LANG==="zh"?"报废损耗":"Wastage",var_red()]);
-  if(can('ent'))acts.push(["ent","🎁",LANG==="zh"?"招待赠送":"Offer",var_amber()]);
-  if(can('ck')&&outletObj().ck)acts.push(["production","🏭",LANG==="zh"?"中央厨房生产":"Production",var_purple()]);
-  if(can('stock'))acts.push(["stocktake","📋",LANG==="zh"?"实物盘点":"Stock Take",var_teal()]);
-  const map={in:["进货","Buy","p-g"],transfer:["调拨","Transfer","p-b"],waste:["报废","Waste","p-r"],ent:["招待","Offer","p-a"],production:["生产","Prod","p-p"],grn:["折让","Credit","p-n"]};
+  // 六大作业各自独立界面（中枢导航卡）
+  const cards=[];
+  if(can('proc')){
+    cards.push(["purchase","📥",LANG==="zh"?"采购进货":"Purchases",LANG==="zh"?"按供应商 · 每年月日进货单":"By supplier · dated invoices",var_green()]);
+    cards.push(["grn","📋",LANG==="zh"?"验收 / 退货折让":"GRN / Returns",LANG==="zh"?"按供应商 · 含补货/免费/取消":"By supplier · settlement",var_blue()]);
+    cards.push(["transfer","🔁",LANG==="zh"?"跨店调拨":"Transfer",LANG==="zh"?"物品调拨 + 人力借调":"Items + staff loans",var_navy()]);
+  }
+  if(can('waste'))cards.push(["waste2","🗑",LANG==="zh"?"报废损耗":"Wastage",LANG==="zh"?"成本×数量 · 原因备注":"Cost × qty · reason",var_red()]);
+  if(can('ent'))cards.push(["offer","🎁",LANG==="zh"?"招待 / 赠送":"Offers",LANG==="zh"?"ENT/Offer · 负责人":"ENT/Offer · in-charge",var_amber()]);
+  if(can('stock'))cards.push(["monthend","🧮",LANG==="zh"?"月末算货":"Month-End",LANG==="zh"?"按供应商 · 月末结存":"Supplier · month-end",var_teal()]);
   return `
-  <h2 class="h" style="margin-top:2px;">🔄 ${LANG==="zh"?"进销存作业":"Operations"}</h2>
-  <div class="act-grid" style="margin-bottom:12px;">
-    ${acts.map(([k,ic,label,color])=>`<button class="act" style="background:${color}" onclick="openM('${k}')"><span class="ai">${ic}</span>${label}</button>`).join('')}
+  <h2 class="h" style="margin-top:2px;">🔄 ${LANG==="zh"?"进销存作业":"Operations"} <span class="tag">${nm(outletObj())}</span></h2>
+  <div class="hint">${LANG==="zh"?"每个作业已拆分为独立界面，点选进入。":"Each operation now has its own dedicated page."}</div>
+  <div class="grid g2" style="margin-bottom:12px;">
+    ${cards.map(([k,ic,label,desc,color])=>`<button class="card" style="text-align:left;padding:14px;border-left:4px solid ${color};cursor:pointer;background:var(--card);" onclick="goProcSub('${k}')">
+      <div style="font-size:22px;">${ic}</div>
+      <div style="font-weight:800;font-size:14px;margin-top:4px;color:var(--ink);">${label}</div>
+      <div class="mini" style="margin-top:2px;">${desc}</div>
+    </button>`).join('')}
   </div>
+  ${can('ck')&&outletObj().ck?`<button class="btn block" style="background:var(--purple);margin-bottom:8px;" onclick="nav('ck')">🏭 ${LANG==="zh"?"中央厨房生产":"Central Kitchen Production"}</button>`:''}
   ${can('ap')?`<button class="btn ghost block sm" style="margin-bottom:8px;" onclick="nav('ap')">💳 ${LANG==="zh"?"查看应付账款 (Accounts Payable)":"View Payables"}</button>`:''}
   ${can('opex')?`<button class="btn ghost block sm" style="margin-bottom:8px;" onclick="nav('opex')">💵 ${LANG==="zh"?"运营开销 (OpEx)":"OpEx"}</button>`:''}
-  ${canW('payroll')?`<button class="btn ghost block sm" style="margin-bottom:12px;" onclick="nav('payroll')">👥 ${LANG==="zh"?"人事薪资 (Payroll)":"Payroll"}</button>`:''}
-  <div class="seg" style="margin-bottom:10px;">
-    ${[["all","全部","All"],["in","进货","Buy"],["transfer","调拨","Transfer"],["waste","报废","Waste"],["ent","招待","Offer"],["production","生产","Prod"]].map(([k,z,e])=>`<button class="${moveFilter===k?'active':''}" onclick="setMF('${k}')">${LANG==="zh"?z:e}</button>`).join('')}
-  </div>
-  <div class="card tbl"><table><thead><tr><th>${LANG==="zh"?"日期":"Date"}</th><th>${LANG==="zh"?"类型":"Type"}</th><th>${LANG==="zh"?"品项":"Item"}</th><th>${LANG==="zh"?"数量":"Qty"}</th><th>${LANG==="zh"?"金额":"Amt"}</th>${canW('proc')?`<th></th>`:''}</tr></thead><tbody>
-    ${d().moves.filter(m=>moveFilter==='all'||m.type===moveFilter).map((m)=>{const gi=d().moves.indexOf(m);const mp=map[m.type]||["其他","Other","p-n"];return `<tr><td class="mini">${m.date.slice(5)}</td><td><span class="pill ${mp[2]}">${LANG==="zh"?mp[0]:mp[1]}</span></td><td>${m.item}${m.note?`<br><span class="mini">${m.note}</span>`:''}</td><td>${num(m.qty)} ${m.unit||''}</td><td>${money(m.amt)}</td>${canW('proc')?`<td><button class="ib" onclick="delMove(${gi})">🗑️</button></td>`:''}</tr>`;}).join('')||`<tr><td colspan="6" class="empty">${LANG==="zh"?"暂无记录":"No records"}</td></tr>`}
-  </tbody></table></div>`;
+  ${canW('payroll')?`<button class="btn ghost block sm" style="margin-bottom:12px;" onclick="nav('payroll')">👥 ${LANG==="zh"?"人事薪资 (Payroll)":"Payroll"}</button>`:''}`;
 }
 function var_green(){return"#2E7D46";}function var_blue(){return"#2A5FA0";}function var_navy(){return"#12203A";}function var_red(){return"#B23A3A";}function var_amber(){return"#C08A2E";}function var_purple(){return"#6B4E9E";}function var_teal(){return"#0F5C4E";}
 function setMF(f){moveFilter=f;render();}
@@ -1190,8 +1237,264 @@ function exportCSV(){
   const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);a.download='明记ERP_'+outletObj().name+'_'+TODAY+'.csv';a.click();
 }
 
+/* ================================================================
+   进销存作业 · 六大独立界面
+   purchase 采购进货 / grn 验收退货 / transfer 跨店调拨 /
+   waste2 报废损耗 / offer 招待赠送 / monthend 月末算货
+   ================================================================ */
+let selSupplier=null;                          // 供应商钻取页共用：当前选中供应商
+const PROC_SUB={purchase:'proc',grn:'proc',transfer:'proc',waste2:'waste',offer:'ent',monthend:'stock'};
+function subCan(p){return PROC_SUB[p]?can(PROC_SUB[p]):can(p);}   // 子页读权限
+function subCanW(p){return PROC_SUB[p]?canW(PROC_SUB[p]):canW(p);}// 子页写权限（汇总视图只读）
+function setSupplier(n){selSupplier=n;render();window.scrollTo(0,0);}
+function backSupplier(){selSupplier=null;render();window.scrollTo(0,0);}
+function goProcSub(p){selSupplier=null;nav(p);}
+
+/* ---- 简易表单弹窗（复用既有 #mbox/#mbg，不干扰 openM）---- */
+function openForm(html){document.getElementById('mbox').innerHTML=html;document.getElementById('mbg').classList.add('show');}
+
+/* ---- 供应商主档（复用 vendors）---- */
+function supplierList(){return d().vendors||[];}
+async function addSupplier(){const n=prompt(LANG==="zh"?"新供应商名称 Supplier name":"Supplier name");if(!n||!n.trim())return;const id=Math.max(0,...supplierList().map(v=>v.id))+1;d().vendors.push({id,name:n.trim(),terms:30});auditLog("新增供应商",n.trim(),"","");await save();render();}
+async function renameSupplier(id){const v=supplierList().find(x=>x.id===id);if(!v)return;const nn=prompt(LANG==="zh"?"修改供应商名称":"Rename supplier",v.name);if(!nn||!nn.trim()||nn.trim()===v.name)return;const old=v.name;v.name=nn.trim();['purchases','grn','monthEnd'].forEach(k=>(d()[k]||[]).forEach(r=>{if(r.supplier===old)r.supplier=v.name;}));auditLog("重命名供应商",old+"→"+v.name,old,v.name);await save();render();}
+
+/* ---- 小工具 ---- */
+function settlePill(s){return s==="补货"?"p-b":s==="不收费"?"p-g":s==="取消订单"?"p-r":"p-n";}
+function settleTxt(s){const m={"补货":"Restock","不收费":"No Charge","取消订单":"Cancelled"};return LANG==="zh"?(s||"—"):(m[s]||s||"—");}
+function modePill(m){return m==="transfer"?"p-b":m==="return"?"p-a":m==="loan"?"p-p":"p-n";}
+function modeTxt(m){const z={transfer:"直接调拨",return:"借用归还",loan:"借出支援"},e={transfer:"Transfer",return:"Return",loan:"Loan Out"};return LANG==="zh"?(z[m]||m):(e[m]||m);}
+function itemSelOpts(sel){return (d().items||[]).map(i=>`<option value="${i.name}" ${i.name===sel?'selected':''}>${i.name}</option>`).join('');}
+function supplierSelOpts(sel){return supplierList().map(v=>`<option value="${v.name}" ${v.name===sel?'selected':''}>${v.name}</option>`).join('');}
+function outletNames(){return OUTLETS.filter(o=>!o.ck&&o.id!==curOutlet).map(o=>nm(o));}
+
+/* ---- 汇总统计 ---- */
+function sumField(recs,f){return recs.reduce((s,r)=>s+(+r[f]||0),0);}
+function itemSummary(recs){
+  const m={};
+  recs.forEach(r=>{const k=(r.code||'')+'|'+(r.item||'');if(!m[k])m[k]={item:r.item||'—',code:r.code||'—',qty:0,weight:0,price:0};m[k].qty+=+r.qty||0;m[k].weight+=+r.weight||0;m[k].price+=+r.price||0;});
+  return Object.values(m);
+}
+
+/* ================= 供应商钻取账册（采购 / 验收退货 / 月末算货 共用）================= */
+function ledgerCfg(mod){return ({
+  purchase:{arr:'purchases',icon:"📥",title:LANG==="zh"?"采购进货":"Purchases",hasSettle:false,byMonth:false,form:'formLedger'},
+  grn:{arr:'grn',icon:"📋",title:LANG==="zh"?"验收 / 退货折让":"GRN / Returns",hasSettle:true,byMonth:false,form:'formLedger'},
+  monthend:{arr:'monthEnd',icon:"🧮",title:LANG==="zh"?"月末算货":"Month-End Count",hasSettle:false,byMonth:true,form:'formLedger'},
+})[mod];}
+
+function pgLedger(mod){
+  const cfg=ledgerCfg(mod);const arr=d()[cfg.arr]||[];const writable=subCanW(mod);
+  const back=`<button class="btn ghost sm" onclick="nav('proc')">← ${LANG==="zh"?"进销存作业":"Operations"}</button>`;
+  // —— 供应商列表视图 ——
+  if(!selSupplier){
+    const sups=supplierList();
+    const cards=sups.map(v=>{
+      const rs=arr.filter(r=>r.supplier===v.name);
+      const tot=sumField(rs,'price');
+      return `<div class="card" style="padding:13px;margin-bottom:9px;cursor:pointer;" onclick="setSupplier('${v.name.replace(/'/g,"\\'")}')">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div><div style="font-weight:800;font-size:15px;">🏢 ${v.name}</div>
+          <div class="mini">${rs.length} ${LANG==="zh"?"笔单据":"records"} · ${LANG==="zh"?"账期":"Terms"} ${v.terms}${LANG==="zh"?"天":"d"}</div></div>
+          <div style="text-align:right;"><div style="font-weight:800;">${money(tot)}</div>
+          <div>${writable?`<button class="ib" onclick="event.stopPropagation();renameSupplier(${v.id})">✏️</button> `:''}<span class="mini">›</span></div></div>
+        </div></div>`;
+    }).join('')||`<div class="empty">${LANG==="zh"?"暂无供应商":"No suppliers"}</div>`;
+    return `<div class="fb"><h2 class="h" style="margin:0;">${cfg.icon} ${cfg.title} <span class="tag">${nm(outletObj())}</span></h2>${back}</div>
+      <div class="hint">${LANG==="zh"?"点选供应商查看其每年/月/日的进货单据、每日总计与各货物总计。":"Tap a supplier to view its dated records, daily & per-item totals."}</div>
+      ${writable?`<button class="btn gold sm" style="margin-bottom:10px;" onclick="addSupplier()">+ ${LANG==="zh"?"新增供应商":"Add Supplier"}</button>`:''}
+      ${cards}`;
+  }
+  // —— 单一供应商钻取视图 ——
+  const rs=arr.filter(r=>r.supplier===selSupplier).slice().sort((a,b)=>b.date.localeCompare(a.date));
+  // 按 年-月 分组，再按 日 分组
+  const byYM={};rs.forEach(r=>{const k=r.date.slice(0,7);(byYM[k]=byYM[k]||[]).push(r);});
+  const months=Object.keys(byYM).sort().reverse();
+  const colspanBase=cfg.hasSettle?6:5; // 到「价钱」列（不含备注/操作）用于总计对齐
+  const monthsHtml=months.map(ymk=>{
+    const mrows=byYM[ymk];
+    const byDay={};mrows.forEach(r=>{(byDay[r.date]=byDay[r.date]||[]).push(r);});
+    const days=Object.keys(byDay).sort().reverse();
+    const daysHtml=days.map(dk=>{
+      const lines=byDay[dk];const dayTot=sumField(lines,'price');
+      const rows=lines.map(r=>{const gi=arr.indexOf(r);return `<tr>
+        <td class="mini">${r.invoice||'—'}</td>
+        <td>${r.code||'—'}</td>
+        <td>${r.item||''}</td>
+        <td>${num(r.qty,2)}</td>
+        <td>${r.weight?num(r.weight,2):'—'}</td>
+        <td>${money(r.price)}</td>
+        ${cfg.hasSettle?`<td><span class="pill ${settlePill(r.settle)}">${settleTxt(r.settle)}</span></td>`:''}
+        <td class="mini">${r.note||''}</td>
+        ${writable?`<td><button class="ib" onclick="delLedger('${mod}',${gi})">🗑️</button></td>`:''}
+      </tr>`;}).join('');
+      return `<div class="mini" style="margin:10px 0 3px;font-weight:700;color:var(--ink2);">📆 ${dk}</div>
+      <div class="card tbl"><table><thead><tr>
+        <th>Invoice</th><th>${LANG==="zh"?"货物Code":"Code"}</th><th>${LANG==="zh"?"品名":"Item"}</th><th>${LANG==="zh"?"数量":"Qty"}</th><th>${LANG==="zh"?"重量kg":"Wt"}</th><th>${LANG==="zh"?"价钱":"Price"}</th>${cfg.hasSettle?`<th>${LANG==="zh"?"处理":"Settle"}</th>`:''}<th>${LANG==="zh"?"备注":"Note"}</th>${writable?'<th></th>':''}
+      </tr></thead><tbody>${rows}
+        <tr style="background:#FAFBFC;font-weight:800;"><td colspan="5">${LANG==="zh"?"当日总计":"Day Total"}</td><td>${money(dayTot)}</td>${cfg.hasSettle?'<td></td>':''}<td></td>${writable?'<td></td>':''}</tr>
+      </tbody></table></div>`;
+    }).join('');
+    const mTot=sumField(mrows,'price');
+    const mLabel=(LANG==="zh"?ymk.replace('-','年')+'月':ymk);
+    return `<h2 class="h">🗓 ${mLabel} <span class="tag">${(cfg.byMonth?(LANG==="zh"?"月末合计 ":"Month Total "):(LANG==="zh"?"当月合计 ":"Month Total "))}${money(mTot)}</span></h2>${daysHtml}`;
+  }).join('')||`<div class="empty">${LANG==="zh"?"该供应商暂无单据":"No records"}</div>`;
+  // 各货物总计
+  const summ=itemSummary(rs);
+  const summHtml=summ.length?`<h2 class="h">📦 ${LANG==="zh"?"各货物总计":"Per-Item Totals"}</h2>
+    <div class="card tbl"><table><thead><tr><th>Code</th><th>${LANG==="zh"?"品名":"Item"}</th><th>${LANG==="zh"?"总数量":"Total Qty"}</th><th>${LANG==="zh"?"总重量kg":"Total Wt"}</th><th>${LANG==="zh"?"总价钱":"Total Price"}</th></tr></thead><tbody>
+    ${summ.map(s=>`<tr><td>${s.code}</td><td><b>${s.item}</b></td><td>${num(s.qty,2)}</td><td>${s.weight?num(s.weight,2):'—'}</td><td>${money(s.price)}</td></tr>`).join('')}
+    <tr style="background:#FAFBFC;font-weight:800;"><td colspan="4">${LANG==="zh"?"供应商合计":"Supplier Total"}</td><td>${money(sumField(rs,'price'))}</td></tr>
+    </tbody></table></div>`:'';
+  return `<div class="fb"><h2 class="h" style="margin:0;">${cfg.icon} ${selSupplier}</h2><button class="btn ghost sm" onclick="backSupplier()">← ${LANG==="zh"?"供应商列表":"Suppliers"}</button></div>
+    ${writable?`<button class="btn brand sm" style="margin-bottom:6px;" onclick="${cfg.form}('${mod}')">+ ${LANG==="zh"?"新增单据":"Add Record"}</button>`:''}
+    ${monthsHtml}${summHtml}`;
+}
+
+/* ---- 采购/验收/月末 共用表单 ---- */
+function formLedger(mod){
+  const cfg=ledgerCfg(mod);
+  openForm(`<h3>${cfg.icon} ${LANG==="zh"?"新增单据":"New Record"} · ${cfg.title} <span class="x" onclick="closeM()">×</span></h3>
+    <div class="fr"><label>${LANG==="zh"?"供应商":"Supplier"}</label><select id="l_sup">${supplierSelOpts(selSupplier)}</select></div>
+    <div class="fg2"><div class="fr"><label>${LANG==="zh"?"日期":"Date"}</label><input id="l_date" type="date" value="${TODAY}"></div>
+      <div class="fr"><label>Invoice No.</label><input id="l_inv" placeholder="INV-..."></div></div>
+    <div class="fg2"><div class="fr"><label>${LANG==="zh"?"货物Code":"Goods Code"}</label><input id="l_code" placeholder="FSH-01"></div>
+      <div class="fr"><label>${LANG==="zh"?"品名":"Item"}</label><select id="l_item">${itemSelOpts()}</select></div></div>
+    <div class="fg3"><div class="fr"><label>${LANG==="zh"?"数量":"Qty"}</label><input id="l_qty" type="number" step="0.01"></div>
+      <div class="fr"><label>${LANG==="zh"?"重量kg":"Weight"}</label><input id="l_wt" type="number" step="0.01"></div>
+      <div class="fr"><label>${LANG==="zh"?"价钱RM":"Price"}</label><input id="l_price" type="number" step="0.01"></div></div>
+    ${cfg.hasSettle?`<div class="fr"><label>${LANG==="zh"?"处理方式":"Settlement"}</label><select id="l_settle"><option value="补货">${LANG==="zh"?"补货":"Restock"}</option><option value="不收费">${LANG==="zh"?"不收取费用":"No Charge"}</option><option value="取消订单">${LANG==="zh"?"取消订单":"Cancel Order"}</option></select></div>`:''}
+    <div class="fr"><label>${LANG==="zh"?"备注":"Note"}</label><input id="l_note" placeholder="${LANG==="zh"?"选填":"optional"}"></div>
+    <button class="btn block brand" onclick="saveLedger('${mod}')">${LANG==="zh"?"保存":"Save"}</button>`);
+}
+async function saveLedger(mod){
+  const cfg=ledgerCfg(mod);const g=id=>document.getElementById(id);
+  const sup=g('l_sup').value;
+  const rec={supplier:sup,date:g('l_date').value||TODAY,invoice:g('l_inv').value.trim(),code:g('l_code').value.trim(),item:g('l_item').value,qty:+g('l_qty').value||0,weight:+g('l_wt').value||0,price:+g('l_price').value||0,note:g('l_note').value.trim()};
+  if(cfg.hasSettle)rec.settle=g('l_settle').value;
+  if(!d()[cfg.arr])d()[cfg.arr]=[];
+  d()[cfg.arr].push(rec);
+  auditLog(cfg.title,sup+" "+rec.item+" "+money(rec.price),"",rec.invoice);
+  await save();selSupplier=sup;closeM();render();
+}
+async function delLedger(mod,gi){if(!confirm(LANG==="zh"?"删除此单据？":"Delete record?"))return;const cfg=ledgerCfg(mod);d()[cfg.arr].splice(gi,1);auditLog("删除单据",cfg.title,"","");await save();render();}
+
+/* ================= 跨店调拨（物品 + 人力）================= */
+function pgTransfer(){
+  const x=d();const writable=subCanW('transfer');
+  const items=x.transfers||[];const loans=x.staffLoans||[];
+  const back=`<button class="btn ghost sm" onclick="nav('proc')">← ${LANG==="zh"?"进销存作业":"Operations"}</button>`;
+  return `<div class="fb"><h2 class="h" style="margin:0;">🔁 ${LANG==="zh"?"跨店调拨":"Inter-Branch Transfer"} <span class="tag">${nm(outletObj())}</span></h2>${back}</div>
+  <div class="hint">${LANG==="zh"?"记录物品被借走/直接调拨（标注归还或直接Transfer），以及人力资源借调其他店面。":"Track item transfers (return or direct) and staff loans between branches."}</div>
+  <div class="fb"><h2 class="h" style="margin:0;">📦 ${LANG==="zh"?"物品调拨":"Item Transfer"}</h2>${writable?`<button class="btn gold sm" onclick="formTransferItem()">+ ${LANG==="zh"?"物品":"Item"}</button>`:''}</div>
+  <div class="card tbl"><table><thead><tr><th>${LANG==="zh"?"日期":"Date"}</th><th>${LANG==="zh"?"品名":"Item"}</th><th>Code</th><th>${LANG==="zh"?"数量":"Qty"}</th><th>${LANG==="zh"?"去向":"To"}</th><th>${LANG==="zh"?"方式":"Mode"}</th><th>${LANG==="zh"?"金额":"Amt"}</th><th>${LANG==="zh"?"备注":"Note"}</th>${writable?'<th></th>':''}</tr></thead><tbody>
+  ${items.map((r,i)=>`<tr><td class="mini">${r.date.slice(5)}</td><td>${r.item}</td><td class="mini">${r.code||'—'}</td><td>${num(r.qty)} ${r.unit||''}</td><td>${r.to}</td><td><span class="pill ${modePill(r.mode)}">${modeTxt(r.mode)}</span></td><td>${money(r.amt)}</td><td class="mini">${r.note||''}</td>${writable?`<td><button class="ib" onclick="delTransfer(${i})">🗑️</button></td>`:''}</tr>`).join('')||`<tr><td colspan="9" class="empty">${LANG==="zh"?"暂无调拨":"None"}</td></tr>`}
+  </tbody></table></div>
+  <div class="fb" style="margin-top:16px;"><h2 class="h" style="margin:0;">🧑‍🍳 ${LANG==="zh"?"人力资源借调":"Staff Loan"}</h2>${writable?`<button class="btn gold sm" onclick="formStaffLoan()">+ ${LANG==="zh"?"借调":"Loan"}</button>`:''}</div>
+  <div class="card tbl"><table><thead><tr><th>${LANG==="zh"?"日期":"Date"}</th><th>${LANG==="zh"?"员工":"Staff"}</th><th>${LANG==="zh"?"职位":"Role"}</th><th>${LANG==="zh"?"支援店面":"To Branch"}</th><th>${LANG==="zh"?"方式":"Mode"}</th><th>${LANG==="zh"?"备注":"Note"}</th>${writable?'<th></th>':''}</tr></thead><tbody>
+  ${loans.map((r,i)=>`<tr><td class="mini">${r.date.slice(5)}</td><td><b>${r.staff}</b></td><td class="mini">${r.role||'—'}</td><td>${r.to}</td><td><span class="pill ${modePill(r.mode)}">${modeTxt(r.mode)}</span></td><td class="mini">${r.note||''}</td>${writable?`<td><button class="ib" onclick="delStaffLoan(${i})">🗑️</button></td>`:''}</tr>`).join('')||`<tr><td colspan="7" class="empty">${LANG==="zh"?"暂无借调":"None"}</td></tr>`}
+  </tbody></table></div>`;
+}
+function formTransferItem(){
+  openForm(`<h3>📦 ${LANG==="zh"?"物品调拨":"Item Transfer"} <span class="x" onclick="closeM()">×</span></h3>
+    <div class="fg2"><div class="fr"><label>${LANG==="zh"?"日期":"Date"}</label><input id="t_date" type="date" value="${TODAY}"></div>
+      <div class="fr"><label>${LANG==="zh"?"品名":"Item"}</label><select id="t_item" onchange="tItemAuto()">${itemSelOpts()}</select></div></div>
+    <div class="fg3"><div class="fr"><label>Code</label><input id="t_code" placeholder="TOF-01"></div>
+      <div class="fr"><label>${LANG==="zh"?"数量":"Qty"}</label><input id="t_qty" type="number" step="0.01"></div>
+      <div class="fr"><label>${LANG==="zh"?"单位":"Unit"}</label><input id="t_unit" placeholder="pcs"></div></div>
+    <div class="fg2"><div class="fr"><label>${LANG==="zh"?"去向分店":"To Branch"}</label><select id="t_to">${outletNames().map(n=>`<option>${n}</option>`).join('')}</select></div>
+      <div class="fr"><label>${LANG==="zh"?"方式":"Mode"}</label><select id="t_mode"><option value="transfer">${LANG==="zh"?"直接调拨 Transfer":"Direct Transfer"}</option><option value="return">${LANG==="zh"?"借用归还 Return":"Borrow/Return"}</option></select></div></div>
+    <div class="fg2"><div class="fr"><label>${LANG==="zh"?"金额RM":"Amount"}</label><input id="t_amt" type="number" step="0.01"></div>
+      <div class="fr"><label>${LANG==="zh"?"备注":"Note"}</label><input id="t_note"></div></div>
+    <button class="btn block brand" onclick="saveTransferItem()">${LANG==="zh"?"保存":"Save"}</button>`);
+}
+function tItemAuto(){const it=(d().items||[]).find(i=>i.name===document.getElementById('t_item').value);if(it){document.getElementById('t_unit').value=it.unit;}}
+async function saveTransferItem(){const g=id=>document.getElementById(id);
+  const rec={date:g('t_date').value||TODAY,item:g('t_item').value,code:g('t_code').value.trim(),qty:+g('t_qty').value||0,unit:g('t_unit').value.trim(),to:g('t_to').value,mode:g('t_mode').value,amt:+g('t_amt').value||0,note:g('t_note').value.trim()};
+  if(!d().transfers)d().transfers=[];d().transfers.unshift(rec);
+  auditLog("跨店调拨",rec.item+" →"+rec.to,"",modeTxt(rec.mode));await save();closeM();render();}
+async function delTransfer(i){if(!confirm(LANG==="zh"?"删除此调拨？":"Delete?"))return;d().transfers.splice(i,1);await save();render();}
+function formStaffLoan(){
+  openForm(`<h3>🧑‍🍳 ${LANG==="zh"?"人力借调":"Staff Loan"} <span class="x" onclick="closeM()">×</span></h3>
+    <div class="fg2"><div class="fr"><label>${LANG==="zh"?"日期":"Date"}</label><input id="s_date" type="date" value="${TODAY}"></div>
+      <div class="fr"><label>${LANG==="zh"?"员工":"Staff"}</label><select id="s_staff">${(d().staff||[]).map(e=>`<option value="${e.name}" data-role="${e.role}">${e.name}</option>`).join('')}</select></div></div>
+    <div class="fg2"><div class="fr"><label>${LANG==="zh"?"支援分店":"To Branch"}</label><select id="s_to">${outletNames().map(n=>`<option>${n}</option>`).join('')}</select></div>
+      <div class="fr"><label>${LANG==="zh"?"方式":"Mode"}</label><select id="s_mode"><option value="loan">${LANG==="zh"?"借出支援 Loan":"Loan Out"}</option><option value="return">${LANG==="zh"?"支援结束返回 Return":"Return"}</option></select></div></div>
+    <div class="fr"><label>${LANG==="zh"?"备注":"Note"}</label><input id="s_note"></div>
+    <button class="btn block brand" onclick="saveStaffLoan()">${LANG==="zh"?"保存":"Save"}</button>`);
+}
+async function saveStaffLoan(){const g=id=>document.getElementById(id);const sel=g('s_staff');const role=sel.options[sel.selectedIndex]?.dataset.role||'';
+  const rec={date:g('s_date').value||TODAY,staff:sel.value,role,to:g('s_to').value,mode:g('s_mode').value,note:g('s_note').value.trim()};
+  if(!d().staffLoans)d().staffLoans=[];d().staffLoans.unshift(rec);
+  auditLog("人力借调",rec.staff+" →"+rec.to,"",modeTxt(rec.mode));await save();closeM();render();}
+async function delStaffLoan(i){if(!confirm(LANG==="zh"?"删除此借调？":"Delete?"))return;d().staffLoans.splice(i,1);await save();render();}
+
+/* ================= 报废损耗（独立）================= */
+function pgWaste2(){
+  const x=d();const writable=subCanW('waste2');const rs=(x.wasteLog||[]).slice().sort((a,b)=>b.date.localeCompare(a.date));
+  const tot=rs.reduce((s,r)=>s+(+r.cost||0)*(+r.qty||0),0);
+  return `<div class="fb"><h2 class="h" style="margin:0;">🗑 ${LANG==="zh"?"报废损耗":"Wastage"} <span class="tag">${nm(outletObj())}</span></h2><button class="btn ghost sm" onclick="nav('proc')">← ${LANG==="zh"?"进销存作业":"Operations"}</button></div>
+  <div class="hint">${LANG==="zh"?"记录年月日、物品、成本价、数量、总额、原因与备注。总额=成本价×数量。":"Date, item, cost, qty, total, reason & note."}</div>
+  ${writable?`<button class="btn brand sm" style="margin-bottom:8px;" onclick="formWaste2()">+ ${LANG==="zh"?"新增报废":"Add"}</button>`:''}
+  <div class="grid g2" style="margin-bottom:10px;"><div class="kpi"><div class="k">${LANG==="zh"?"报废笔数":"Records"}</div><div class="v sm">${rs.length}</div></div><div class="kpi"><div class="k">${LANG==="zh"?"损耗总额":"Total Loss"}</div><div class="v sm neg">${money(tot)}</div></div></div>
+  <div class="card tbl"><table><thead><tr><th>${LANG==="zh"?"日期":"Date"}</th><th>${LANG==="zh"?"物品名称":"Item"}</th><th>Code</th><th>${LANG==="zh"?"成本价":"Cost"}</th><th>${LANG==="zh"?"数量":"Qty"}</th><th>Total</th><th>${LANG==="zh"?"原因":"Reason"}</th><th>${LANG==="zh"?"备注":"Note"}</th>${writable?'<th></th>':''}</tr></thead><tbody>
+  ${rs.map(r=>{const gi=x.wasteLog.indexOf(r);const line=(+r.cost||0)*(+r.qty||0);return `<tr><td class="mini">${r.date}</td><td><b>${r.item}</b></td><td class="mini">${r.code||'—'}</td><td>${money(r.cost)}</td><td>${num(r.qty,2)}</td><td class="neg">${money(line)}</td><td>${r.reason||'—'}</td><td class="mini">${r.note||''}</td>${writable?`<td><button class="ib" onclick="delWaste2(${gi})">🗑️</button></td>`:''}</tr>`;}).join('')||`<tr><td colspan="9" class="empty">${LANG==="zh"?"暂无报废":"None"}</td></tr>`}
+  </tbody><tfoot><tr style="background:#FAFBFC;font-weight:800;"><td colspan="5">${LANG==="zh"?"合计":"Total"}</td><td class="neg">${money(tot)}</td><td colspan="${writable?3:2}"></td></tr></tfoot></table></div>`;
+}
+function formWaste2(){
+  openForm(`<h3>🗑 ${LANG==="zh"?"新增报废":"New Wastage"} <span class="x" onclick="closeM()">×</span></h3>
+    <div class="fg2"><div class="fr"><label>${LANG==="zh"?"日期":"Date"}</label><input id="w_date" type="date" value="${TODAY}"></div>
+      <div class="fr"><label>${LANG==="zh"?"物品名称":"Item"}</label><select id="w_item" onchange="wItemAuto()">${itemSelOpts()}</select></div></div>
+    <div class="fg3"><div class="fr"><label>Code</label><input id="w_code"></div>
+      <div class="fr"><label>${LANG==="zh"?"成本价RM":"Cost"}</label><input id="w_cost" type="number" step="0.01"></div>
+      <div class="fr"><label>${LANG==="zh"?"数量":"Qty"}</label><input id="w_qty" type="number" step="0.01"></div></div>
+    <div class="fr"><label>${LANG==="zh"?"原因":"Reason"}</label><select id="w_reason"><option>过期变质</option><option>打翻/损坏</option><option>变色发臭</option><option>烹调失误</option><option>其他</option></select></div>
+    <div class="fr"><label>${LANG==="zh"?"备注":"Note"}</label><input id="w_note"></div>
+    <button class="btn block brand" onclick="saveWaste2()">${LANG==="zh"?"保存":"Save"}</button>`);
+}
+function wItemAuto(){const it=(d().items||[]).find(i=>i.name===document.getElementById('w_item').value);if(it){document.getElementById('w_cost').value=it.cost;}}
+async function saveWaste2(){const g=id=>document.getElementById(id);
+  const rec={date:g('w_date').value||TODAY,item:g('w_item').value,code:g('w_code').value.trim(),cost:+g('w_cost').value||0,qty:+g('w_qty').value||0,reason:g('w_reason').value,note:g('w_note').value.trim()};
+  if(!d().wasteLog)d().wasteLog=[];d().wasteLog.unshift(rec);
+  auditLog("报废损耗",rec.item+" ×"+rec.qty,"",money(rec.cost*rec.qty));await save();closeM();render();}
+async function delWaste2(gi){if(!confirm(LANG==="zh"?"删除此报废？":"Delete?"))return;d().wasteLog.splice(gi,1);await save();render();}
+
+/* ================= 招待 / 赠送（独立）================= */
+function pgOffer(){
+  const x=d();const writable=subCanW('offer');const rs=(x.offers||[]).slice().sort((a,b)=>b.date.localeCompare(a.date));
+  const tot=rs.reduce((s,r)=>s+(+r.total||0),0);
+  return `<div class="fb"><h2 class="h" style="margin:0;">🎁 ${LANG==="zh"?"招待 / 赠送":"Offers / ENT"} <span class="tag">${nm(outletObj())}</span></h2><button class="btn ghost sm" onclick="nav('proc')">← ${LANG==="zh"?"进销存作业":"Operations"}</button></div>
+  <div class="hint">${LANG==="zh"?"记录年月日、类型(ENT/Offer)、物品名称、负责人、数量、总数与备注。":"Date, type, item, person-in-charge, qty, total & note."}</div>
+  ${writable?`<button class="btn brand sm" style="margin-bottom:8px;" onclick="formOffer()">+ ${LANG==="zh"?"新增招待":"Add"}</button>`:''}
+  <div class="grid g2" style="margin-bottom:10px;"><div class="kpi"><div class="k">${LANG==="zh"?"招待笔数":"Records"}</div><div class="v sm">${rs.length}</div></div><div class="kpi"><div class="k">${LANG==="zh"?"招待总额":"Total"}</div><div class="v sm warnc">${money(tot)}</div></div></div>
+  <div class="card tbl"><table><thead><tr><th>${LANG==="zh"?"日期":"Date"}</th><th>${LANG==="zh"?"类型":"Type"}</th><th>${LANG==="zh"?"物品名称":"Item"}</th><th>${LANG==="zh"?"负责人":"In Charge"}</th><th>${LANG==="zh"?"数量":"Qty"}</th><th>${LANG==="zh"?"总数":"Total"}</th><th>${LANG==="zh"?"备注":"Note"}</th>${writable?'<th></th>':''}</tr></thead><tbody>
+  ${rs.map(r=>{const gi=x.offers.indexOf(r);return `<tr><td class="mini">${r.date}</td><td><span class="pill ${r.type==='ENT'?'p-a':'p-b'}">${r.type}</span></td><td><b>${r.item}</b></td><td>${r.person||'—'}</td><td>${num(r.qty)}</td><td>${money(r.total)}</td><td class="mini">${r.note||''}</td>${writable?`<td><button class="ib" onclick="delOffer(${gi})">🗑️</button></td>`:''}</tr>`;}).join('')||`<tr><td colspan="8" class="empty">${LANG==="zh"?"暂无招待":"None"}</td></tr>`}
+  </tbody><tfoot><tr style="background:#FAFBFC;font-weight:800;"><td colspan="5">${LANG==="zh"?"合计":"Total"}</td><td class="warnc">${money(tot)}</td><td colspan="${writable?2:1}"></td></tr></tfoot></table></div>`;
+}
+function formOffer(){
+  openForm(`<h3>🎁 ${LANG==="zh"?"新增招待/赠送":"New Offer"} <span class="x" onclick="closeM()">×</span></h3>
+    <div class="fg2"><div class="fr"><label>${LANG==="zh"?"日期":"Date"}</label><input id="o_date" type="date" value="${TODAY}"></div>
+      <div class="fr"><label>${LANG==="zh"?"类型":"Type"}</label><select id="o_type"><option value="ENT">ENT ${LANG==="zh"?"招待":""}</option><option value="Offer">Offer ${LANG==="zh"?"赠送":""}</option></select></div></div>
+    <div class="fr"><label>${LANG==="zh"?"物品名称 / 菜品":"Item / Dish"}</label><input id="o_item" placeholder="${LANG==="zh"?"如 南乳炸鸡":"e.g. Fried Chicken"}"></div>
+    <div class="fg3"><div class="fr"><label>${LANG==="zh"?"负责人":"In Charge"}</label><input id="o_person"></div>
+      <div class="fr"><label>${LANG==="zh"?"数量":"Qty"}</label><input id="o_qty" type="number" step="1"></div>
+      <div class="fr"><label>${LANG==="zh"?"总数RM":"Total"}</label><input id="o_total" type="number" step="0.01"></div></div>
+    <div class="fr"><label>${LANG==="zh"?"备注":"Note"}</label><input id="o_note"></div>
+    <button class="btn block brand" onclick="saveOffer()">${LANG==="zh"?"保存":"Save"}</button>`);
+}
+async function saveOffer(){const g=id=>document.getElementById(id);
+  const rec={date:g('o_date').value||TODAY,type:g('o_type').value,item:g('o_item').value.trim(),person:g('o_person').value.trim(),qty:+g('o_qty').value||0,total:+g('o_total').value||0,note:g('o_note').value.trim()};
+  if(!d().offers)d().offers=[];d().offers.unshift(rec);
+  auditLog("招待赠送",rec.type+" "+rec.item,"",money(rec.total));await save();closeM();render();}
+async function delOffer(gi){if(!confirm(LANG==="zh"?"删除此招待？":"Delete?"))return;d().offers.splice(gi,1);await save();render();}
+
+/* 路由封装：三个供应商账册 */
+function pgPurchase(){return pgLedger('purchase');}
+function pgGRN(){return pgLedger('grn');}
+function pgMonthEnd(){return pgLedger('monthend');}
+
 /* 页面路由补充（ap/opex 不在底部tab，用函数导航） */
-const _pages={dash:pgDash,sales:pgSales,inv:pgInv,proc:pgProc,bom:pgBom,report:pgReport,settings:pgSettings,ap:pgAp,opex:pgOpex,payroll:pgPayroll,hr:pgHR,attend:pgAttend,schedule:pgSchedule,leave:pgLeave,ck:pgCK,stock:pgStock};
+const _pages={dash:pgDash,sales:pgSales,inv:pgInv,proc:pgProc,bom:pgBom,report:pgReport,settings:pgSettings,ap:pgAp,opex:pgOpex,payroll:pgPayroll,hr:pgHR,attend:pgAttend,schedule:pgSchedule,leave:pgLeave,ck:pgCK,stock:pgStock,
+  purchase:pgPurchase,grn:pgGRN,transfer:pgTransfer,waste2:pgWaste2,offer:pgOffer,monthend:pgMonthEnd};
 function render(){
   renderTop();renderSidebar();
   if(isAgg())_aggCache=null; // 每次渲染刷新汇总，反映最新各店数据
