@@ -454,7 +454,7 @@ function recipeCost(r){ // 支持多级 BOM
   },0);
 }
 function auditLog(act,detail,oldv,newv){
-  d().audit.unshift({date:TODAY+" "+new Date().toTimeString().slice(0,5),user:ROLES[curRole].name,act,detail,old:oldv||"",new:newv||""});
+  d().audit.unshift({date:TODAY+" "+new Date().toTimeString().slice(0,5),user:ROLES[curRole].name,roleKey:curRole,act,detail,old:oldv||"",new:newv||""});
 }
 
 /* ================= 渲染框架 ================= */
@@ -1040,6 +1040,53 @@ function permEditorHTML(){
       </div>
     </div>`).join('')}`;
 }
+/* ---- 员工操作监察：跨分店审计（仅 老板/区域副经理）---- */
+let auditBranch='all', auditRole='all';
+function setAuditBranch(v){auditBranch=v;render();}
+function setAuditRole(v){auditRole=v;render();}
+async function refreshAudit(){if(CLOUD){try{for(const o of OUTLETS)await reloadOutlet(o.id);}catch(e){}}render();}
+function inferRole(user){user=user||'';
+  if(/店长|Manager/i.test(user))return 'manager';
+  if(/厨师长|Head Chef|Chef/i.test(user))return 'headchef';
+  if(/区域|Area/i.test(user))return 'area';
+  if(/员工|Staff|Siti|Helper|Steward|Server/i.test(user))return 'staff';
+  if(/老板|Owner|HR|人事/i.test(user))return 'owner';
+  return 'staff';
+}
+function auditKind(act){act=act||'';
+  if(/删除|作废|移除|delete|remove/i.test(act))return {t:LANG==="zh"?"删除":"Delete",c:'p-r'};
+  if(/新增|添加|入库|申请|排班|进货|生产|借调|调拨|add|new|apply/i.test(act))return {t:LANG==="zh"?"新增":"Add",c:'p-g'};
+  return {t:LANG==="zh"?"修改":"Edit",c:'p-a'};
+}
+function buildCrossAudit(){
+  const rows=[];
+  OUTLETS.forEach(o=>{const b=DB[o.id];if(!b||!b.audit)return;
+    b.audit.forEach(a=>{rows.push({...a,_outlet:o.id,_outletName:nm(o),_role:a.roleKey||inferRole(a.user)});});
+  });
+  rows.sort((x,y)=>String(y.date).localeCompare(String(x.date)));
+  return rows;
+}
+function auditMonitorHTML(){
+  if(!canEditPerms())return '';
+  const roleName={manager:LANG==="zh"?"店长":"Manager",headchef:LANG==="zh"?"厨师长":"Head Chef",staff:LANG==="zh"?"员工":"Staff"};
+  const rolePill={manager:'p-b',headchef:'p-p',staff:'p-n'};
+  let rows=buildCrossAudit().filter(a=>['manager','headchef','staff'].includes(a._role));
+  if(auditBranch!=='all')rows=rows.filter(a=>a._outlet===auditBranch);
+  if(auditRole!=='all')rows=rows.filter(a=>a._role===auditRole);
+  const selStyle="padding:7px 9px;border:1.5px solid var(--line);border-radius:8px;font-size:12.5px;background:#fff;color:var(--ink);font-weight:600;";
+  const branchOpts=`<option value="all">${LANG==="zh"?"全部分店":"All branches"}</option>`+OUTLETS.map(o=>`<option value="${o.id}" ${auditBranch===o.id?'selected':''}>${nm(o)}</option>`).join('');
+  const roleOpts=`<option value="all">${LANG==="zh"?"全部岗位":"All roles"}</option>`+['manager','headchef','staff'].map(r=>`<option value="${r}" ${auditRole===r?'selected':''}>${roleName[r]}</option>`).join('');
+  return `<div class="fb" style="margin-top:4px;"><h2 class="h" style="margin:0;">🔍 ${LANG==="zh"?"员工操作监察（跨分店审计）":"Staff Activity Monitor"} <span class="tag">${rows.length}</span></h2>
+    <button class="btn ghost sm" onclick="refreshAudit()">🔄 ${LANG==="zh"?"刷新":"Refresh"}</button></div>
+  <div class="hint">${LANG==="zh"?"老板 / 区域副经理专用：查看各分店 店长、厨师长、员工 的新增 · 修改 · 删除操作。可按分店与岗位筛选。":"Owner / Area only: what Managers, Head Chefs & Staff added, edited or deleted, across all branches."}</div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
+    <select style="${selStyle}" onchange="setAuditBranch(this.value)">${branchOpts}</select>
+    <select style="${selStyle}" onchange="setAuditRole(this.value)">${roleOpts}</select>
+  </div>
+  <div class="card tbl"><table><thead><tr><th>${LANG==="zh"?"时间":"Time"}</th><th>${LANG==="zh"?"分店":"Branch"}</th><th>${LANG==="zh"?"岗位":"Role"}</th><th>${LANG==="zh"?"类别":"Kind"}</th><th>${LANG==="zh"?"动作":"Action"}</th><th>${LANG==="zh"?"明细":"Detail"}</th><th>${LANG==="zh"?"旧→新":"Old→New"}</th></tr></thead><tbody>
+    ${rows.map(a=>{const k=auditKind(a.act);return `<tr><td class="mini">${a.date}</td><td>${a._outletName}</td><td><span class="pill ${rolePill[a._role]||'p-n'}">${roleName[a._role]||a._role}</span></td><td><span class="pill ${k.c}">${k.t}</span></td><td>${a.act}</td><td>${a.detail||''}</td><td class="mini">${(a.old||'')}${a.old||a.new?'→':''}${(a.new||'')}</td></tr>`;}).join('')||`<tr><td colspan="7" class="empty">${LANG==="zh"?"暂无符合条件的记录":"No records"}</td></tr>`}
+  </tbody></table></div>`;
+}
 function pgSettings(){
   const x=d();
   return `<h2 class="h" style="margin-top:2px;">⚙️ ${LANG==="zh"?"系统设置":"Settings"}</h2>
@@ -1049,6 +1096,7 @@ function pgSettings(){
     <div class="mini">${LANG==="zh"?"切换角色请用右上角选单。老板/人事经理：全权含个人薪资。区域副经理：全权但薪资只看总数、不看个人。店长：本店采购/盘点/损耗/OpEx+报表。厨师长：生产/成品入库/配送调拨。员工：打卡/请假/查看自己薪资。":"Switch role top-right."}</div>
   </div>
   ${permEditorHTML()}
+  ${auditMonitorHTML()}
   <div class="card" style="padding:12px;margin-bottom:12px;">
     <div class="fr" style="margin:0 0 8px;"><label>☁️ ${LANG==="zh"?"数据存储状态":"Storage Status"}</label>
     <div class="al ${CLOUD?'al-b':'al-a'}" style="margin:0;"><div class="t">${CLOUD?("🟢 "+(LANG==="zh"?"Supabase 云端同步 已启用":"Cloud sync ON")):("🟡 "+(LANG==="zh"?"本地存储模式（localStorage）":"Local storage mode"))}</div>
