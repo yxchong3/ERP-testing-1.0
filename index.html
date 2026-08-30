@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>明记餐饮 ERP · 多分店进销存系统</title>
+<title>明记家乡小食店 · 多分店进销存系统</title>
 <style>
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
   :root{
@@ -16,6 +16,8 @@
   .top{background:var(--ink);color:#fff;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;position:sticky;top:0;z-index:60;flex-wrap:wrap;}
   .top .l{display:flex;align-items:center;gap:9px;}
   .logo{background:var(--gold);color:var(--ink);font-weight:800;font-size:12px;padding:3px 8px;border-radius:5px;letter-spacing:.02em;}
+  .brand-logo{display:inline-flex;align-items:center;line-height:0;}
+  .brand-logo svg{display:block;border-radius:8px;}
   .top h1{font-size:15px;font-weight:700;}
   .top .r{display:flex;gap:7px;align-items:center;flex-wrap:wrap;}
   .sel{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:7px;padding:6px 8px;font-size:12px;font-weight:600;}
@@ -134,12 +136,12 @@
 </head>
 <body>
 <div class="top">
-  <div class="l"><button class="menu-btn" onclick="toggleSide()">☰</button><span class="logo">明记 MK</span><h1 id="appTitle">餐饮 ERP</h1></div>
+  <div class="l"><button class="menu-btn" onclick="toggleSide()">☰</button><span class="brand-logo" title="明记家乡小食店"><svg width="32" height="32" viewBox="0 0 100 100" aria-label="明记"><rect x="4" y="4" width="92" height="92" rx="16" fill="#7C1619"/><rect x="4" y="4" width="92" height="92" rx="16" fill="none" stroke="#F2B417" stroke-width="7"/><text x="50" y="33" text-anchor="middle" dominant-baseline="central" font-family="'Microsoft YaHei','PingFang SC',sans-serif" font-weight="800" font-size="40" fill="#F2B417">明</text><text x="50" y="70" text-anchor="middle" dominant-baseline="central" font-family="'Microsoft YaHei','PingFang SC',sans-serif" font-weight="800" font-size="40" fill="#F2B417">记</text></svg></span><h1 id="appTitle">明记家乡小食店</h1></div>
   <div class="r">
     <button class="lang" onclick="toggleLang()" id="langBtn">EN</button>
     <select class="sel" id="roleSel" onchange="switchRole()"></select>
     <select class="sel" id="outletSel" onchange="switchOutlet()"></select>
-    <button class="lang" onclick="confirmLogout()" id="logoutBtn" title="登出 Log Out">🚪</button>
+    <button class="lang" onclick="confirmLogout()" id="logoutBtn" title="登出 Log Out">🔓</button>
   </div>
 </div>
 
@@ -207,9 +209,9 @@ let USERS=[];       // 白名单/用户目录缓存（erp_users）
 /* ---------- i18n ---------- */
 const T={
   zh:{dash:"利润大盘",inv:"库存",proc:"采购进销",ap:"应付账款",ck:"中央厨房",stock:"盘点",waste:"损耗",ent:"招待",bom:"配方成本",opex:"运营开销",payroll:"人事薪资",report:"报表",settings:"设置&审计",
-    appTitle:"餐饮 ERP 进销存"},
+    appTitle:"明记家乡小食店"},
   en:{dash:"Dashboard",inv:"Inventory",proc:"Procurement",ap:"Payables",ck:"Central Kitchen",stock:"Stock Take",waste:"Wastage",ent:"Offers",bom:"Recipe Cost",opex:"OpEx",payroll:"Payroll",report:"Reports",settings:"Settings",
-    appTitle:"Restaurant ERP"}
+    appTitle:"Meng Kee Eatery"}
 };
 function t(k){return (T[LANG][k]||k);}
 function nm(o){return LANG==="zh"?o.name:o.en;}
@@ -1051,6 +1053,14 @@ async function resetPerms(){
   Object.keys(ROLE_DEFAULTS).forEach(k=>{if(ROLES[k])ROLES[k].can=ROLE_DEFAULTS[k].slice();});
   auditLog("重置岗位权限",LANG==="zh"?"恢复默认":"reset to defaults","","");await saveRolePerms();render();
 }
+/* 「账号权限」功能分区：把岗位权限管理收纳其中（仅管理角色可见，可折叠）*/
+function accountPermsSection(){
+  if(!canEditPerms())return '';
+  return `<details class="card" style="padding:0;margin-bottom:12px;">
+    <summary style="padding:13px;font-weight:800;cursor:pointer;font-size:14px;color:var(--ink);">🔑 ${LANG==="zh"?"账号权限":"Account Permissions"} <span class="mini" style="font-weight:400;">· ${LANG==="zh"?"点开管理各岗位可访问的模块":"manage role access"}</span></summary>
+    <div style="padding:2px 12px 12px;">${permEditorHTML()}</div>
+  </details>`;
+}
 function permEditorHTML(){
   if(!canEditPerms())return '';
   return `<div class="fb" style="margin-top:4px;"><h2 class="h" style="margin:0;">🛡️ ${LANG==="zh"?"岗位权限管理":"Role Permission Editor"}</h2>
@@ -1169,7 +1179,7 @@ function pgSettings(){
     <div class="mini">${Object.entries(ROLES).map(([k,v])=>`<div style="padding:4px 0;">${k===curRole?'▶ ':''}<b>${LANG==="zh"?v.name:v.en}</b>：${v.can.length} ${LANG==="zh"?"个模块":"modules"}</div>`).join('')}</div></div>
     <div class="mini">${LANG==="zh"?"切换角色请用右上角选单。老板/人事经理：全权含个人薪资。区域副经理：全权但薪资只看总数、不看个人。店长：本店采购/盘点/损耗/OpEx+报表。厨师长：生产/成品入库/配送调拨。员工：打卡/请假/查看自己薪资。":"Switch role top-right."}</div>
   </div>
-  ${permEditorHTML()}
+  ${accountPermsSection()}
   ${whitelistHTML()}
   ${auditMonitorHTML()}
   <div class="card" style="padding:12px;margin-bottom:12px;">
@@ -1747,7 +1757,7 @@ function showAuthLogin(msg){
   document.getElementById('pageHost').innerHTML=`
   <div style="max-width:380px;margin:7vh auto;padding:28px 22px;background:#fff;border:1px solid var(--line);border-radius:16px;text-align:center;">
     <div style="font-size:30px;margin-bottom:6px;">🍜</div>
-    <div style="font-weight:800;font-size:19px;color:var(--ink);">明记餐饮 ERP</div>
+    <div style="font-weight:800;font-size:19px;color:var(--ink);">明记家乡小食店</div>
     <div class="mini" style="margin:4px 0 16px;">${LANG==="zh"?"多分店进销存系统 · 请登录":"Please sign in"}</div>
     ${msg?`<div class="al al-r" style="text-align:left;">${msg}</div>`:''}
     <div class="fr" style="text-align:left;margin-bottom:8px;"><label>${LANG==="zh"?"邮箱":"Email"}</label><input id="au_email" type="email" placeholder="you@example.com" autocomplete="username"></div>
@@ -1813,7 +1823,7 @@ function showLogin(){
   document.getElementById('pageHost').innerHTML=`
   <div style="max-width:380px;margin:8vh auto;padding:28px 22px;background:#fff;border:1px solid var(--line);border-radius:16px;text-align:center;">
     <div style="font-size:30px;margin-bottom:6px;">🍜</div>
-    <div style="font-weight:800;font-size:19px;color:var(--ink);">明记餐饮 ERP</div>
+    <div style="font-weight:800;font-size:19px;color:var(--ink);">明记家乡小食店</div>
     <div class="mini" style="margin:4px 0 20px;">${LANG==="zh"?"多分店进销存系统 · 演示登录（未连云端）":"Demo login (no cloud)"}</div>
     <div class="fr" style="text-align:left;"><label>${LANG==="zh"?"选择登录角色（演示）":"Login as (demo)"}</label>
       <select id="loginRole">${Object.entries(ROLES).map(([k,v])=>`<option value="${k}">${LANG==="zh"?v.name:v.en}</option>`).join('')}</select></div>
