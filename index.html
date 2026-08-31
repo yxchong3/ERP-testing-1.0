@@ -625,6 +625,7 @@ function pgInv(){
     <div style="display:flex;gap:6px;">
       <button class="btn ghost sm" onclick="openM('suggest')">🤖 ${LANG==="zh"?"建议订货":"Suggest"}</button>
       ${canW('proc')?`<button class="btn gold sm" onclick="openM('item')">+ ${LANG==="zh"?"品项":"Item"}</button>`:''}
+      ${canW('proc')?`<button class="btn ghost sm" onclick="bulkAddForm('item')">📋 ${LANG==="zh"?"批量导入":"Bulk"}</button>`:''}
     </div>
   </div>
   <div class="hint">${LANG==="zh"?"状态依批次到期与在库天数。加权单价随进货自动更新。采购单位→消耗单位自动换算。":"Status by batch expiry & age. Weighted cost auto-updates on receipt."}</div>
@@ -1095,7 +1096,7 @@ function inferRole(user){user=user||'';
 function auditKind(act){act=act||'';
   if(/修改|编辑|更新|调整|edit|update/i.test(act))return {t:LANG==="zh"?"修改":"Edit",c:'p-a'};
   if(/删除|作废|移除|delete|remove/i.test(act))return {t:LANG==="zh"?"删除":"Delete",c:'p-r'};
-  if(/新增|添加|入库|申请|排班|进货|生产|借调|调拨|add|new|apply/i.test(act))return {t:LANG==="zh"?"新增":"Add",c:'p-g'};
+  if(/新增|添加|导入|入库|申请|排班|进货|生产|借调|调拨|add|new|apply|import/i.test(act))return {t:LANG==="zh"?"新增":"Add",c:'p-g'};
   return {t:LANG==="zh"?"修改":"Edit",c:'p-a'};
 }
 function buildCrossAudit(){
@@ -1493,6 +1494,34 @@ function openForm(html){document.getElementById('mbox').innerHTML=html;document.
 /* ---- 供应商主档（复用 vendors）---- */
 function supplierList(){return d().vendors||[];}
 async function addSupplier(){const n=prompt(LANG==="zh"?"新供应商名称 Supplier name":"Supplier name");if(!n||!n.trim())return;const id=Math.max(0,...supplierList().map(v=>v.id))+1;d().vendors.push({id,name:n.trim(),terms:30});auditLog("新增供应商",n.trim(),"","");await save();render();}
+
+/* ---- 批量导入：供应商 / 品项（从 WPS Excel/Word 复制名称粘贴，一行一个）---- */
+function bulkAddForm(kind){
+  const zh=LANG==="zh";const isSup=kind==='supplier';
+  openForm(`<h3>📋 ${zh?(isSup?"批量导入供应商":"批量导入品项"):(isSup?"Bulk Add Suppliers":"Bulk Add Items")} <span class="x" onclick="closeM()">×</span></h3>
+    <div class="hint">${zh?"从你的 WPS Excel / Word 复制"+(isSup?"供应商名称":"品名")+"那一列，粘贴到下面，一行一个。重复的会自动跳过。":"Paste names, one per line. Duplicates skipped."}</div>
+    <div class="fr"><textarea id="bulk_txt" rows="10" placeholder="${isSup?'泰记海鲜 Thye Kee Seafood\n合发肉商 Hup Huat Meat\n...':'鸡腿肉 Chicken Leg\n沙白 Clams\n...'}" style="width:100%;padding:9px 10px;border:1.5px solid var(--line);border-radius:8px;font-size:14px;font-family:inherit;background:#fff;color:var(--ink);resize:vertical;"></textarea></div>
+    <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin:2px 0 12px;"><input type="checkbox" id="bulk_all"> ${zh?"同时应用到全部分店（含中央厨房）":"Apply to all branches"}</label>
+    <button class="btn block brand" onclick="doBulkAdd('${kind}')">${zh?"导入":"Import"}</button>`);
+}
+async function doBulkAdd(kind){
+  const zh=LANG==="zh";
+  const raw=(document.getElementById('bulk_txt')||{}).value||'';
+  const names=[...new Set(raw.split(/\r?\n/).map(s=>s.trim()).filter(Boolean))];
+  if(!names.length){alert(zh?"请先粘贴至少一个名称。":"Paste at least one name.");return;}
+  const all=document.getElementById('bulk_all').checked || isAgg();
+  const targets=all?OUTLETS.map(o=>o.id):[curOutlet];
+  const who=curUser?(curUser.name+" ("+curUser.email+")"):ROLES[curRole].name;
+  let total=0;
+  for(const oid of targets){
+    const db=DB[oid];if(!db)continue;let added=0;
+    if(kind==='supplier'){db.vendors=db.vendors||[];names.forEach(n=>{if(!db.vendors.some(v=>v.name===n)){db.vendors.push({id:Math.max(0,...db.vendors.map(v=>v.id))+1,name:n,terms:30});added++;}});}
+    else{db.items=db.items||[];names.forEach(n=>{if(!db.items.some(i=>i.name===n)){db.items.push({id:Math.max(0,...db.items.map(i=>i.id))+1,name:n,unit:'pcs',buyUnit:'',conv:1,qty:0,cost:0,cat:'其他',par:0,yield:100,batches:[]});added++;}});}
+    if(added>0){db.audit=db.audit||[];db.audit.unshift({date:TODAY+" "+new Date().toTimeString().slice(0,5),user:who,roleKey:curRole,act:kind==='supplier'?"批量导入供应商":"批量导入品项",detail:added+(zh?" 项":" items"),old:"",new:""});await save(oid);total+=added;}
+  }
+  _aggCache=null;closeM();render();
+  alert((zh?"已导入 ":"Added ")+total+(zh?" 项（重复已跳过）"+(all?"，已应用到全部分店。":"。"):" (duplicates skipped)."));
+}
 async function renameSupplier(id){const v=supplierList().find(x=>x.id===id);if(!v)return;const nn=prompt(LANG==="zh"?"修改供应商名称":"Rename supplier",v.name);if(!nn||!nn.trim()||nn.trim()===v.name)return;const old=v.name;v.name=nn.trim();['purchases','grn','monthEnd'].forEach(k=>(d()[k]||[]).forEach(r=>{if(r.supplier===old)r.supplier=v.name;}));auditLog("重命名供应商",old+"→"+v.name,old,v.name);await save();render();}
 
 /* ---- 小工具 ---- */
@@ -1538,7 +1567,7 @@ function pgLedger(mod){
     }).join('')||`<div class="empty">${LANG==="zh"?"暂无供应商":"No suppliers"}</div>`;
     return `<div class="fb"><h2 class="h" style="margin:0;">${cfg.icon} ${cfg.title} <span class="tag">${nm(outletObj())}</span></h2>${back}</div>
       <div class="hint">${LANG==="zh"?"点选供应商查看其每年/月/日的进货单据、每日总计与各货物总计。":"Tap a supplier to view its dated records, daily & per-item totals."}</div>
-      ${writable?`<button class="btn gold sm" style="margin-bottom:10px;" onclick="addSupplier()">+ ${LANG==="zh"?"新增供应商":"Add Supplier"}</button>`:''}
+      ${writable?`<div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;"><button class="btn gold sm" onclick="addSupplier()">+ ${LANG==="zh"?"新增供应商":"Add Supplier"}</button><button class="btn ghost sm" onclick="bulkAddForm('supplier')">📋 ${LANG==="zh"?"批量导入":"Bulk Import"}</button></div>`:''}
       ${cards}`;
   }
   // —— 单一供应商钻取视图 ——
