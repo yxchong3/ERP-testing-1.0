@@ -482,6 +482,56 @@ function recipeCost(r){ // 支持多级 BOM
     const it=findItem(ig.n);return s+(it?netCost(it)*ig.q:0);
   },0);
 }
+
+/* ================= 库存联动引擎 =================
+   进货 → 加库存(加权平均成本+批次)；报废/调出/销售(BOM) → 扣库存。
+   全部经由这里改动 items.qty，采购/报废/调拨/销售任何增删改都会实时反映。 */
+function invItem(name){return (d().items||[]).find(i=>i.name===name);}
+function invReceive(name,qty,amount,unit,exp,date){ // 进货入库
+  qty=+qty||0;if(!qty)return;
+  let it=invItem(name);
+  if(!it){it={id:Math.max(0,...(d().items||[]).map(i=>i.id),0)+1,name,unit:unit||'pcs',buyUnit:'',conv:1,qty:0,cost:0,cat:'其他',par:0,yield:100,batches:[]};(d().items=d().items||[]).push(it);}
+  const nq=it.qty+qty;
+  if(amount!=null&&qty>0)it.cost=+(((it.qty*it.cost)+(+amount||0))/(nq||1)).toFixed(4);
+  it.qty=+nq.toFixed(3);
+  if(exp){it.batches=it.batches||[];it.batches.push({qty,exp,in:date||TODAY});}
+}
+function invReduce(name,qty){ // 出库/扣减（FIFO 扣批次）
+  qty=+qty||0;if(!qty)return;
+  const it=invItem(name);if(!it)return;
+  it.qty=+(it.qty-qty).toFixed(3);
+  let rem=qty;(it.batches||[]).sort((a,b)=>new Date(a.exp)-new Date(b.exp));
+  for(const b of (it.batches||[])){if(rem<=0)break;const dd=Math.min(b.qty,rem);b.qty-=dd;rem-=dd;}
+  it.batches=(it.batches||[]).filter(b=>b.qty>0.0001);
+}
+// 反做一笔进货（编辑/删除时用）：扣回数量（成本不追溯还原）
+function invUnreceive(name,qty){invReduce(name,qty);}
+// 一份销量对应的「食材消耗表」（展开多级 BOM）
+function salesConsumption(salesArr){
+  const map={};const b=d();
+  (salesArr||[]).forEach(s=>{const rp=(b.recipes||[]).find(x=>x.id===s.recipeId);if(!rp)return;const q=+s.qty||0;
+    rp.ing.forEach(ig=>{
+      if(ig.sub){const sub=(b.subRecipes||[]).find(x=>x.name===ig.n);if(sub&&sub.yieldQty){const per=ig.q/sub.yieldQty;sub.ing.forEach(si=>{map[si.n]=(map[si.n]||0)+si.q*per*q;});}}
+      else{map[ig.n]=(map[ig.n]||0)+ig.q*q;}
+    });
+  });
+  return map;
+}
+// 应用销量变化对库存的差量（新-旧）：POS/手动录销量共用
+function applySalesDelta(oldArr,newArr){
+  const o=salesConsumption(oldArr),n=salesConsumption(newArr);
+  new Set([...Object.keys(o),...Object.keys(n)]).forEach(nm=>{const delta=(n[nm]||0)-(o[nm]||0);if(delta>0)invReduce(nm,delta);else if(delta<0)invReceive(nm,-delta,null);});
+}
+/* ★ POS 接口预留 ★ 未来 POS 推送销量时，调用本函数即可自动扣库存并联动净利：
+   window.applyPOSSales([{recipeId, qty}, ...])  →  覆盖当日销量并按差量扣食材。 */
+async function applyPOSSales(newSales){
+  const old=JSON.parse(JSON.stringify(d().sales||[]));
+  d().sales=(newSales||[]).map(s=>({recipeId:+s.recipeId,qty:+s.qty||0}));
+  applySalesDelta(old,d().sales);
+  auditLog("POS销售过账",(newSales||[]).length+(LANG==="zh"?" 项":" items"),"","");
+  await save();if(typeof render==='function')render();
+}
+if(typeof window!=='undefined')window.applyPOSSales=applyPOSSales;
 function auditLog(act,detail,oldv,newv){
   const who=curUser?(curUser.name+" ("+curUser.email+")"):ROLES[curRole].name;
   d().audit.unshift({date:TODAY+" "+new Date().toTimeString().slice(0,5),user:who,roleKey:curRole,act,detail,old:oldv||"",new:newv||""});
@@ -648,7 +698,7 @@ function pgInv(){
       ${canW('proc')?`<button class="btn ghost sm" onclick="bulkAddForm('item')">📋 ${LANG==="zh"?"批量导入":"Bulk"}</button>`:''}
     </div>
   </div>
-  <div class="hint">${LANG==="zh"?"状态依批次到期与在库天数。加权单价随进货自动更新。采购单位→消耗单位自动换算。":"Status by batch expiry & age. Weighted cost auto-updates on receipt."}</div>
+  <div class="hint">${LANG==="zh"?"📦 库存已全链联动：进货自动入库(加权成本)、报废/调拨自动扣减、销售按配方(BOM)自动扣食材。加权单价随进货自动更新。":"Live-linked: purchases add stock, wastage/transfer/sales auto-deduct (sales via recipe BOM)."}</div>
   <div class="card tbl"><table><thead><tr>
     <th>${LANG==="zh"?"品名":"Item"}</th><th>${LANG==="zh"?"库存":"Qty"}</th><th>${LANG==="zh"?"加权单价":"W.Cost"}</th><th>${LANG==="zh"?"净料成本":"Net Cost"}</th><th>${LANG==="zh"?"库存值":"Value"}</th><th>${LANG==="zh"?"批次/状态":"Batch"}</th>${canW('proc')?`<th>${LANG==="zh"?"操作":"Action"}</th>`:''}
   </tr></thead><tbody>
@@ -1469,8 +1519,10 @@ async function saveEmp(){
 }
 async function saveSales(){
   if(!d().sales)d().sales=[];
+  const oldSales=JSON.parse(JSON.stringify(d().sales)); // 记录旧销量，算库存差量
   (d().recipes||[]).forEach(r=>{const el=document.getElementById('sl_'+r.id);if(!el)return;const qty=+el.value||0;const ex=d().sales.find(s=>s.recipeId===r.id);if(ex)ex.qty=qty;else d().sales.push({recipeId:r.id,qty});});
-  auditLog("录入销量","POS数据层更新","","");await save();closeM();render();
+  applySalesDelta(oldSales,d().sales); // 销量变化 → 按配方(BOM)自动扣/补食材库存
+  auditLog("录入销量","POS数据层更新（已按配方扣库存）","","");await save();closeM();render();
 }
 async function saveShift(){
   if(!d().schedule)d().schedule=[];
@@ -1704,15 +1756,17 @@ async function saveLedger(mod,editIdx){
   if(!d()[cfg.arr])d()[cfg.arr]=[];
   if(editIdx!=null&&d()[cfg.arr][editIdx]){
     const old=d()[cfg.arr][editIdx];
+    if(mod==='purchase'){invUnreceive(old.item,old.qty);invReceive(rec.item,rec.qty,rec.price,null,null,rec.date);} // 采购编辑→库存差量
     auditLog("编辑单据",cfg.title+" "+sup+" "+rec.item, old.item+" "+money(old.price)+"×"+num(old.qty,2), rec.item+" "+money(rec.price)+"×"+num(rec.qty,2));
     d()[cfg.arr][editIdx]=rec;
   }else{
     d()[cfg.arr].push(rec);
+    if(mod==='purchase')invReceive(rec.item,rec.qty,rec.price,null,null,rec.date); // 采购新增→自动入库+加权成本
     auditLog(cfg.title,sup+" "+rec.item+" "+money(rec.price),"",rec.invoice);
   }
   await save();selSupplier=sup;closeM();render();
 }
-async function delLedger(mod,gi){if(!confirm(LANG==="zh"?"删除此单据？":"Delete record?"))return;const cfg=ledgerCfg(mod);const old=d()[cfg.arr][gi]||{};d()[cfg.arr].splice(gi,1);auditLog("删除单据",cfg.title+" "+(old.item||'')+" "+(old.invoice||''),money(old.price),"");await save();render();}
+async function delLedger(mod,gi){if(!confirm(LANG==="zh"?"删除此单据？":"Delete record?"))return;const cfg=ledgerCfg(mod);const old=d()[cfg.arr][gi]||{};if(mod==='purchase')invUnreceive(old.item,old.qty);d()[cfg.arr].splice(gi,1);auditLog("删除单据",cfg.title+" "+(old.item||'')+" "+(old.invoice||''),money(old.price),"");await save();render();}
 
 /* ================= 跨店调拨（物品 + 人力）================= */
 function pgTransfer(){
@@ -1749,10 +1803,10 @@ function tItemAuto(){const it=(d().items||[]).find(i=>i.name===document.getEleme
 async function saveTransferItem(editIdx){const g=id=>document.getElementById(id);
   const rec={date:g('t_date').value||TODAY,item:g('t_item').value,code:g('t_code').value.trim(),qty:+g('t_qty').value||0,unit:g('t_unit').value.trim(),to:g('t_to').value,mode:g('t_mode').value,amt:+g('t_amt').value||0,note:g('t_note').value.trim()};
   if(!d().transfers)d().transfers=[];
-  if(editIdx!=null&&d().transfers[editIdx]){const old=d().transfers[editIdx];auditLog("编辑调拨",rec.item+" →"+rec.to,old.item+" "+num(old.qty)+" "+modeTxt(old.mode),rec.item+" "+num(rec.qty)+" "+modeTxt(rec.mode));d().transfers[editIdx]=rec;}
-  else{d().transfers.unshift(rec);auditLog("跨店调拨",rec.item+" →"+rec.to,"",modeTxt(rec.mode));}
+  if(editIdx!=null&&d().transfers[editIdx]){const old=d().transfers[editIdx];invReceive(old.item,old.qty,null);invReduce(rec.item,rec.qty);auditLog("编辑调拨",rec.item+" →"+rec.to,old.item+" "+num(old.qty)+" "+modeTxt(old.mode),rec.item+" "+num(rec.qty)+" "+modeTxt(rec.mode));d().transfers[editIdx]=rec;}
+  else{d().transfers.unshift(rec);invReduce(rec.item,rec.qty);auditLog("跨店调拨",rec.item+" →"+rec.to,"",modeTxt(rec.mode));}
   await save();closeM();render();}
-async function delTransfer(i){if(!confirm(LANG==="zh"?"删除此调拨？":"Delete?"))return;const old=d().transfers[i]||{};d().transfers.splice(i,1);auditLog("删除调拨",(old.item||'')+" →"+(old.to||''),"","");await save();render();}
+async function delTransfer(i){if(!confirm(LANG==="zh"?"删除此调拨？":"Delete?"))return;const old=d().transfers[i]||{};invReceive(old.item,old.qty,null);d().transfers.splice(i,1);auditLog("删除调拨",(old.item||'')+" →"+(old.to||''),"","");await save();render();}
 function formStaffLoan(editIdx){
   const r=(editIdx!=null)?(d().staffLoans||[])[editIdx]:null;const isEdit=!!r;
   const staffOpts=(d().staff||[]).map(e=>`<option value="${e.name}" data-role="${e.role}" ${r&&r.staff===e.name?'selected':''}>${e.name}</option>`).join('');
@@ -1803,10 +1857,10 @@ function wItemAuto(){const it=(d().items||[]).find(i=>i.name===document.getEleme
 async function saveWaste2(editIdx){const g=id=>document.getElementById(id);
   const rec={date:g('w_date').value||TODAY,item:g('w_item').value,code:g('w_code').value.trim(),cost:+g('w_cost').value||0,qty:+g('w_qty').value||0,reason:g('w_reason').value,note:g('w_note').value.trim()};
   if(!d().wasteLog)d().wasteLog=[];
-  if(editIdx!=null&&d().wasteLog[editIdx]){const old=d().wasteLog[editIdx];auditLog("编辑报废",rec.item+" ×"+rec.qty,money(old.cost*old.qty),money(rec.cost*rec.qty));d().wasteLog[editIdx]=rec;}
-  else{d().wasteLog.unshift(rec);auditLog("报废损耗",rec.item+" ×"+rec.qty,"",money(rec.cost*rec.qty));}
+  if(editIdx!=null&&d().wasteLog[editIdx]){const old=d().wasteLog[editIdx];invReceive(old.item,old.qty,null);invReduce(rec.item,rec.qty);auditLog("编辑报废",rec.item+" ×"+rec.qty,money(old.cost*old.qty),money(rec.cost*rec.qty));d().wasteLog[editIdx]=rec;}
+  else{d().wasteLog.unshift(rec);invReduce(rec.item,rec.qty);auditLog("报废损耗",rec.item+" ×"+rec.qty,"",money(rec.cost*rec.qty));}
   await save();closeM();render();}
-async function delWaste2(gi){if(!confirm(LANG==="zh"?"删除此报废？":"Delete?"))return;const old=d().wasteLog[gi]||{};d().wasteLog.splice(gi,1);auditLog("删除报废",(old.item||'')+" ×"+(old.qty||''),money((old.cost||0)*(old.qty||0)),"");await save();render();}
+async function delWaste2(gi){if(!confirm(LANG==="zh"?"删除此报废？":"Delete?"))return;const old=d().wasteLog[gi]||{};invReceive(old.item,old.qty,null);d().wasteLog.splice(gi,1);auditLog("删除报废",(old.item||'')+" ×"+(old.qty||''),money((old.cost||0)*(old.qty||0)),"");await save();render();}
 
 /* ================= 招待 / 赠送（独立）================= */
 function pgOffer(){
