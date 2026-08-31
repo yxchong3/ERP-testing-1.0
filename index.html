@@ -532,6 +532,38 @@ async function applyPOSSales(newSales){
   await save();if(typeof render==='function')render();
 }
 if(typeof window!=='undefined')window.applyPOSSales=applyPOSSales;
+
+/* ================= 会计科目分类：食材(food)/包装(pack)/清洁营运(clean) =================
+   纯派生，不改动数据。优先用导入档案的供应商归类，其次按品名关键词。 */
+const ITEM_ACCT={};
+(function(){try{if(typeof SUPPLIER_CATALOG==='undefined')return;Object.keys(SUPPLIER_CATALOG).forEach(sup=>{let g='food';if(/包装|packaging/i.test(sup))g='pack';else if(/洗洁|洗涤|清洁|detergent|tissue|纸巾/i.test(sup))g='clean';SUPPLIER_CATALOG[sup].forEach(it=>{if(g!=='food'||!(it in ITEM_ACCT))ITEM_ACCT[it]=g;});});}catch(e){}})();
+function itemAcctGroup(name){
+  if(ITEM_ACCT[name])return ITEM_ACCT[name];
+  const s=name||'';
+  if(/打包|外卖|纸碗|汤匙|叉子|封口膜|保鲜膜|饭盒|餐盒|打包盒|打包袋|吸管|筷子|桌布|塑料纸|塑胶圈|straw|chopstick|thermal paper|packaging|lunch box|table cloth/i.test(s))return 'pack';
+  if(/洗洁精|洗碗|垃圾袋|抹布|手套|洗手液|漂白|抹地|抹桌|通渠|glove|detergent|tissue|纸巾|bleach|cleaner|handwash|dishwash|rubbish/i.test(s))return 'clean';
+  return 'food';
+}
+function acctLabel(g){const z={food:'食材',pack:'包装',clean:'清洁营运'},e={food:'Food',pack:'Packaging',clean:'Cleaning'};return (LANG==="zh"?z[g]:e[g])||g;}
+function acctPill(g){return g==='pack'?'p-a':g==='clean'?'p-b':'p-g';}
+const ACCT_TARGET={food:[28,35],pack:[2,5],clean:[1,2]};
+/* 成本分类占比面板（对标行业区间；低于→青色、高于→红色）*/
+function acctCostPanel(){
+  const zh=LANG==="zh";
+  const rev=calcRevenue()/1.06; // 净营业额
+  const food=calcCOGS();        // 食材：按销量(BOM)消耗
+  let pack=0,clean=0;           // 包装/清洁：按当期进货金额
+  (d().purchases||[]).forEach(r=>{const g=itemAcctGroup(r.item);if(g==='pack')pack+=(+r.price||0);else if(g==='clean')clean+=(+r.price||0);});
+  const rows=[['food',zh?'食材 Food & Beverage':'Food & Beverage',food,zh?'销货成本 COGS':'COGS'],
+    ['pack',zh?'包装耗材 Packaging':'Packaging',pack,zh?'销货成本 COGS':'COGS'],
+    ['clean',zh?'清洁营运 Cleaning & Operating':'Cleaning & Operating',clean,zh?'营业费用 OPEX':'OPEX']];
+  return `<h2 class="h">📊 ${zh?'成本分类占比（对标行业）':'Cost Categories vs Benchmark'}</h2>
+  <div class="hint">${zh?'各类成本占净营业额比例。<b>低于</b>参考区间→<span style="color:#0891B2;font-weight:800;">青色</span>；<b>高于</b>→<span style="color:var(--red);font-weight:800;">红色</span>；区间内→绿色。食材按销量(BOM)消耗算，包装/清洁按当期进货算。':'Share of net sales vs benchmark.'}</div>
+  <div class="card tbl"><table><thead><tr><th>${zh?'类别':'Category'}</th><th>${zh?'报表归属':'P&L'}</th><th>${zh?'金额':'Cost'}</th><th>${zh?'占营业额':'% Sales'}</th><th>${zh?'参考区间':'Target'}</th></tr></thead><tbody>
+  ${rows.map(([k,label,cost,pl])=>{const t=ACCT_TARGET[k];const pct=rev?cost/rev*100:0;let col,tag;if(pct<t[0]){col='#0891B2';tag=zh?'偏低':'low';}else if(pct>t[1]){col='var(--red)';tag=zh?'偏高':'high';}else{col='var(--green)';tag=zh?'达标':'ok';}
+    return `<tr><td><b>${label}</b></td><td class="mini">${pl}</td><td>${money(cost)}</td><td style="color:${col};font-weight:800;">${pct.toFixed(1)}% <span class="mini">(${tag})</span></td><td class="mini">${t[0]}%–${t[1]}%</td></tr>`;}).join('')}
+  </tbody></table></div>`;
+}
 function auditLog(act,detail,oldv,newv){
   const who=curUser?(curUser.name+" ("+curUser.email+")"):ROLES[curRole].name;
   d().audit.unshift({date:TODAY+" "+new Date().toTimeString().slice(0,5),user:who,roleKey:curRole,act,detail,old:oldv||"",new:newv||""});
@@ -708,7 +740,7 @@ function pgInv(){
       const expSoon=firstBatch?days(firstBatch.exp,TODAY):999;
       const stt = expSoon<=3?{t:"临期",e:"Expiring",c:"p-r"}:st;
       return `<tr>
-        <td><b>${i.name}</b><br><span class="mini">${i.cat} · ${LANG==="zh"?"得率":"Yield"}${i.yield}% · 1${i.buyUnit}=${i.conv}${i.unit}</span></td>
+        <td><b>${i.name}</b> <span class="pill ${acctPill(itemAcctGroup(i.name))}">${acctLabel(itemAcctGroup(i.name))}</span><br><span class="mini">${i.cat} · ${LANG==="zh"?"得率":"Yield"}${i.yield}% · 1${i.buyUnit}=${i.conv}${i.unit}</span></td>
         <td>${num(i.qty)} ${i.unit}<br><span class="mini ${i.qty<=i.par?'neg':''}">Par ${i.par}</span></td>
         <td>${money(i.cost)}</td>
         <td>${money(netCost(i))}</td>
@@ -955,6 +987,7 @@ function pgReport(){
     <div class="kpi"><div class="k">${LANG==="zh"?"死货数":"Dead"}</div><div class="v sm ${dead.length?'neg':'pos'}">${dead.length}</div></div>
     <div class="kpi"><div class="k">${LANG==="zh"?"本月进货":"Purchases"}</div><div class="v sm pos">${money(inT)}</div></div>
   </div>
+  ${acctCostPanel()}
   ${renderCharts(f)}
   <h2 class="h">📋 ${LANG==="zh"?"盘点差异 (理论 vs 实盘)":"Stock Variance"}</h2>
   <div class="card tbl"><table><thead><tr><th>${LANG==="zh"?"品项":"Item"}</th><th>${LANG==="zh"?"理论":"Theory"}</th><th>${LANG==="zh"?"实盘":"Actual"}</th><th>${LANG==="zh"?"盘差":"Var"}</th><th>${LANG==="zh"?"盘差额":"Val"}</th></tr></thead><tbody>
