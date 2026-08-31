@@ -628,7 +628,7 @@ async function switchOutlet(){curOutlet=document.getElementById('outletSel').val
   render();}
 function switchRole(){curRole=document.getElementById('roleSel').value;if(!pageAllowed(curPage))curPage=firstAllowedPage();render();}
 function toggleLang(){LANG=LANG==="zh"?"en":"zh";render();}
-function nav(p){curPage=p;if(!['purchase','grn','monthend'].includes(p))selSupplier=null;const sb=document.getElementById('sidebar');if(sb)sb.classList.remove('open');const bd=document.getElementById('backdrop');if(bd)bd.classList.remove('show');render();window.scrollTo(0,0);}
+function nav(p){curPage=p;if(!['purchase','grn','monthend'].includes(p))selSupplier=null;if(p!=='inv')invSupplier=null;const sb=document.getElementById('sidebar');if(sb)sb.classList.remove('open');const bd=document.getElementById('backdrop');if(bd)bd.classList.remove('show');render();window.scrollTo(0,0);}
 
 
 /* ================= M1 利润大盘 ================= */
@@ -719,37 +719,62 @@ function renderAlerts(){
   return a||`<div class="empty">✅ ${LANG==="zh"?"目前没有需要注意的问题":"All clear"}</div>`;
 }
 
-/* ================= M2 库存 ================= */
+/* ================= M2 库存（按供应商分组）================= */
+/* 品项→供应商 映射（来自导入的营运档案目录）*/
+const ITEM_SUPPLIER={};
+(function(){try{if(typeof SUPPLIER_CATALOG==='undefined')return;Object.keys(SUPPLIER_CATALOG).forEach(sup=>{SUPPLIER_CATALOG[sup].forEach(it=>{if(!(it in ITEM_SUPPLIER))ITEM_SUPPLIER[it]=sup;});});}catch(e){}})();
+function itemSupplier(name){return ITEM_SUPPLIER[name]||(LANG==="zh"?"其他 / 未分类":"Others / Unclassified");}
+let invSupplier=null;
+function setInvSupplier(n){invSupplier=n;render();window.scrollTo(0,0);}
+function backInvSupplier(){invSupplier=null;render();window.scrollTo(0,0);}
+function invRow(i){
+  const firstBatch=(i.batches||[]).slice().sort((a,b)=>new Date(a.exp)-new Date(b.exp))[0];
+  const st=firstBatch?statusOf(days(firstBatch.exp,TODAY)>60?0:days(TODAY,firstBatch.in)):statusOf(0);
+  const expSoon=firstBatch?days(firstBatch.exp,TODAY):999;
+  const stt=expSoon<=3?{t:"临期",e:"Expiring",c:"p-r"}:st;
+  return `<tr>
+    <td><b>${i.name}</b> <span class="pill ${acctPill(itemAcctGroup(i.name))}">${acctLabel(itemAcctGroup(i.name))}</span><br><span class="mini">${i.cat} · ${LANG==="zh"?"得率":"Yield"}${i.yield}% · 1${i.buyUnit}=${i.conv}${i.unit}</span></td>
+    <td>${num(i.qty)} ${i.unit}<br><span class="mini ${i.qty<=i.par?'neg':''}">Par ${i.par}</span></td>
+    <td>${money(i.cost)}</td>
+    <td>${money(netCost(i))}</td>
+    <td>${money(i.qty*i.cost)}</td>
+    <td><span class="pill ${stt.c}">${stTxt(stt)}</span>${firstBatch?`<br><span class="mini">${LANG==="zh"?"效期":"Exp"} ${firstBatch.exp}</span>`:''}</td>
+    ${canW('proc')?`<td style="white-space:nowrap;"><button class="ib" onclick="openM('item',${i.id})">✏️</button> <button class="ib" onclick="delItem(${i.id})">🗑️</button></td>`:''}
+  </tr>`;
+}
 function pgInv(){
-  const x=d();
-  return `
-  <div class="fb"><h2 class="h" style="margin:0;">📦 ${LANG==="zh"?"库存清单":"Inventory"}</h2>
-    <div style="display:flex;gap:6px;">
-      <button class="btn ghost sm" onclick="openM('suggest')">🤖 ${LANG==="zh"?"建议订货":"Suggest"}</button>
-      ${canW('proc')?`<button class="btn gold sm" onclick="openM('item')">+ ${LANG==="zh"?"品项":"Item"}</button>`:''}
-      ${canW('proc')?`<button class="btn ghost sm" onclick="bulkAddForm('item')">📋 ${LANG==="zh"?"批量导入":"Bulk"}</button>`:''}
-    </div>
-  </div>
-  <div class="hint">${LANG==="zh"?"📦 库存已全链联动：进货自动入库(加权成本)、报废/调拨自动扣减、销售按配方(BOM)自动扣食材。加权单价随进货自动更新。":"Live-linked: purchases add stock, wastage/transfer/sales auto-deduct (sales via recipe BOM)."}</div>
-  <div class="card tbl"><table><thead><tr>
-    <th>${LANG==="zh"?"品名":"Item"}</th><th>${LANG==="zh"?"库存":"Qty"}</th><th>${LANG==="zh"?"加权单价":"W.Cost"}</th><th>${LANG==="zh"?"净料成本":"Net Cost"}</th><th>${LANG==="zh"?"库存值":"Value"}</th><th>${LANG==="zh"?"批次/状态":"Batch"}</th>${canW('proc')?`<th>${LANG==="zh"?"操作":"Action"}</th>`:''}
-  </tr></thead><tbody>
-    ${x.items.map(i=>{
-      const firstBatch=(i.batches||[]).slice().sort((a,b)=>new Date(a.exp)-new Date(b.exp))[0];
-      const st=firstBatch?statusOf(days(firstBatch.exp,TODAY)>60?0:days(TODAY,firstBatch.in)):statusOf(0);
-      const expSoon=firstBatch?days(firstBatch.exp,TODAY):999;
-      const stt = expSoon<=3?{t:"临期",e:"Expiring",c:"p-r"}:st;
-      return `<tr>
-        <td><b>${i.name}</b> <span class="pill ${acctPill(itemAcctGroup(i.name))}">${acctLabel(itemAcctGroup(i.name))}</span><br><span class="mini">${i.cat} · ${LANG==="zh"?"得率":"Yield"}${i.yield}% · 1${i.buyUnit}=${i.conv}${i.unit}</span></td>
-        <td>${num(i.qty)} ${i.unit}<br><span class="mini ${i.qty<=i.par?'neg':''}">Par ${i.par}</span></td>
-        <td>${money(i.cost)}</td>
-        <td>${money(netCost(i))}</td>
-        <td>${money(i.qty*i.cost)}</td>
-        <td><span class="pill ${stt.c}">${stTxt(stt)}</span>${firstBatch?`<br><span class="mini">${LANG==="zh"?"效期":"Exp"} ${firstBatch.exp}</span>`:''}</td>
-        ${canW('proc')?`<td><button class="ib" onclick="openM('item',${i.id})">✏️</button> <button class="ib" onclick="delItem(${i.id})">🗑️</button></td>`:''}
-      </tr>`;
-    }).join('')}
-  </tbody></table></div>`;
+  const x=d();const zh=LANG==="zh";
+  const addBtns=`<div style="display:flex;gap:6px;flex-wrap:wrap;">
+      <button class="btn ghost sm" onclick="openM('suggest')">🤖 ${zh?"建议订货":"Suggest"}</button>
+      ${canW('proc')?`<button class="btn gold sm" onclick="openM('item')">+ ${zh?"品项":"Item"}</button>`:''}
+      ${canW('proc')?`<button class="btn ghost sm" onclick="bulkAddForm('item')">📋 ${zh?"批量导入":"Bulk"}</button>`:''}</div>`;
+  // 按供应商分组
+  const groups={};(x.items||[]).forEach(i=>{const s=itemSupplier(i.name);(groups[s]=groups[s]||[]).push(i);});
+  const tHead=`<thead><tr><th>${zh?"品名":"Item"}</th><th>${zh?"库存":"Qty"}</th><th>${zh?"加权单价":"W.Cost"}</th><th>${zh?"净料成本":"Net Cost"}</th><th>${zh?"库存值":"Value"}</th><th>${zh?"批次/状态":"Batch"}</th>${canW('proc')?`<th>${zh?"操作":"Action"}</th>`:''}</tr></thead>`;
+  // —— 供应商列表视图 ——
+  if(!invSupplier){
+    const keys=Object.keys(groups).sort((a,b)=>groups[b].length-groups[a].length);
+    const cards=keys.map(s=>{const items=groups[s];const val=items.reduce((a,i)=>a+i.qty*i.cost,0);const low=items.filter(i=>i.qty<=i.par).length;
+      return `<div class="card" style="padding:13px;margin-bottom:9px;cursor:pointer;" onclick="setInvSupplier('${s.replace(/'/g,"\\'")}')">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div><div style="font-weight:800;font-size:15px;">🏢 ${s}</div>
+          <div class="mini">${items.length} ${zh?"个品项":"items"}${low?` · <span class="neg">${low} ${zh?"低于安全库存":"low"}</span>`:''}</div></div>
+          <div style="text-align:right;"><div style="font-weight:800;">${money(val)}</div><span class="mini">${zh?"库存值":"value"} ›</span></div>
+        </div></div>`;
+    }).join('')||`<div class="empty">${zh?"暂无品项，先在采购或此页导入。":"No items"}</div>`;
+    return `<div class="fb"><h2 class="h" style="margin:0;">📦 ${zh?"库存清单":"Inventory"} <span class="tag">${nm(outletObj())}</span></h2>${addBtns}</div>
+      <div class="hint">${zh?"按供应商分组。点选供应商查看其全部品项库存。全链联动：进货入库、报废/调拨/销售自动扣减。":"Grouped by supplier. Tap one to view its stock."}</div>
+      ${cards}`;
+  }
+  // —— 单一供应商库存视图 ——
+  const items=groups[invSupplier]||[];
+  const val=items.reduce((a,i)=>a+i.qty*i.cost,0);
+  return `<div class="fb"><h2 class="h" style="margin:0;">📦 ${invSupplier} <span class="tag">${items.length} ${zh?"品项":"items"}</span></h2><button class="btn ghost sm" onclick="backInvSupplier()">← ${zh?"供应商列表":"Suppliers"}</button></div>
+    ${addBtns}
+    <div class="card tbl"><table>${tHead}<tbody>
+    ${items.map(invRow).join('')||`<tr><td colspan="7" class="empty">${zh?"该供应商暂无品项":"No items"}</td></tr>`}
+    <tr style="background:#FAFBFC;font-weight:800;"><td colspan="4">${zh?"库存值合计":"Total Value"}</td><td>${money(val)}</td><td colspan="${canW('proc')?2:1}"></td></tr>
+    </tbody></table></div>`;
 }
 
 /* ================= M2/M3/M4/M5/M6 作业中心 ================= */
