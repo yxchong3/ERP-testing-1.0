@@ -171,6 +171,26 @@ const OUTLETS=[
   {id:"b10",name:"分店 10",en:"Branch 10",lat:3.1100,lng:101.5500},
   {id:"b11",name:"分店 11",en:"Branch 11",lat:3.1700,lng:101.6000},
 ];
+/* ===== 从营运档案提取的供应商→品项目录 + ENT菜单（可在库存/供应商里再增删）===== */
+const SUPPLIER_CATALOG={
+  "(菜)SUNNY KHOR FOOD TRADING SB":["Sawi 菜心","Sayur Raja (Di Wong Miao) 帝王苗","Kang Kung 翁菜","Daun Bawang 青葱/生葱","Coriander 元茜(香菜)","You Mak(Romain) 油麦","Qing Long 青龙菜","7 Tian Qi 田七","Salad Bulat 玻璃生菜","Cili Merah 红辣椒 （灯笼椒）","Cili Hijau 青辣椒","Ginger Old Halia Tua 老姜","Limau Nipis 酸柑","Tomato 番茄","Timun 黄瓜","Lobak Putih","Sweet Potato Leaf 番薯苗","Daun Kari 咖喱叶","Daun Selasih 九层塔","Daun Pandan 斑斓叶","Daun Asam 亚三叶","Arrow Root 粉葛","Watercress 西洋菜","Taugeh 芽菜","Tau Foo Jepun 日本豆腐","Tau Foo Kotak 盒豆腐","Tau Foo Goreng 豆腐卜","Kobis Bulat 包菜","Kacang Panjang 豆角","Kacang Bendi 羊角豆","Terong Panjang 茄子(长)","Peria 苦瓜","Petai 臭豆","Carrot 金笋（红萝卜）","Serai 香茅","Cili Api Merah 小红辣椒","Nai Pai 乃白菜","Telur （B） 鸡蛋","Labu Air 葫芦","Timun Tua 老黄瓜"],
+  "(猪)GRAND HARVEST FROZEN SB":["猪手/猪脚 Pork Leg","无皮五花肉 Pork Belly (No Skin）","后腿肉 （咕佬肉）Pork Whole Leg","肉碎 Minced Pork"],
+  "(鸡)GRAB FRESH TRADING SB":["(三杯鸡) Taiwan Chicken鸡二度 Chicken Whole Leg","菜园鸡 (Steamed Herb Chicken)Cone Fed Chicken","老鸡 Old Chicken","(南乳炸鸡) Fried Chicken白鸡 Normal Chicken","鸡翅膀 Chicken Wing","琵琶鸭 PiPa Duck"],
+  "(中央)TCY OKR SB":["Peanut 花生","保鲜膜 Cling Wrap","Cooking Rice Wine 兴兴发花雕酒","Beancurd Preserved 大石腐乳（南乳）","Santan (Kara)椰浆","Chili Bean Sauce 辣豆瓣酱","Desaus Chili Sauce 辣椒酱","MAGGIE Chili Sause 美极辣椒酱","MAGGIE Tomato Sause 美极番茄酱","Thai Chili Sos 妈巴侬牌泰国点鸡酱","Ajinamoto Monosodium 味精","Salt （Green） 双燕幼盐","Tapioca Starch (ABC) 木薯淀粉","Belacan （Ket Hoe) 吉和峇拉煎","MAGGIE Chicken Stock 美极鸡精粉","White Pepper Powder 鹰牌白胡椒粉","Tepung Merah (Babi Masin) 海阳牌加料五香粉","Tepung Curry Sotong Goreng 时钟牌英国咖喱粉","Dong Gui (Soup) 当归片(A) (青袋子)","Red Dates 红枣","Wolfberry(s) 枸杞（包）","Common Yam Slice 淮山（1）","Polygonatum Odoratum 玉竹","Dried Shrimp Udang Kering 虾米仔","Mergui Dried Fish 丹佬咸鱼（盒）","Ikan Masin Minyak 油浸马鲛咸鱼","Century Egg 皮蛋","Salted Egg 咸蛋","Cooking Oil 食用油","Jasmine Siam Special 5 Rice (Green) 白米","FIsh Mince 鱼胶","Taiwanese Chicken 三杯鸡","Lobak 肉卷","Tian Jin Preserved Vegetable 天津冬菜","Minced Pork冬菜猪肉","Curry Pork Ribs 咖喱排骨","Black Bean Pork Ribs 豉汁排骨","Chicke Marinade 炸鸡粉","Pork Marinade炸肉粉","Duck Marinade 腌鸭粉","Concentrated Soup 鲜汤","Fish Sauce 鱼汁","Duck Sauce 酸梅鸭酱","Taiwanese Sauce 三杯鸡酱","Stewed Sauce 卤猪脚酱","Belacan Sauce 马来栈酱","Nyonya Sauce 娘惹酱","Curry Sauce 咖喱酱","Kam Heong Sauce 金香酱","Sweet & Sour Sauce 咕佬肉酱","Black Bean SOS 炒鱼头酱","Spicy Bean Sauce （红酱蒸）辣酱蒸酱","Sayur Masin Hancur 菜脯（咸）","Sayur Manis Hancur 菜脯（甜）","麦芽糖 Maltose","Dry Chili 辣椒干","Onion 大葱","Shallot 葱头仔","Garlic 蒜米","Winfuel Thermogel 胶状燃料","Coarse Grain Sugar 粗白砂糖","Cili Powder 辣椒粉","Uniform 员工制服","Dried Shredded Squid 特选吊片丝","Food Wrap 保鲜膜","Soya Sauce A(Yellow) 蒸鱼生抽(黄盖)","Soya Sauce (Green) 普通生抽(青盖)","黑酱油 Black Sauce A1","蜻蜓牌蚝油 Qing Ting Oyster Sauce"],
+  "(鱼) Fish-LC FROZEN SB":["松鱼头 Big Head Carp","红非洲 Red Tilapia","(一条)白须公 Baung （Catfish）","大头虾 Scampi U5","老虎虾 Tiger Prawn"],
+  "Mayou& Lala(马友啦啦苏东)":["马友鱼 Threadfin（Mayou）@ 28/Kg","沙白 Signature Lala @ 5 / Pkt","啦啦 Kam Heong Lala @ 5 / Pkt","苏东 4/6 Sotong（No Skin）@ 27 / Pkt"],
+  "(啤酒) MHML TRADING SB":["黑狗 Guinness（640ml x 12 / ctn）","老虎 Tiger （640ml x 12 / ctn）","哈尔滨 Harbin"],
+  "(杯装凉水)SAN XIN":["竹蔗马蹄 Sugarcane","洋参菊花 Chrysanthemum","爱玉冰 Aiyu","百香果爱玉冰 Passion Aiyu"],
+  "(龙虎斑) DRAGON TASTE SEAFOOD WHOL":["龙虎斑头 Dragon / Tiger Grouper Head","龙虎斑鱼(整条) Dragon / Tiger Grouper"],
+  "(食油鸭沙白)":["食油 Cooking Oil @ 17Kg /Btl","鸭 Duck @ 2.1Kg Per Unit","沙白 Lala"],
+  "(包装) Packaging":["E & C - 40GG - 17 x 20A Singlet Bag (100pkt)","18 x 22 (Y）Plastic (80pkt)","KL - HD 6 x 9 1Kg (30pkt) 凉水打包袋（中）","HM 3 x 5 300g KM 酱料打包袋 （小）","HD 8 x 12 Plastic Bag 打包袋（大）","20 x 20 700g KM （Plastic Sheet） 打包用塑料纸","5.0mm Chopstick (Take Away) 打包用筷子","E & C - 70 x 70' Table Cloth (Red) 一次性桌布","Chinese Spoon (Take Away ) 打包用汤匙","Straw 吸管","NLT - PP Lunch Box (100pcs) 饭打包盒","BX-210 中型打包盒","E & C Rubber Band(1kg) 塑胶圈","Gas 煤气","Thermal Paper Roll"],
+  "(凉水汽水)冰块":["北紫草 Leong Shui （35pkt/ bdl）","100 Plus","Coca Cola","冰块 Ice"],
+  "(茶）Tea":["香片 Jasmine Tea","普洱 Pu ’Er","铁观音 Tie Guan Yin","茶王 Tea King","菊花 Chrysanthemum"],
+  "(洗洁精纸巾) Detergent & Tissue":["洗碗水 Dishwash","漂白水 Bleach","洗手液 Handwash","抹地水 Floor Cleaner","抹桌水 Table Cleaner"],
+  "(酱油）LAI YUAN SAUCE":["黄盖酱油（蒸鱼） Yellow Soy","青盖酱油（普通酱油）Green Soy","黑酱油 Black Sauce A1","蚝油 Oyster Sauce","Qing Ting Oyster Sauce 蜻蜓牌蚝油"],
+};
+const MENU_ITEMS=["A001 招牌蒸鱼头 Signature","A002 酱蒸鱼头（辣椒）Spicy Paste Bean","A003 清蒸鱼头 Steamed with Ginger Silk","A004 炒松鱼头 Stir-Fried","A005 娘惹蒸鱼头 Steamed Nyonya Style","A006 豆豉面豉蒸（咸）鱼头Steamed with Black Bean Taucu","A007 油浸鱼头 Deep-Fried","A008 招牌蒸金凤鱼Signature","A009 酱蒸金凤鱼（辣椒）Steamed with Spicy Paste Bean","A010 清蒸金凤鱼 Steamed with Ginger Silk","A011 炒金凤鱼 Stir-Fried","A012 油浸金凤鱼 Deep-Fried","A013 娘惹蒸金凤鱼 Steamed with Nyonya Style","A014 娘惹炸金凤鱼 Deep-Fried with Nyonya Style","A015 咖喱金凤鱼 Curry Red Tilapia","A018 咖喱石斑鱼头 Grouper (Curry)","A020 红尾斑/红尾白须公 Catfish (Signature/Steamed)","A021 招牌蒸啦啦 Signature Lala","A022 金香啦啦 Kam Heong Lala","A023 招牌三鲜煲 Mixed Seafood Curry","A024 娘惹蒸苏东 Nyonya Style Squid","A025 招牌蒸苏东 Signature Squid","A026 炸苏东 Deep-Fried Squid","A027 椒盐苏东 Salt & Pepper Squid","A028 咸蛋苏东 Salted Egg Yolk Fried Squid","A029 招牌蒸大头虾 Signature King Prawn","A030 干煎大头虾 Pan-Fried King Prawn (min. 2只)","A031 招牌蒸老虎虾 Signature Tiger Prawn","A032 干煎老虎虾 Pan-Fried Tiger Prawn","A033 咸蛋炒老虎虾 Salted Egg Yolk Tiger Prawn","A034 卤猪脚 Signature Stewed Pork","A035 五香肉卷 Lo Bak","A036 南乳炸肉 Deep-Fried Marinated Pork","A037 咕噜肉 Sweet and Sour Pork","A038 冬菜蒸猪肉 Dong Choi Steam Meat Patty","A039 咖喱排骨 Curry Pork Ribs","A040 豉汁排骨 Black Bean Paste Pork Ribs","A042 琵琶鸭 Pipa Duck","A043 南乳炸鸡 Deep-Fried Marinated Chicken","A044 三杯鸡 Taiwan Style Chicken","A045 飞鸡翼 Chicken Wing with Sauce (min. 4只)","A046 纪子当归菜园鸡 Signature Herb Chicken","A047 田七 Tien Chi","A048 油麦 Yau Mak","A049 蕹菜 Kang Kung","A050 番薯叶 Sweet Potato Leaf","A051 帝王苗 Dai Wong Miu","A052 乃白 Nai Bak","A053 芽菜 Bean Sprout","A054 青龙菜 Qing Long","A055 四大天王 Spicy Mixed Vegetable","A057 招牌豆腐 Signature Fried Beancurd","A058 葱油豆腐 Scallion Steamed Beancurd","A059 铁板豆腐 Sizzling Beancurd","A060 荷包蛋 Poached Egg","A061 蒸蛋 Omelette","A062 大葱蛋 Onion Omelette","A063 苦瓜蛋 Bitter Gourd Omelette","A064 三皇蛋 Three Flavours Steam Egg","A065 蒸水蛋 Steamed Egg","A066 菜圃蒸蛋 Chai Po Omelette","A067 虾仁煎蛋 Shrimp Omelette","A067s 老黄瓜炖瘦肉 Chinese Melon Soup","A068 西洋菜汤炖瘦肉 Watercress Soup","A069 花生粉葛汤 Peanuts & Arrowroot Soup","B008 凉水（热/冷）Homemade (Hot/Cold)","B009 竹蔗马蹄 Sugarcane","B010 洋参菊花 Chrysanthemum","B011 金玉米 Ai Yu","B012 100号 100 Plus","B013 可乐 Coca Cola","B014 啤酒 Tiger","B015 黑啤酒 Guinness","B001 香片 Heong Pin","B002 普洱 Pou Lei","B003 铁观音 Tit Koon Yam","B004 菊普 Guk Pou","B005 寿玉 Sau Mei","B006 菊花 Chrysanthemum","Z01 卤猪脚饭 Signature Stewed Pork Rice","Z02 咕佬肉饭 Sweet and Sour Pork Rice","Z03 咖喱排骨饭 Curry Pork Rib Rice","Z04 豉汁排骨饭Black Bean Paste Pork Rib Rice","Z05 炒饭 Fried Rice","Z06 虾仁炒饭 Shrimp Fried Rice","Z07 叁巴炒饭 Sambal Fried Rice","Z08 海鲜炒饭 Seafood Fried Rice","Z09 咸鱼炒饭 Salted Fish Fried Rice","Z11 冬菜蒸猪肉饭 Dong Choi Steam Meat Patty Rice","Z13 肉碎豆腐饭 Beancurd w Minced Pork Rice","C01 咖喱杂菜 Curry Mix Vegetabales","其他 Others"];
+
 const ROLES={
   owner:{name:"老板/人事经理 Owner/HR",en:"Owner / HR Manager",
     can:["dash","sales","inv","proc","transfer","ck","stock","waste","ent","bom","ap","opex","report","hr","attend","schedule","leave","payroll","settings"],
@@ -1481,11 +1501,14 @@ function exportCSV(){
    waste2 报废损耗 / offer 招待赠送 / monthend 月末算货
    ================================================================ */
 let selSupplier=null;                          // 供应商钻取页共用：当前选中供应商
+let ledgerMonth='all';                         // 账册月份筛选（YYYY-MM 或 all）
+function setLedgerMonth(v){ledgerMonth=v;render();window.scrollTo(0,0);}
+function monthLabel(ymk){if(ymk==='all')return LANG==="zh"?"全部月份":"All months";const[y,m]=ymk.split('-');return LANG==="zh"?(y+"年"+(+m)+"月"):(ymk);}
 const PROC_SUB={purchase:'proc',grn:'proc',transfer:'transfer',waste2:'waste',offer:'ent',monthend:'stock'};
 function subCan(p){return PROC_SUB[p]?can(PROC_SUB[p]):can(p);}   // 子页读权限
 function subCanW(p){return PROC_SUB[p]?canW(PROC_SUB[p]):canW(p);}// 子页写权限（汇总视图只读）
-function setSupplier(n){selSupplier=n;render();window.scrollTo(0,0);}
-function backSupplier(){selSupplier=null;render();window.scrollTo(0,0);}
+function setSupplier(n){selSupplier=n;ledgerMonth='all';render();window.scrollTo(0,0);}
+function backSupplier(){selSupplier=null;ledgerMonth='all';render();window.scrollTo(0,0);}
 function goProcSub(p){selSupplier=null;nav(p);}
 
 /* ---- 简易表单弹窗（复用既有 #mbox/#mbg，不干扰 openM）---- */
@@ -1521,6 +1544,41 @@ async function doBulkAdd(kind){
   }
   _aggCache=null;closeM();render();
   alert((zh?"已导入 ":"Added ")+total+(zh?" 项（重复已跳过）"+(all?"，已应用到全部分店。":"。"):" (duplicates skipped)."));
+}
+
+/* ---- 供应商→品项联动：选供应商后，品项下拉自动显示该供应商的品项 ---- */
+function catalogItemOpts(supplier,sel){
+  let list=(typeof SUPPLIER_CATALOG!=='undefined'&&SUPPLIER_CATALOG[supplier])?SUPPLIER_CATALOG[supplier].slice():[];
+  if(!list.length)list=(d().items||[]).map(i=>i.name);
+  if(sel&&!list.includes(sel))list.unshift(sel);
+  return list.map(n=>`<option value="${n}" ${n===sel?'selected':''}>${n}</option>`).join('')||`<option value=""></option>`;
+}
+function ledgerSupChange(){const s=document.getElementById('l_sup');const el=document.getElementById('l_item');if(s&&el)el.innerHTML=catalogItemOpts(s.value,'');}
+
+/* ---- 一键导入营运档案目录（15 供应商 + 各自品项）---- */
+function importCatalogForm(){
+  const zh=LANG==="zh";const nsup=Object.keys(SUPPLIER_CATALOG).length;const nitem=new Set(Object.values(SUPPLIER_CATALOG).flat()).size;
+  openForm(`<h3>📥 ${zh?"导入营运档案目录":"Import Catalog"} <span class="x" onclick="closeM()">×</span></h3>
+    <div class="hint">${zh?`将从你的营运档案提取的 <b>${nsup}</b> 个供应商与约 <b>${nitem}</b> 个品项一次性导入。之后在采购/验收/月末表单里选供应商，会自动弹出它的品项。重复的自动跳过。`:`Import ${nsup} suppliers & ~${nitem} items. Picking a supplier will show its items.`}</div>
+    <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin:2px 0 12px;"><input type="checkbox" id="cat_all" checked> ${zh?"应用到全部分店（含中央厨房）":"Apply to all branches"}</label>
+    <button class="btn block brand" onclick="doImportCatalog()">${zh?"导入":"Import"}</button>`);
+}
+async function doImportCatalog(){
+  const zh=LANG==="zh";
+  const all=document.getElementById('cat_all').checked || isAgg();
+  const targets=all?OUTLETS.map(o=>o.id):[curOutlet];
+  const who=curUser?(curUser.name+" ("+curUser.email+")"):ROLES[curRole].name;
+  const allItems=[...new Set(Object.values(SUPPLIER_CATALOG).flat())];
+  let sTot=0,iTot=0;
+  for(const oid of targets){
+    const db=DB[oid];if(!db)continue;db.vendors=db.vendors||[];db.items=db.items||[];let sa=0,ia=0;
+    Object.keys(SUPPLIER_CATALOG).forEach(n=>{if(!db.vendors.some(v=>v.name===n)){db.vendors.push({id:Math.max(0,...db.vendors.map(v=>v.id))+1,name:n,terms:30});sa++;}});
+    allItems.forEach(n=>{if(!db.items.some(i=>i.name===n)){db.items.push({id:Math.max(0,...db.items.map(i=>i.id))+1,name:n,unit:'pcs',buyUnit:'',conv:1,qty:0,cost:0,cat:'其他',par:0,yield:100,batches:[]});ia++;}});
+    db.audit=db.audit||[];db.audit.unshift({date:TODAY+" "+new Date().toTimeString().slice(0,5),user:who,roleKey:curRole,act:"导入档案目录",detail:(zh?"供应商+":"suppliers+")+sa+(zh?" 品项+":" items+")+ia,old:"",new:""});
+    await save(oid);sTot+=sa;iTot+=ia;
+  }
+  _aggCache=null;closeM();render();
+  alert(zh?`已导入：供应商 +${sTot}，品项 +${iTot}（重复已跳过）。`:`Imported ${sTot} suppliers, ${iTot} items.`);
 }
 async function renameSupplier(id){const v=supplierList().find(x=>x.id===id);if(!v)return;const nn=prompt(LANG==="zh"?"修改供应商名称":"Rename supplier",v.name);if(!nn||!nn.trim()||nn.trim()===v.name)return;const old=v.name;v.name=nn.trim();['purchases','grn','monthEnd'].forEach(k=>(d()[k]||[]).forEach(r=>{if(r.supplier===old)r.supplier=v.name;}));auditLog("重命名供应商",old+"→"+v.name,old,v.name);await save();render();}
 
@@ -1567,14 +1625,17 @@ function pgLedger(mod){
     }).join('')||`<div class="empty">${LANG==="zh"?"暂无供应商":"No suppliers"}</div>`;
     return `<div class="fb"><h2 class="h" style="margin:0;">${cfg.icon} ${cfg.title} <span class="tag">${nm(outletObj())}</span></h2>${back}</div>
       <div class="hint">${LANG==="zh"?"点选供应商查看其每年/月/日的进货单据、每日总计与各货物总计。":"Tap a supplier to view its dated records, daily & per-item totals."}</div>
-      ${writable?`<div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;"><button class="btn gold sm" onclick="addSupplier()">+ ${LANG==="zh"?"新增供应商":"Add Supplier"}</button><button class="btn ghost sm" onclick="bulkAddForm('supplier')">📋 ${LANG==="zh"?"批量导入":"Bulk Import"}</button></div>`:''}
+      ${writable?`<div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;"><button class="btn gold sm" onclick="addSupplier()">+ ${LANG==="zh"?"新增供应商":"Add Supplier"}</button><button class="btn ghost sm" onclick="bulkAddForm('supplier')">📋 ${LANG==="zh"?"批量导入":"Bulk Import"}</button><button class="btn ghost sm" onclick="importCatalogForm()">📥 ${LANG==="zh"?"导入档案目录":"Import Catalog"}</button></div>`:''}
       ${cards}`;
   }
   // —— 单一供应商钻取视图 ——
   const rs=arr.filter(r=>r.supplier===selSupplier).slice().sort((a,b)=>b.date.localeCompare(a.date));
   // 按 年-月 分组，再按 日 分组
   const byYM={};rs.forEach(r=>{const k=r.date.slice(0,7);(byYM[k]=byYM[k]||[]).push(r);});
-  const months=Object.keys(byYM).sort().reverse();
+  const allMonths=Object.keys(byYM).sort().reverse();
+  if(ledgerMonth!=='all'&&!allMonths.includes(ledgerMonth))ledgerMonth='all';
+  const months=(ledgerMonth==='all')?allMonths:allMonths.filter(m=>m===ledgerMonth);
+  const monthPicker=allMonths.length?`<div style="margin-bottom:8px;"><select style="padding:7px 9px;border:1.5px solid var(--line);border-radius:8px;font-size:12.5px;font-weight:600;background:#fff;color:var(--ink);" onchange="setLedgerMonth(this.value)"><option value="all">${LANG==="zh"?"全部月份":"All months"}</option>${allMonths.map(m=>`<option value="${m}" ${ledgerMonth===m?'selected':''}>${monthLabel(m)}</option>`).join('')}</select></div>`:'';
   const colspanBase=cfg.hasSettle?6:5; // 到「价钱」列（不含备注/操作）用于总计对齐
   const monthsHtml=months.map(ymk=>{
     const mrows=byYM[ymk];
@@ -1604,15 +1665,16 @@ function pgLedger(mod){
     const mLabel=(LANG==="zh"?ymk.replace('-','年')+'月':ymk);
     return `<h2 class="h">🗓 ${mLabel} <span class="tag">${(cfg.byMonth?(LANG==="zh"?"月末合计 ":"Month Total "):(LANG==="zh"?"当月合计 ":"Month Total "))}${money(mTot)}</span></h2>${daysHtml}`;
   }).join('')||`<div class="empty">${LANG==="zh"?"该供应商暂无单据":"No records"}</div>`;
-  // 各货物总计
-  const summ=itemSummary(rs);
-  const summHtml=summ.length?`<h2 class="h">📦 ${LANG==="zh"?"各货物总计":"Per-Item Totals"}</h2>
+  // 各货物总计（跟随月份筛选）
+  const rsView=(ledgerMonth==='all')?rs:rs.filter(r=>r.date.slice(0,7)===ledgerMonth);
+  const summ=itemSummary(rsView);
+  const summHtml=summ.length?`<h2 class="h">📦 ${LANG==="zh"?"各货物总计":"Per-Item Totals"} ${ledgerMonth==='all'?'':`<span class="tag">${monthLabel(ledgerMonth)}</span>`}</h2>
     <div class="card tbl"><table><thead><tr><th>Code</th><th>${LANG==="zh"?"品名":"Item"}</th><th>${LANG==="zh"?"总数量":"Total Qty"}</th><th>${LANG==="zh"?"总重量kg":"Total Wt"}</th><th>${LANG==="zh"?"总价钱":"Total Price"}</th></tr></thead><tbody>
     ${summ.map(s=>`<tr><td>${s.code}</td><td><b>${s.item}</b></td><td>${num(s.qty,2)}</td><td>${s.weight?num(s.weight,2):'—'}</td><td>${money(s.price)}</td></tr>`).join('')}
-    <tr style="background:#FAFBFC;font-weight:800;"><td colspan="4">${LANG==="zh"?"供应商合计":"Supplier Total"}</td><td>${money(sumField(rs,'price'))}</td></tr>
+    <tr style="background:#FAFBFC;font-weight:800;"><td colspan="4">${ledgerMonth==='all'?(LANG==="zh"?"供应商合计":"Supplier Total"):(LANG==="zh"?"本月合计":"Month Total")}</td><td>${money(sumField(rsView,'price'))}</td></tr>
     </tbody></table></div>`:'';
   return `<div class="fb"><h2 class="h" style="margin:0;">${cfg.icon} ${selSupplier}</h2><button class="btn ghost sm" onclick="backSupplier()">← ${LANG==="zh"?"供应商列表":"Suppliers"}</button></div>
-    ${writable?`<button class="btn brand sm" style="margin-bottom:6px;" onclick="${cfg.form}('${mod}')">+ ${LANG==="zh"?"新增单据":"Add Record"}</button>`:''}
+    <div style="display:flex;gap:6px;align-items:center;margin-bottom:6px;flex-wrap:wrap;">${writable?`<button class="btn brand sm" onclick="${cfg.form}('${mod}')">+ ${LANG==="zh"?"新增单据":"Add Record"}</button>`:''}${monthPicker}</div>
     ${monthsHtml}${summHtml}`;
 }
 
@@ -1622,11 +1684,11 @@ function formLedger(mod,editIdx){
   const isEdit=(editIdx!=null);const r=isEdit?(d()[cfg.arr]||[])[editIdx]:null;
   const settleOpt=(v)=>`<option value="补货" ${r&&r.settle==='补货'?'selected':''}>${LANG==="zh"?"补货":"Restock"}</option><option value="不收费" ${r&&r.settle==='不收费'?'selected':''}>${LANG==="zh"?"不收取费用":"No Charge"}</option><option value="取消订单" ${r&&r.settle==='取消订单'?'selected':''}>${LANG==="zh"?"取消订单":"Cancel Order"}</option>`;
   openForm(`<h3>${cfg.icon} ${isEdit?(LANG==="zh"?"编辑单据":"Edit Record"):(LANG==="zh"?"新增单据":"New Record")} · ${cfg.title} <span class="x" onclick="closeM()">×</span></h3>
-    <div class="fr"><label>${LANG==="zh"?"供应商":"Supplier"}</label><select id="l_sup">${supplierSelOpts(r?r.supplier:selSupplier)}</select></div>
+    <div class="fr"><label>${LANG==="zh"?"供应商":"Supplier"}</label><select id="l_sup" onchange="ledgerSupChange()">${supplierSelOpts(r?r.supplier:selSupplier)}</select></div>
     <div class="fg2"><div class="fr"><label>${LANG==="zh"?"日期":"Date"}</label><input id="l_date" type="date" value="${r?r.date:TODAY}"></div>
       <div class="fr"><label>Invoice No.</label><input id="l_inv" placeholder="INV-..." value="${r?(r.invoice||''):''}"></div></div>
     <div class="fg2"><div class="fr"><label>${LANG==="zh"?"货物Code":"Goods Code"}</label><input id="l_code" placeholder="FSH-01" value="${r?(r.code||''):''}"></div>
-      <div class="fr"><label>${LANG==="zh"?"品名":"Item"}</label><select id="l_item">${itemSelOpts(r?r.item:'')}</select></div></div>
+      <div class="fr"><label>${LANG==="zh"?"品名（选供应商后自动列出）":"Item"}</label><select id="l_item">${catalogItemOpts(r?r.supplier:selSupplier, r?r.item:'')}</select></div></div>
     <div class="fg3"><div class="fr"><label>${LANG==="zh"?"数量":"Qty"}</label><input id="l_qty" type="number" step="0.01" value="${r?r.qty:''}"></div>
       <div class="fr"><label>${LANG==="zh"?"重量kg":"Weight"}</label><input id="l_wt" type="number" step="0.01" value="${r?r.weight:''}"></div>
       <div class="fr"><label>${LANG==="zh"?"价钱RM":"Price"}</label><input id="l_price" type="number" step="0.01" value="${r?r.price:''}"></div></div>
@@ -1763,7 +1825,7 @@ function formOffer(editIdx){
   openForm(`<h3>🎁 ${isEdit?(LANG==="zh"?"编辑招待/赠送":"Edit Offer"):(LANG==="zh"?"新增招待/赠送":"New Offer")} <span class="x" onclick="closeM()">×</span></h3>
     <div class="fg2"><div class="fr"><label>${LANG==="zh"?"日期":"Date"}</label><input id="o_date" type="date" value="${r?r.date:TODAY}"></div>
       <div class="fr"><label>${LANG==="zh"?"类型":"Type"}</label><select id="o_type"><option value="ENT" ${r&&r.type==='ENT'?'selected':''}>ENT ${LANG==="zh"?"招待":""}</option><option value="Offer" ${r&&r.type==='Offer'?'selected':''}>Offer ${LANG==="zh"?"赠送":""}</option></select></div></div>
-    <div class="fr"><label>${LANG==="zh"?"物品名称 / 菜品":"Item / Dish"}</label><input id="o_item" placeholder="${LANG==="zh"?"如 南乳炸鸡":"e.g. Fried Chicken"}" value="${r?(r.item||''):''}"></div>
+    <div class="fr"><label>${LANG==="zh"?"物品名称 / 菜品（可选可输入）":"Item / Dish"}</label><input id="o_item" list="menuList" placeholder="${LANG==="zh"?"点开选菜单，或直接输入":"pick or type"}" value="${r?(r.item||''):''}"><datalist id="menuList">${(typeof MENU_ITEMS!=='undefined'?MENU_ITEMS:[]).map(m=>`<option value="${m}"></option>`).join('')}</datalist></div>
     <div class="fg3"><div class="fr"><label>${LANG==="zh"?"负责人":"In Charge"}</label><input id="o_person" value="${r?(r.person||''):''}"></div>
       <div class="fr"><label>${LANG==="zh"?"数量":"Qty"}</label><input id="o_qty" type="number" step="1" value="${r?r.qty:''}"></div>
       <div class="fr"><label>${LANG==="zh"?"总数RM":"Total"}</label><input id="o_total" type="number" step="0.01" value="${r?r.total:''}"></div></div>
