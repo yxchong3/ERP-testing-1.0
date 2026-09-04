@@ -275,11 +275,7 @@ function seed(outletId){
     {date:"2026-08-24",type:"transfer",item:"豆腐 Tofu",qty:20,unit:"pcs",amt:24,note:"→分店 C"},
     {date:"2026-08-23",type:"waste",item:"沙白 Clams",qty:1,unit:"kg",amt:14,note:"过期变质"},
   ];
-  const vendors=[
-    {id:1,name:"泰记海鲜 Thye Kee Seafood",terms:30},
-    {id:2,name:"合发肉商 Hup Huat Meat",terms:14},
-    {id:3,name:"永兴杂货 Weng Heng Sundry",terms:7},
-  ];
+  const vendors=[]; // 供应商由用户自行添加/导入（不预置示范供应商）
   const payables=[
     {id:1,vendor:"泰记海鲜 Thye Kee Seafood",po:"PO-2408-012",amt:266,date:"2026-08-25",due:"2026-09-24",status:"未付"},
     {id:2,vendor:"合发肉商 Hup Huat Meat",po:"PO-2408-009",amt:475,date:"2026-08-20",due:"2026-09-03",status:"部分付",paid:200},
@@ -1691,6 +1687,16 @@ async function doImportCatalog(){
   alert(zh?`已导入：供应商 +${sTot}，品项 +${iTot}（重复已跳过）。`:`Imported ${sTot} suppliers, ${iTot} items.`);
 }
 async function renameSupplier(id){const v=supplierList().find(x=>x.id===id);if(!v)return;const nn=prompt(LANG==="zh"?"修改供应商名称":"Rename supplier",v.name);if(!nn||!nn.trim()||nn.trim()===v.name)return;const old=v.name;v.name=nn.trim();['purchases','grn','monthEnd'].forEach(k=>(d()[k]||[]).forEach(r=>{if(r.supplier===old)r.supplier=v.name;}));auditLog("重命名供应商",old+"→"+v.name,old,v.name);await save();render();}
+async function delSupplier(id){const v=supplierList().find(x=>x.id===id);if(!v)return;const cnt=['purchases','grn','monthEnd'].reduce((s,k)=>s+((d()[k]||[]).filter(r=>r.supplier===v.name).length),0);if(!confirm(LANG==="zh"?`删除供应商「${v.name}」？${cnt?"其 "+cnt+" 笔历史单据会保留但不再显示在列表。":""}`:`Delete supplier "${v.name}"?`))return;d().vendors=d().vendors.filter(x=>x.id!==id);auditLog("删除供应商",v.name,"","");await save();render();}
+async function clearSuppliers(){
+  const zh=LANG==="zh";
+  if(!confirm(zh?"清空本店的全部供应商？（历史单据保留，仅清列表；之后你可自行重新添加）":"Clear all suppliers for this outlet?"))return;
+  const all=confirm(zh?"也要一起清空『全部分店』的供应商吗？\n确定=全部分店；取消=只清本店":"Also clear ALL branches? OK=all, Cancel=this outlet only");
+  const targets=all?OUTLETS.map(o=>o.id):[curOutlet];
+  for(const oid of targets){const db=DB[oid];if(!db)continue;const n=(db.vendors||[]).length;db.vendors=[];db.audit=db.audit||[];db.audit.unshift({date:TODAY+" "+new Date().toTimeString().slice(0,5),user:(curUser?curUser.name+" ("+curUser.email+")":ROLES[curRole].name),roleKey:curRole,act:"清空供应商",detail:(zh?"清除 ":"cleared ")+n,old:"",new:""});await save(oid);}
+  _aggCache=null;selSupplier=null;render();
+  alert(zh?"已清空供应商，你可以开始添加自己的了。":"Suppliers cleared.");
+}
 
 /* ---- 小工具 ---- */
 function settlePill(s){return s==="补货"?"p-b":s==="不收费"?"p-g":s==="取消订单"?"p-r":"p-n";}
@@ -1730,62 +1736,53 @@ function pgLedger(mod){
           <div><div style="font-weight:800;font-size:15px;">🏢 ${v.name}</div>
           <div class="mini">${rs.length} ${LANG==="zh"?"笔单据":"records"} · ${LANG==="zh"?"账期":"Terms"} ${v.terms}${LANG==="zh"?"天":"d"}</div></div>
           <div style="text-align:right;"><div style="font-weight:800;">${money(tot)}</div>
-          <div>${writable?`<button class="ib" onclick="event.stopPropagation();renameSupplier(${v.id})">✏️</button> `:''}<span class="mini">›</span></div></div>
+          <div style="white-space:nowrap;">${writable?`<button class="ib" onclick="event.stopPropagation();renameSupplier(${v.id})">✏️</button> <button class="ib" onclick="event.stopPropagation();delSupplier(${v.id})">🗑️</button> `:''}<span class="mini">›</span></div></div>
         </div></div>`;
-    }).join('')||`<div class="empty">${LANG==="zh"?"暂无供应商":"No suppliers"}</div>`;
+    }).join('')||`<div class="empty">${LANG==="zh"?"暂无供应商，点『新增供应商』开始添加。":"No suppliers — tap Add Supplier."}</div>`;
     return `<div class="fb"><h2 class="h" style="margin:0;">${cfg.icon} ${cfg.title} <span class="tag">${nm(outletObj())}</span></h2>${back}</div>
-      <div class="hint">${LANG==="zh"?"点选供应商查看其每年/月/日的进货单据、每日总计与各货物总计。":"Tap a supplier to view its dated records, daily & per-item totals."}</div>
-      ${writable?`<div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;"><button class="btn gold sm" onclick="addSupplier()">+ ${LANG==="zh"?"新增供应商":"Add Supplier"}</button><button class="btn ghost sm" onclick="bulkAddForm('supplier')">📋 ${LANG==="zh"?"批量导入":"Bulk Import"}</button><button class="btn ghost sm" onclick="importCatalogForm()">📥 ${LANG==="zh"?"导入档案目录":"Import Catalog"}</button></div>`:''}
+      <div class="hint">${LANG==="zh"?"点选供应商 → 先看每月汇总，再点月份看该月每日明细。":"Tap a supplier → monthly breakdown → tap a month for its daily list."}</div>
+      ${writable?`<div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;"><button class="btn gold sm" onclick="addSupplier()">+ ${LANG==="zh"?"新增供应商":"Add Supplier"}</button><button class="btn ghost sm" onclick="bulkAddForm('supplier')">📋 ${LANG==="zh"?"批量导入":"Bulk Import"}</button>${sups.length?`<button class="btn ghost sm" onclick="clearSuppliers()">🗑️ ${LANG==="zh"?"清空全部":"Clear All"}</button>`:''}</div>`:''}
       ${cards}`;
   }
-  // —— 单一供应商钻取视图 ——
-  const rs=arr.filter(r=>r.supplier===selSupplier).slice().sort((a,b)=>b.date.localeCompare(a.date));
-  // 按 年-月 分组，再按 日 分组
-  const byYM={};rs.forEach(r=>{const k=r.date.slice(0,7);(byYM[k]=byYM[k]||[]).push(r);});
-  const allMonths=Object.keys(byYM).sort().reverse();
-  if(ledgerMonth!=='all'&&!allMonths.includes(ledgerMonth))ledgerMonth='all';
-  const months=(ledgerMonth==='all')?allMonths:allMonths.filter(m=>m===ledgerMonth);
-  const monthPicker=allMonths.length?`<div style="margin-bottom:8px;"><select style="padding:7px 9px;border:1.5px solid var(--line);border-radius:8px;font-size:12.5px;font-weight:600;background:#fff;color:var(--ink);" onchange="setLedgerMonth(this.value)"><option value="all">${LANG==="zh"?"全部月份":"All months"}</option>${allMonths.map(m=>`<option value="${m}" ${ledgerMonth===m?'selected':''}>${monthLabel(m)}</option>`).join('')}</select></div>`:'';
-  const colspanBase=cfg.hasSettle?6:5; // 到「价钱」列（不含备注/操作）用于总计对齐
-  const monthsHtml=months.map(ymk=>{
-    const mrows=byYM[ymk];
-    const byDay={};mrows.forEach(r=>{(byDay[r.date]=byDay[r.date]||[]).push(r);});
-    const days=Object.keys(byDay).sort().reverse();
-    const daysHtml=days.map(dk=>{
-      const lines=byDay[dk];const dayTot=sumField(lines,'price');
-      const rows=lines.map(r=>{const gi=arr.indexOf(r);return `<tr>
-        <td class="mini">${r.invoice||'—'}</td>
-        <td>${r.code||'—'}</td>
-        <td>${r.item||''}</td>
-        <td>${num(r.qty,2)}</td>
-        <td>${r.weight?num(r.weight,2):'—'}</td>
-        <td>${money(r.price)}</td>
-        ${cfg.hasSettle?`<td><span class="pill ${settlePill(r.settle)}">${settleTxt(r.settle)}</span></td>`:''}
-        <td class="mini">${r.note||''}</td>
-        ${writable?`<td style="white-space:nowrap;"><button class="ib" onclick="formLedger('${mod}',${gi})">✏️</button> <button class="ib" onclick="delLedger('${mod}',${gi})">🗑️</button></td>`:''}
-      </tr>`;}).join('');
-      return `<div class="mini" style="margin:10px 0 3px;font-weight:700;color:var(--ink2);">📆 ${dk}</div>
-      <div class="card tbl"><table><thead><tr>
-        <th>Invoice</th><th>${LANG==="zh"?"货物Code":"Code"}</th><th>${LANG==="zh"?"品名":"Item"}</th><th>${LANG==="zh"?"数量":"Qty"}</th><th>${LANG==="zh"?"重量kg":"Wt"}</th><th>${LANG==="zh"?"价钱":"Price"}</th>${cfg.hasSettle?`<th>${LANG==="zh"?"处理":"Settle"}</th>`:''}<th>${LANG==="zh"?"备注":"Note"}</th>${writable?'<th></th>':''}
-      </tr></thead><tbody>${rows}
-        <tr style="background:#FAFBFC;font-weight:800;"><td colspan="5">${LANG==="zh"?"当日总计":"Day Total"}</td><td>${money(dayTot)}</td>${cfg.hasSettle?'<td></td>':''}<td></td>${writable?'<td></td>':''}</tr>
-      </tbody></table></div>`;
-    }).join('');
-    const mTot=sumField(mrows,'price');
-    const mLabel=(LANG==="zh"?ymk.replace('-','年')+'月':ymk);
-    return `<h2 class="h">🗓 ${mLabel} <span class="tag">${(cfg.byMonth?(LANG==="zh"?"月末合计 ":"Month Total "):(LANG==="zh"?"当月合计 ":"Month Total "))}${money(mTot)}</span></h2>${daysHtml}`;
-  }).join('')||`<div class="empty">${LANG==="zh"?"该供应商暂无单据":"No records"}</div>`;
-  // 各货物总计（跟随月份筛选）
-  const rsView=(ledgerMonth==='all')?rs:rs.filter(r=>r.date.slice(0,7)===ledgerMonth);
-  const summ=itemSummary(rsView);
-  const summHtml=summ.length?`<h2 class="h">📦 ${LANG==="zh"?"各货物总计":"Per-Item Totals"} ${ledgerMonth==='all'?'':`<span class="tag">${monthLabel(ledgerMonth)}</span>`}</h2>
+  // —— 单一供应商：月份 breakdown → 点月份看该月每日列表 ——
+  const rs=arr.filter(r=>r.supplier===selSupplier).slice();
+  const byYM={};rs.forEach(r=>{const k=(r.date||'').slice(0,7);(byYM[k]=byYM[k]||[]).push(r);});
+  const allMonths=Object.keys(byYM).filter(Boolean).sort().reverse();
+  if(ledgerMonth!=='all'&&!byYM[ledgerMonth])ledgerMonth='all';
+  const supHead=`<div class="fb"><h2 class="h" style="margin:0;">${cfg.icon} ${selSupplier}</h2><button class="btn ghost sm" onclick="backSupplier()">← ${LANG==="zh"?"供应商列表":"Suppliers"}</button></div>`;
+  const addBtn=writable?`<button class="btn brand sm" style="margin-bottom:8px;" onclick="${cfg.form}('${mod}')">+ ${LANG==="zh"?"新增单据":"Add Record"}</button>`:'';
+  // ---- 月份 breakdown（年/月）----
+  if(ledgerMonth==='all'){
+    const cards=allMonths.map(m=>{const mrows=byYM[m];const tot=sumField(mrows,'price');const dcount=new Set(mrows.map(r=>r.date)).size;
+      return `<div class="card" style="padding:13px;margin-bottom:9px;cursor:pointer;" onclick="setLedgerMonth('${m}')">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div><div style="font-weight:800;font-size:15px;">🗓 ${monthLabel(m)}</div>
+          <div class="mini">${mrows.length} ${LANG==="zh"?"笔单据":"records"} · ${dcount} ${LANG==="zh"?"天":"days"}</div></div>
+          <div style="text-align:right;"><div style="font-weight:800;">${money(tot)}</div><span class="mini">${LANG==="zh"?"看每日明细":"daily"} ›</span></div>
+        </div></div>`;
+    }).join('')||`<div class="empty">${LANG==="zh"?"该供应商暂无单据，点『新增单据』录入。":"No records — tap Add Record."}</div>`;
+    return `${supHead}${addBtn}<div class="hint">${LANG==="zh"?"按月汇总。点某个月份 → 查看该月每天的进货列表。":"Monthly summary. Tap a month for its daily list."}</div>${cards}`;
+  }
+  // ---- 该月每日列表（30天）----
+  const mrows=byYM[ledgerMonth]||[];
+  const byDay={};mrows.forEach(r=>{(byDay[r.date]=byDay[r.date]||[]).push(r);});
+  const days=Object.keys(byDay).sort(); // 升序：像月历 1→31
+  const daysHtml=days.map(dk=>{
+    const lines=byDay[dk];const dayTot=sumField(lines,'price');
+    const rows=lines.map(r=>{const gi=arr.indexOf(r);return `<tr><td class="mini">${r.invoice||'—'}</td><td>${r.code||'—'}</td><td>${r.item||''}</td><td>${num(r.qty,2)}</td><td>${r.weight?num(r.weight,2):'—'}</td><td>${money(r.price)}</td>${cfg.hasSettle?`<td><span class="pill ${settlePill(r.settle)}">${settleTxt(r.settle)}</span></td>`:''}<td class="mini">${r.note||''}</td>${writable?`<td style="white-space:nowrap;"><button class="ib" onclick="formLedger('${mod}',${gi})">✏️</button> <button class="ib" onclick="delLedger('${mod}',${gi})">🗑️</button></td>`:''}</tr>`;}).join('');
+    return `<div class="mini" style="margin:10px 0 3px;font-weight:700;color:var(--ink2);">📆 ${dk}</div>
+    <div class="card tbl"><table><thead><tr><th>Invoice</th><th>${LANG==="zh"?"货物Code":"Code"}</th><th>${LANG==="zh"?"品名":"Item"}</th><th>${LANG==="zh"?"数量":"Qty"}</th><th>${LANG==="zh"?"重量kg":"Wt"}</th><th>${LANG==="zh"?"价钱":"Price"}</th>${cfg.hasSettle?`<th>${LANG==="zh"?"处理":"Settle"}</th>`:''}<th>${LANG==="zh"?"备注":"Note"}</th>${writable?'<th></th>':''}</tr></thead><tbody>${rows}<tr style="background:#FAFBFC;font-weight:800;"><td colspan="5">${LANG==="zh"?"当日总计":"Day Total"}</td><td>${money(dayTot)}</td>${cfg.hasSettle?'<td></td>':''}<td></td>${writable?'<td></td>':''}</tr></tbody></table></div>`;
+  }).join('')||`<div class="empty">${LANG==="zh"?"本月暂无单据":"No records this month"}</div>`;
+  const mTot=sumField(mrows,'price');
+  const summ=itemSummary(mrows);
+  const summHtml=summ.length?`<h2 class="h">📦 ${LANG==="zh"?"各货物总计":"Per-Item Totals"} <span class="tag">${monthLabel(ledgerMonth)}</span></h2>
     <div class="card tbl"><table><thead><tr><th>Code</th><th>${LANG==="zh"?"品名":"Item"}</th><th>${LANG==="zh"?"总数量":"Total Qty"}</th><th>${LANG==="zh"?"总重量kg":"Total Wt"}</th><th>${LANG==="zh"?"总价钱":"Total Price"}</th></tr></thead><tbody>
     ${summ.map(s=>`<tr><td>${s.code}</td><td><b>${s.item}</b></td><td>${num(s.qty,2)}</td><td>${s.weight?num(s.weight,2):'—'}</td><td>${money(s.price)}</td></tr>`).join('')}
-    <tr style="background:#FAFBFC;font-weight:800;"><td colspan="4">${ledgerMonth==='all'?(LANG==="zh"?"供应商合计":"Supplier Total"):(LANG==="zh"?"本月合计":"Month Total")}</td><td>${money(sumField(rsView,'price'))}</td></tr>
+    <tr style="background:#FAFBFC;font-weight:800;"><td colspan="4">${LANG==="zh"?"本月合计":"Month Total"}</td><td>${money(mTot)}</td></tr>
     </tbody></table></div>`:'';
-  return `<div class="fb"><h2 class="h" style="margin:0;">${cfg.icon} ${selSupplier}</h2><button class="btn ghost sm" onclick="backSupplier()">← ${LANG==="zh"?"供应商列表":"Suppliers"}</button></div>
-    <div style="display:flex;gap:6px;align-items:center;margin-bottom:6px;flex-wrap:wrap;">${writable?`<button class="btn brand sm" onclick="${cfg.form}('${mod}')">+ ${LANG==="zh"?"新增单据":"Add Record"}</button>`:''}${monthPicker}</div>
-    ${monthsHtml}${summHtml}`;
+  return `${supHead}
+    <div class="fb"><button class="btn ghost sm" onclick="setLedgerMonth('all')">← ${LANG==="zh"?"月份列表":"Months"}</button><h2 class="h" style="margin:0;">🗓 ${monthLabel(ledgerMonth)} <span class="tag">${money(mTot)}</span></h2></div>
+    ${addBtn}${daysHtml}${summHtml}`;
 }
 
 /* ---- 采购/验收/月末 共用表单（支持新增与编辑）---- */
