@@ -600,7 +600,9 @@ function seed(outletId){
     {supplier:"合发肉商 Hup Huat Meat",date:"2026-08-31",invoice:"ME-2408-05",code:"CHK-01",item:"鸡腿肉 Chicken Leg",qty:12,weight:12,price:114,note:"8月月末结存"},
   ];
   const dishCosts=[]; // 可编辑菜品成本表（用户导入/自建）
-  return {items,recipes,subRecipes,moves,vendors,payables,stocktakes,opex,staff,attendance,schedule,leaves,sales,fin,audit,purchases,grn,transfers,staffLoans,wasteLog,offers,monthEnd,dishCosts};
+  const monthlySales={}; // 按月销量：{ "2026-09": [{dishId, qty}] }（POS/手动）
+  const monthClose={};   // 月度锁定档案：{ "2026-09": {locked,date,avgPrices,dishCost} }
+  return {items,recipes,subRecipes,moves,vendors,payables,stocktakes,opex,staff,attendance,schedule,leaves,sales,fin,audit,purchases,grn,transfers,staffLoans,wasteLog,offers,monthEnd,dishCosts,monthlySales,monthClose};
 }
 
 /* ================= 数据持久化：Supabase 云端 ⇄ 本地存储 自动切换 =================
@@ -804,7 +806,7 @@ function auditLog(act,detail,oldv,newv){
 function can(p){return ROLES[curRole].can.includes(p);}
 // 作业中心(proc)只要拥有任一子作业权限即可进入；子页与页面级访问统一由 pageAllowed 判定
 function hasAnyOp(){return ['proc','transfer','waste','ent','stock'].some(p=>can(p));}
-function pageAllowed(p){if(p==='proc')return hasAnyOp();if(typeof PROC_SUB!=='undefined'&&PROC_SUB[p])return can(PROC_SUB[p]);return can(p);}
+function pageAllowed(p){if(p==='proc')return hasAnyOp();if(p==='monthly')return can('report');if(typeof PROC_SUB!=='undefined'&&PROC_SUB[p])return can(PROC_SUB[p]);return can(p);}
 function firstAllowedPage(){const order=['dash','attend','leave','payroll','hr','schedule','sales','inv','proc','ck','stock','opex','ap','bom','report','settings'];for(const p of order)if(pageAllowed(p))return p;return 'dash';}
 function canW(p){return can(p)&&!isAgg();} // 汇总视图为只读
 function renderTop(){
@@ -838,11 +840,11 @@ function renderTop(){
 const MENU=[
   ["营运 Operations",[["dash","💰","dash"],["sales","🧾","sales"],["proc","🔄","proc"],["ck","🏭","ck"]]],
   ["库存 Inventory",[["inv","📦","inv"],["bom","🍲","bom"],["stock","📋","stock"]]],
-  ["财务 Finance",[["ap","💳","ap"],["opex","💵","opex"],["report","📈","report"]]],
+  ["财务 Finance",[["ap","💳","ap"],["opex","💵","opex"],["monthly","📅","monthly"],["report","📈","report"]]],
   ["人事 HR",[["hr","👤","hr"],["attend","🕐","attend"],["schedule","📅","schedule"],["leave","🌴","leave"],["payroll","💴","payroll"]]],
   ["系统 System",[["settings","⚙️","settings"]]],
 ];
-const MENU_LABELS={sales:{zh:"销售 (POS)",en:"Sales (POS)"},ck:{zh:"中央厨房",en:"Central Kitchen"},stock:{zh:"盘点",en:"Stock Take"},hr:{zh:"员工档案",en:"Staff Profiles"},attend:{zh:"打卡考勤",en:"Attendance"},schedule:{zh:"排班",en:"Schedule"},leave:{zh:"请假",en:"Leave"}};
+const MENU_LABELS={sales:{zh:"销售 (POS)",en:"Sales (POS)"},ck:{zh:"中央厨房",en:"Central Kitchen"},stock:{zh:"盘点",en:"Stock Take"},hr:{zh:"员工档案",en:"Staff Profiles"},attend:{zh:"打卡考勤",en:"Attendance"},schedule:{zh:"排班",en:"Schedule"},leave:{zh:"请假",en:"Leave"},monthly:{zh:"月度核算",en:"Monthly Cost"},bom:{zh:"配方成本",en:"Recipe Cost"}};
 function mlabel(p){if(MENU_LABELS[p])return MENU_LABELS[p][LANG];return t(p);}
 function renderSidebar(){
   const html=MENU.map(([grp,items])=>{
@@ -914,6 +916,15 @@ function pgDash(){
     <div class="kpi"><div class="k">${LANG==="zh"?"SST 6% 代收":"SST 6%"}</div><div class="v sm warnc">${money(f.sst)}</div><div class="s mini">${LANG==="zh"?"需另存缴税":"Set aside"}</div></div>
   </div>
 
+  ${(function(){const mp=monthlyPnL(costMonth);if(!(mp.rev||mp.cogs))return '';const cpc=mp.foodPct<28?'#0891B2':(mp.foodPct<=35?'var(--green)':'var(--red)');return `
+  <h2 class="h">📅 ${LANG==="zh"?"月度核算":"Monthly Costing"} <span class="tag">${monthLabel2(costMonth)}${monthLocked(costMonth)?' 🔒':''}</span></h2>
+  <div class="pl">
+    <div class="row"><span>${LANG==="zh"?"月营收":"Revenue"}</span><b>${money(mp.rev)}</b></div>
+    <div class="row ind"><span>− ${LANG==="zh"?"食材成本(当月均价)":"COGS (monthly avg)"}</span><span class="r-neg">${money(mp.cogs)}</span></div>
+    <div class="row"><span>= ${LANG==="zh"?"食材毛利":"Gross"}</span><b>${money(mp.gp)}</b></div>
+    <div class="row"><span>${LANG==="zh"?"成本率 / 毛利率":"Food% / GM%"}</span><b style="color:${cpc}">${mp.foodPct.toFixed(1)}% / ${mp.margin.toFixed(1)}%</b></div>
+  </div>
+  <button class="btn ghost block sm" style="margin:8px 0 4px;" onclick="nav('monthly')">📅 ${LANG==="zh"?"打开月度核算（9月对9月，按月锁定）":"Open Monthly Costing"}</button>`;})()}
   <h2 class="h">📋 ${LANG==="zh"?"损益表":"P&L Statement"} <span class="tag">${rangeLabel[dashRange]||""}</span></h2>
   <div class="pl">
     <div class="row"><span>${LANG==="zh"?"POS 含税营业额":"POS Gross Sales"}</span><b>${money(f.gross)}</b></div>
@@ -1062,6 +1073,51 @@ function dcCostPctColor(pct){return pct<28?'#0891B2':(pct<=35?'var(--green)':'va
 function setDcSel(id){dcSel=id;render();window.scrollTo(0,0);}
 function backDc(){dcSel=null;render();window.scrollTo(0,0);}
 function setDcSearch(v){dcSearch=(v||'').trim();render();}
+/* ================= 月度核算引擎（按自然月独立联动，9月对9月）================= */
+let costMonth = TODAY.slice(0,7);
+function setCostMonth(m){costMonth=m;render();window.scrollTo(0,0);}
+function monthLabel2(m){if(!m)return '';const[y,mm]=m.split('-');return LANG==="zh"?(y+"年"+(+mm)+"月"):m;}
+function availMonths(){const s=new Set([costMonth,TODAY.slice(0,7)]);(d().purchases||[]).forEach(r=>{if(r.date)s.add(r.date.slice(0,7));});Object.keys(d().monthlySales||{}).forEach(m=>s.add(m));Object.keys(d().monthClose||{}).forEach(m=>s.add(m));return [...s].filter(Boolean).sort().reverse();}
+function monthLocked(m){const mc=(d().monthClose||{})[m];return !!(mc&&mc.locked);}
+function monthAvgPrice(month,item){ // 原料当月加权平均进价（锁定后取归档值）
+  const mc=(d().monthClose||{})[month];
+  if(mc&&mc.locked&&mc.avgPrices&&(item in mc.avgPrices))return mc.avgPrices[item];
+  let amt=0,qty=0;(d().purchases||[]).forEach(r=>{if((r.date||'').slice(0,7)===month&&r.item===item){amt+=(+r.price||0);qty+=(+r.qty||0);}});
+  return qty?amt/qty:0;
+}
+function monthMaterials(month){ // 当月采购原料汇总
+  const m={};(d().purchases||[]).forEach(r=>{if((r.date||'').slice(0,7)!==month)return;const k=r.item||'—';if(!m[k])m[k]={item:k,qty:0,amt:0};m[k].qty+=(+r.qty||0);m[k].amt+=(+r.price||0);});
+  return Object.values(m).map(x=>({...x,avg:x.qty?x.amt/x.qty:0})).sort((a,b)=>b.amt-a.amt);
+}
+function dishCostForMonth(dc,month){ // 菜品当月成本=Σ(关联原料 当月均价×用量)+Σ(未关联=固定配料)
+  const mc=(d().monthClose||{})[month];
+  if(mc&&mc.locked&&mc.dishCost&&(dc.id in mc.dishCost))return mc.dishCost[dc.id];
+  return (dc.ing||[]).reduce((s,ig)=>{if(ig.link)return s+monthAvgPrice(month,ig.link)*(+ig.qty||0);return s+(+ig.cost||0);},0);
+}
+function monthSales(month){return (d().monthlySales||{})[month]||[];}
+function monthlyPnL(month){ // 月度损益（当月菜品成本×当月销量）
+  const dishes=d().dishCosts||[];const ms=monthSales(month);let rev=0,cogs=0;
+  ms.forEach(s=>{const dc=dishes.find(x=>x.id===s.dishId);if(!dc)return;const q=+s.qty||0;rev+=(+dc.price||0)*q;cogs+=dishCostForMonth(dc,month)*q;});
+  const gp=rev-cogs;return {rev,cogs,gp,margin:rev?gp/rev*100:0,foodPct:rev?cogs/rev*100:0,orders:ms.reduce((a,s)=>a+(+s.qty||0),0)};
+}
+async function lockMonth(month){
+  if(!confirm(LANG==="zh"?`锁定 ${monthLabel2(month)} 的月度成本？锁定后该月原料均价与菜品成本归档固定，历史查询恒用此值，绝不串月。`:`Lock ${month}?`))return;
+  const avgPrices={};monthMaterials(month).forEach(x=>{avgPrices[x.item]=+x.avg.toFixed(4);});
+  const dishCost={};(d().dishCosts||[]).forEach(dc=>{dishCost[dc.id]=+dishCostForMonth(dc,month).toFixed(4);});
+  if(!d().monthClose)d().monthClose={};
+  d().monthClose[month]={locked:true,date:TODAY,avgPrices,dishCost,pnl:monthlyPnL(month)};
+  auditLog("月度锁定",monthLabel2(month),"","");await save();render();
+}
+async function unlockMonth(month){if(!confirm(LANG==="zh"?`解锁 ${monthLabel2(month)}？改回按实时采购数据计算。`:`Unlock ${month}?`))return;if(d().monthClose&&d().monthClose[month]){delete d().monthClose[month];auditLog("解锁月度",monthLabel2(month),"","");await save();render();}}
+/* ★ POS 接口（按月）★ window.applyPOSSalesMonthly("2026-09",[{dishId,qty}]) */
+async function applyPOSSalesMonthly(month,arr){
+  if(!d().monthlySales)d().monthlySales={};
+  d().monthlySales[month]=(arr||[]).map(s=>({dishId:+s.dishId,qty:+s.qty||0}));
+  auditLog("POS月度销量",monthLabel2(month)+" "+((arr||[]).length)+(LANG==="zh"?"项":""),"","");
+  await save();if(typeof render==='function')render();
+}
+if(typeof window!=='undefined')window.applyPOSSalesMonthly=applyPOSSalesMonthly;
+
 function pgBom(){
   const x=d();const zh=LANG==="zh";const w=canW('proc');
   const list=x.dishCosts||[];
@@ -1071,7 +1127,7 @@ function pgBom(){
     if(!dc){dcSel=null;}else{
       const tot=dcTotal(dc);const gp=(+dc.price||0)-tot;const cp=dc.price?tot/dc.price*100:0;const gm=dc.price?gp/dc.price*100:0;
       const rows=(dc.ing||[]).map((ig,idx)=>{const share=tot?(+ig.cost||0)/tot*100:0;return `<tr>
-        <td><b>${ig.item||''}</b></td><td class="mini">${ig.type||'—'}</td><td>${num(ig.qty,2)}</td><td class="mini">${ig.unit||''}</td><td>${money(ig.cost)}</td><td class="mini">${share.toFixed(1)}%</td>
+        <td><b>${ig.item||''}</b>${ig.link?` <span class="pill p-b" title="关联 ${ig.link}">🔗</span>`:''}</td><td class="mini">${ig.type||'—'}</td><td>${num(ig.qty,2)}</td><td class="mini">${ig.unit||''}</td><td>${money(ig.link?monthAvgPrice(costMonth,ig.link)*(+ig.qty||0):ig.cost)}${ig.link?`<br><span class="mini">${monthLabel2(costMonth)}</span>`:''}</td><td class="mini">${share.toFixed(1)}%</td>
         ${w?`<td style="white-space:nowrap;"><button class="ib" onclick="formDcIng(${dc.id},${idx})">✏️</button> <button class="ib" onclick="delDcIng(${dc.id},${idx})">🗑️</button></td>`:''}</tr>`;}).join('')||`<tr><td colspan="7" class="empty">${zh?"暂无材料，点『+ 材料』添加":"No ingredients"}</td></tr>`;
       return `<div class="fb"><h2 class="h" style="margin:0;">🍽 ${dc.cn||dc.code} <span class="tag">${dc.code||''}</span></h2><button class="btn ghost sm" onclick="backDc()">← ${zh?"菜品列表":"Dishes"}</button></div>
       <div class="mini" style="margin-bottom:8px;">${dc.en||''}</div>
@@ -1138,16 +1194,19 @@ async function delDish(id){if(!confirm(LANG==="zh"?"删除此菜品？":"Delete 
 function formDcIng(dishId,idx){
   const zh=LANG==="zh";const dc=(d().dishCosts||[]).find(x=>x.id===dishId);if(!dc)return;const ig=idx!=null?(dc.ing||[])[idx]:null;
   const types=["主料 Main","配料 Side","调味 Season","油 Oil","其他 Other"];
+  const linkOpts=`<option value="">${zh?"（不关联＝固定配料）":"(fixed)"}</option>`+(d().items||[]).map(i=>`<option value="${i.name}" ${ig&&ig.link===i.name?'selected':''}>${i.name}</option>`).join('');
   openForm(`<h3>🧪 ${ig?(zh?"编辑材料":"Edit Ingredient"):(zh?"新增材料":"New Ingredient")} <span class="x" onclick="closeM()">×</span></h3>
     <div class="fr"><label>${zh?"材料/项目":"Item"}</label><input id="di_item" value="${ig?(ig.item||''):''}"></div>
     <div class="fg2"><div class="fr"><label>${zh?"类别":"Type"}</label><select id="di_type">${types.map(t=>`<option ${ig&&ig.type===t?'selected':''}>${t}</option>`).join('')}</select></div>
       <div class="fr"><label>${zh?"用量":"Qty"}</label><input id="di_qty" type="number" step="0.01" value="${ig?ig.qty:''}"></div></div>
     <div class="fg2"><div class="fr"><label>${zh?"单位":"Unit"}</label><input id="di_unit" value="${ig?(ig.unit||''):''}" placeholder="G/ML/条"></div>
-      <div class="fr"><label>${zh?"成本RM":"Cost"}</label><input id="di_cost" type="number" step="0.001" value="${ig?ig.cost:''}"></div></div>
+      <div class="fr"><label>${zh?"成本RM(固定)":"Cost"}</label><input id="di_cost" type="number" step="0.001" value="${ig?ig.cost:''}"></div></div>
+    <div class="fr"><label>🔗 ${zh?"关联原料（跟当月进价联动，可留空）":"Link material (monthly avg)"}</label><select id="di_link">${linkOpts}</select></div>
+    <div class="hint">${zh?"关联原料后，该材料成本＝<b>当月该原料平均进价 × 用量</b>（用量请填成与该原料采购单位一致，如按kg则填kg数）。留空则用上面的固定成本(固定配料)。":"Linked cost = monthly avg price × qty; else fixed."}</div>
     <button class="btn block brand" onclick="saveDcIng(${dishId},${idx!=null?idx:'null'})">${zh?"保存":"Save"}</button>`);
 }
 async function saveDcIng(dishId,idx){const g=x=>document.getElementById(x);const dc=(d().dishCosts||[]).find(x=>x.id===dishId);if(!dc)return;dc.ing=dc.ing||[];
-  const rec={item:g('di_item').value.trim(),type:g('di_type').value,qty:+g('di_qty').value||0,unit:g('di_unit').value.trim(),cost:+g('di_cost').value||0};
+  const rec={item:g('di_item').value.trim(),type:g('di_type').value,qty:+g('di_qty').value||0,unit:g('di_unit').value.trim(),cost:+g('di_cost').value||0,link:g('di_link').value||''};
   if(idx!=null&&dc.ing[idx])dc.ing[idx]=rec;else dc.ing.push(rec);
   auditLog("编辑配方材料",(dc.cn||dc.code)+" · "+rec.item,"",money(rec.cost));await save();closeM();render();}
 async function delDcIng(dishId,idx){if(!confirm(LANG==="zh"?"删除此材料？":"Delete ingredient?"))return;const dc=(d().dishCosts||[]).find(x=>x.id===dishId);if(!dc)return;dc.ing.splice(idx,1);auditLog("删除配方材料",dc.cn||dc.code,"","");await save();render();}
@@ -1169,6 +1228,65 @@ async function doImportDish(){
   }
   _aggCache=null;closeM();render();alert(zh?`已导入 ${tot} 道菜（重复已跳过）。`:`Imported ${tot} dishes.`);
 }
+
+/* ================= 月度核算页（按自然月独立联动 → 大盘/报表）================= */
+function pgMonthly(){
+  const zh=LANG==="zh";const w=can('report')||canW('proc');const m=costMonth;const locked=monthLocked(m);
+  const months=availMonths();const dishes=d().dishCosts||[];
+  const picker=`<select style="padding:7px 9px;border:1.5px solid var(--line);border-radius:8px;font-size:12.5px;font-weight:700;background:#fff;color:var(--ink);" onchange="setCostMonth(this.value)">${months.map(x=>`<option value="${x}" ${x===m?'selected':''}>${monthLabel2(x)}</option>`).join('')}</select>`;
+  const pnl=monthlyPnL(m);
+  const mats=monthMaterials(m);
+  const sales=monthSales(m);
+  const cpCol=(pct)=>pct<28?'#0891B2':(pct<=35?'var(--green)':'var(--red)');
+  // 销售明细
+  const salesRows=sales.map((s,i)=>{const dc=dishes.find(x=>x.id===s.dishId);if(!dc)return '';const q=+s.qty||0;const uc=dishCostForMonth(dc,m);const rev=(+dc.price||0)*q;const cogs=uc*q;return `<tr>
+    <td><b>${dc.cn||dc.code}</b> <span class="mini">${dc.code||''}</span></td><td>${num(q)}</td><td>${money(dc.price)}</td><td>${money(uc)}</td><td>${money(rev)}</td><td class="neg">${money(cogs)}</td><td class="${rev-cogs>=0?'pos':'neg'}">${money(rev-cogs)}</td>
+    ${w&&!locked?`<td style="white-space:nowrap;"><button class="ib" onclick="formMonthSale('${m}',${i})">✏️</button> <button class="ib" onclick="delMonthSale('${m}',${i})">🗑️</button></td>`:''}</tr>`;}).join('')||`<tr><td colspan="8" class="empty">${zh?"本月暂无销量，点『录入销量』或由 POS 推送":"No sales this month"}</td></tr>`;
+  return `<div class="fb"><h2 class="h" style="margin:0;">📅 ${zh?"月度核算":"Monthly Cost"} ${picker}</h2>
+    ${locked?`<span class="pill p-b">🔒 ${zh?"已锁定":"Locked"}</span>`:''}</div>
+  <div class="hint">${zh?`按自然月独立联动：每月原料用<b>当月加权平均进价</b>算菜品成本，${monthLabel2(m)}的销售只用${monthLabel2(m)}的成本，绝不串月。锁定后归档固定。库存仍以月末算货兜底。`:"Natural-month costing."}</div>
+  <div class="grid g4" style="margin-bottom:10px;">
+    <div class="kpi"><div class="k">${zh?"月营收":"Revenue"}</div><div class="v sm pos">${money(pnl.rev)}</div><div class="s mini">${num(pnl.orders)} ${zh?"份":"sold"}</div></div>
+    <div class="kpi"><div class="k">${zh?"食材成本 COGS":"COGS"}</div><div class="v sm neg">${money(pnl.cogs)}</div></div>
+    <div class="kpi"><div class="k">${zh?"毛利":"Gross"}</div><div class="v sm ${pnl.gp>=0?'pos':'neg'}">${money(pnl.gp)}</div></div>
+    <div class="kpi"><div class="k">${zh?"成本率 / 毛利率":"Food% / GM%"}</div><div class="v sm" style="color:${cpCol(pnl.foodPct)}">${pnl.foodPct.toFixed(1)}%<span class="mini"> / ${pnl.margin.toFixed(1)}%</span></div></div>
+  </div>
+  <div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;">
+    ${w&&!locked?`<button class="btn brand sm" onclick="formMonthSale('${m}')">+ ${zh?"录入销量":"Add Sales"}</button>`:''}
+    ${w?(locked?`<button class="btn ghost sm" onclick="unlockMonth('${m}')">🔓 ${zh?"解锁本月":"Unlock"}</button>`:`<button class="btn gold sm" onclick="lockMonth('${m}')">🔒 ${zh?"月末锁定":"Month-End Close"}</button>`):''}
+  </div>
+  <h2 class="h">🧾 ${zh?"月度销售 → 成本 → 毛利":"Sales · Cost · Gross"} <span class="tag">${monthLabel2(m)}</span></h2>
+  <div class="card tbl"><table><thead><tr><th>${zh?"菜品":"Dish"}</th><th>${zh?"销量":"Qty"}</th><th>${zh?"售价":"Price"}</th><th>${zh?"当月单位成本":"Unit Cost"}</th><th>${zh?"营收":"Revenue"}</th><th>${zh?"成本":"COGS"}</th><th>${zh?"毛利":"Gross"}</th>${w&&!locked?'<th></th>':''}</tr></thead><tbody>
+    ${salesRows}
+    <tr style="background:#FAFBFC;font-weight:800;"><td colspan="4">${zh?"合计":"Total"}</td><td>${money(pnl.rev)}</td><td class="neg">${money(pnl.cogs)}</td><td class="${pnl.gp>=0?'pos':'neg'}">${money(pnl.gp)}</td>${w&&!locked?'<td></td>':''}</tr>
+  </tbody></table></div>
+  <details class="card" style="padding:0;margin-top:12px;"><summary style="padding:13px;font-weight:800;cursor:pointer;">🥩 ${zh?"原料月度平均进价":"Monthly Avg Material Price"} <span class="mini">· ${mats.length}</span></summary><div style="padding:2px 12px 12px;">
+    <div class="mini" style="margin-bottom:6px;">${zh?"月均单价＝当月该原料采购总额÷总数量（来自采购单）":"= month purchase amount / qty"}</div>
+    <div class="card tbl"><table><thead><tr><th>${zh?"原料":"Material"}</th><th>${zh?"当月采购量":"Qty"}</th><th>${zh?"当月采购额":"Amount"}</th><th>${zh?"月均单价":"Avg Price"}</th></tr></thead><tbody>
+    ${mats.map(x=>`<tr><td><b>${x.item}</b></td><td>${num(x.qty,2)}</td><td>${money(x.amt)}</td><td style="font-weight:800;">${money(x.avg)}</td></tr>`).join('')||`<tr><td colspan="4" class="empty">${zh?"当月无采购":"No purchases"}</td></tr>`}
+    </tbody></table></div>
+  </div></details>
+  <details class="card" style="padding:0;margin-top:12px;"><summary style="padding:13px;font-weight:800;cursor:pointer;">🍽 ${zh?"各菜品当月成本":"Dish Cost This Month"}</summary><div style="padding:2px 12px 12px;">
+    <div class="card tbl"><table><thead><tr><th>${zh?"菜品":"Dish"}</th><th>${zh?"售价":"Price"}</th><th>${zh?"当月成本":"Cost"}</th><th>${zh?"成本率":"Food%"}</th></tr></thead><tbody>
+    ${dishes.filter(dc=>(dc.ing||[]).length).slice(0,300).map(dc=>{const c=dishCostForMonth(dc,m);const cp=dc.price?c/dc.price*100:0;return `<tr><td><b>${dc.cn||dc.code}</b></td><td>${money(dc.price)}</td><td>${money(c)}</td><td style="color:${cpCol(cp)};font-weight:800;">${dc.price?cp.toFixed(0)+'%':'—'}</td></tr>`;}).join('')||`<tr><td colspan="4" class="empty">${zh?"暂无带配方的菜品":"No dishes"}</td></tr>`}
+    </tbody></table></div>
+  </div></details>`;
+}
+function formMonthSale(month,idx){
+  const zh=LANG==="zh";const arr=monthSales(month);const cur=idx!=null?arr[idx]:null;
+  const opts=(d().dishCosts||[]).map(dc=>`<option value="${dc.id}" ${cur&&cur.dishId===dc.id?'selected':''}>${dc.code?dc.code+' ':''}${dc.cn||dc.en}</option>`).join('');
+  openForm(`<h3>🧾 ${cur?(zh?"编辑销量":"Edit Sales"):(zh?"录入销量":"Add Sales")} · ${monthLabel2(month)} <span class="x" onclick="closeM()">×</span></h3>
+    <div class="fr"><label>${zh?"菜品":"Dish"}</label><select id="ms_dish">${opts}</select></div>
+    <div class="fr"><label>${zh?"本月销量(份)":"Qty sold"}</label><input id="ms_qty" type="number" step="1" value="${cur?cur.qty:''}"></div>
+    <button class="btn block brand" onclick="saveMonthSale('${month}',${idx!=null?idx:'null'})">${zh?"保存":"Save"}</button>`);
+}
+async function saveMonthSale(month,idx){const g=x=>document.getElementById(x);const rec={dishId:+g('ms_dish').value,qty:+g('ms_qty').value||0};
+  if(!d().monthlySales)d().monthlySales={};if(!d().monthlySales[month])d().monthlySales[month]=[];
+  const arr=d().monthlySales[month];
+  if(idx!=null&&arr[idx])arr[idx]=rec;else{const ex=arr.find(s=>s.dishId===rec.dishId);if(ex)ex.qty=rec.qty;else arr.push(rec);}
+  const dc=(d().dishCosts||[]).find(x=>x.id===rec.dishId);auditLog("录入月度销量",monthLabel2(month)+" "+(dc?(dc.cn||dc.code):rec.dishId)+" ×"+rec.qty,"","");
+  await save();closeM();render();}
+async function delMonthSale(month,idx){if(!confirm(LANG==="zh"?"删除此销量？":"Delete?"))return;(d().monthlySales[month]||[]).splice(idx,1);auditLog("删除月度销量",monthLabel2(month),"","");await save();render();}
 
 /* ================= M8 OpEx ================= */
 function pgOpex(){
@@ -1342,6 +1460,8 @@ function pgReport(){
     <div class="kpi"><div class="k">${LANG==="zh"?"本月进货":"Purchases"}</div><div class="v sm pos">${money(inT)}</div></div>
   </div>
   ${acctCostPanel()}
+  ${(function(){const mp=monthlyPnL(costMonth);const cpc=mp.foodPct<28?'#0891B2':(mp.foodPct<=35?'var(--green)':'var(--red)');return `<div class="fb"><h2 class="h" style="margin:0;">📅 ${LANG==="zh"?"月度核算":"Monthly Costing"} <span class="tag">${monthLabel2(costMonth)}${monthLocked(costMonth)?' 🔒':''}</span></h2><button class="btn ghost sm" onclick="nav('monthly')">${LANG==="zh"?"打开":"Open"} ›</button></div>
+  <div class="grid g4"><div class="kpi"><div class="k">${LANG==="zh"?"月营收":"Revenue"}</div><div class="v sm pos">${money(mp.rev)}</div></div><div class="kpi"><div class="k">COGS</div><div class="v sm neg">${money(mp.cogs)}</div></div><div class="kpi"><div class="k">${LANG==="zh"?"毛利":"Gross"}</div><div class="v sm">${money(mp.gp)}</div></div><div class="kpi"><div class="k">${LANG==="zh"?"成本率/毛利率":"Food/GM%"}</div><div class="v sm" style="color:${cpc}">${mp.foodPct.toFixed(1)}%/${mp.margin.toFixed(1)}%</div></div></div>`;})()}
   ${renderCharts(f)}
   <h2 class="h">📋 ${LANG==="zh"?"盘点差异 (理论 vs 实盘)":"Stock Variance"}</h2>
   <div class="card tbl"><table><thead><tr><th>${LANG==="zh"?"品项":"Item"}</th><th>${LANG==="zh"?"理论":"Theory"}</th><th>${LANG==="zh"?"实盘":"Actual"}</th><th>${LANG==="zh"?"盘差":"Var"}</th><th>${LANG==="zh"?"盘差额":"Val"}</th></tr></thead><tbody>
@@ -2289,7 +2409,7 @@ function pgMonthEnd(){return pgLedger('monthend');}
 
 /* 页面路由补充（ap/opex 不在底部tab，用函数导航） */
 const _pages={dash:pgDash,sales:pgSales,inv:pgInv,proc:pgProc,bom:pgBom,report:pgReport,settings:pgSettings,ap:pgAp,opex:pgOpex,payroll:pgPayroll,hr:pgHR,attend:pgAttend,schedule:pgSchedule,leave:pgLeave,ck:pgCK,stock:pgStock,
-  purchase:pgPurchase,grn:pgGRN,transfer:pgTransfer,waste2:pgWaste2,offer:pgOffer,monthend:pgMonthEnd};
+  purchase:pgPurchase,grn:pgGRN,transfer:pgTransfer,waste2:pgWaste2,offer:pgOffer,monthend:pgMonthEnd,monthly:pgMonthly};
 function render(){
   if(!pageAllowed(curPage)){curPage=firstAllowedPage();selSupplier=null;} // 权限收紧后自动落到可访问页
   renderTop();renderSidebar();
