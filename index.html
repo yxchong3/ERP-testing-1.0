@@ -191,6 +191,240 @@ const SUPPLIER_CATALOG={
 };
 const MENU_ITEMS=["A001 招牌蒸鱼头 Signature","A002 酱蒸鱼头（辣椒）Spicy Paste Bean","A003 清蒸鱼头 Steamed with Ginger Silk","A004 炒松鱼头 Stir-Fried","A005 娘惹蒸鱼头 Steamed Nyonya Style","A006 豆豉面豉蒸（咸）鱼头Steamed with Black Bean Taucu","A007 油浸鱼头 Deep-Fried","A008 招牌蒸金凤鱼Signature","A009 酱蒸金凤鱼（辣椒）Steamed with Spicy Paste Bean","A010 清蒸金凤鱼 Steamed with Ginger Silk","A011 炒金凤鱼 Stir-Fried","A012 油浸金凤鱼 Deep-Fried","A013 娘惹蒸金凤鱼 Steamed with Nyonya Style","A014 娘惹炸金凤鱼 Deep-Fried with Nyonya Style","A015 咖喱金凤鱼 Curry Red Tilapia","A018 咖喱石斑鱼头 Grouper (Curry)","A020 红尾斑/红尾白须公 Catfish (Signature/Steamed)","A021 招牌蒸啦啦 Signature Lala","A022 金香啦啦 Kam Heong Lala","A023 招牌三鲜煲 Mixed Seafood Curry","A024 娘惹蒸苏东 Nyonya Style Squid","A025 招牌蒸苏东 Signature Squid","A026 炸苏东 Deep-Fried Squid","A027 椒盐苏东 Salt & Pepper Squid","A028 咸蛋苏东 Salted Egg Yolk Fried Squid","A029 招牌蒸大头虾 Signature King Prawn","A030 干煎大头虾 Pan-Fried King Prawn (min. 2只)","A031 招牌蒸老虎虾 Signature Tiger Prawn","A032 干煎老虎虾 Pan-Fried Tiger Prawn","A033 咸蛋炒老虎虾 Salted Egg Yolk Tiger Prawn","A034 卤猪脚 Signature Stewed Pork","A035 五香肉卷 Lo Bak","A036 南乳炸肉 Deep-Fried Marinated Pork","A037 咕噜肉 Sweet and Sour Pork","A038 冬菜蒸猪肉 Dong Choi Steam Meat Patty","A039 咖喱排骨 Curry Pork Ribs","A040 豉汁排骨 Black Bean Paste Pork Ribs","A042 琵琶鸭 Pipa Duck","A043 南乳炸鸡 Deep-Fried Marinated Chicken","A044 三杯鸡 Taiwan Style Chicken","A045 飞鸡翼 Chicken Wing with Sauce (min. 4只)","A046 纪子当归菜园鸡 Signature Herb Chicken","A047 田七 Tien Chi","A048 油麦 Yau Mak","A049 蕹菜 Kang Kung","A050 番薯叶 Sweet Potato Leaf","A051 帝王苗 Dai Wong Miu","A052 乃白 Nai Bak","A053 芽菜 Bean Sprout","A054 青龙菜 Qing Long","A055 四大天王 Spicy Mixed Vegetable","A057 招牌豆腐 Signature Fried Beancurd","A058 葱油豆腐 Scallion Steamed Beancurd","A059 铁板豆腐 Sizzling Beancurd","A060 荷包蛋 Poached Egg","A061 蒸蛋 Omelette","A062 大葱蛋 Onion Omelette","A063 苦瓜蛋 Bitter Gourd Omelette","A064 三皇蛋 Three Flavours Steam Egg","A065 蒸水蛋 Steamed Egg","A066 菜圃蒸蛋 Chai Po Omelette","A067 虾仁煎蛋 Shrimp Omelette","A067s 老黄瓜炖瘦肉 Chinese Melon Soup","A068 西洋菜汤炖瘦肉 Watercress Soup","A069 花生粉葛汤 Peanuts & Arrowroot Soup","B008 凉水（热/冷）Homemade (Hot/Cold)","B009 竹蔗马蹄 Sugarcane","B010 洋参菊花 Chrysanthemum","B011 金玉米 Ai Yu","B012 100号 100 Plus","B013 可乐 Coca Cola","B014 啤酒 Tiger","B015 黑啤酒 Guinness","B001 香片 Heong Pin","B002 普洱 Pou Lei","B003 铁观音 Tit Koon Yam","B004 菊普 Guk Pou","B005 寿玉 Sau Mei","B006 菊花 Chrysanthemum","Z01 卤猪脚饭 Signature Stewed Pork Rice","Z02 咕佬肉饭 Sweet and Sour Pork Rice","Z03 咖喱排骨饭 Curry Pork Rib Rice","Z04 豉汁排骨饭Black Bean Paste Pork Rib Rice","Z05 炒饭 Fried Rice","Z06 虾仁炒饭 Shrimp Fried Rice","Z07 叁巴炒饭 Sambal Fried Rice","Z08 海鲜炒饭 Seafood Fried Rice","Z09 咸鱼炒饭 Salted Fish Fried Rice","Z11 冬菜蒸猪肉饭 Dong Choi Steam Meat Patty Rice","Z13 肉碎豆腐饭 Beancurd w Minced Pork Rice","C01 咖喱杂菜 Curry Mix Vegetabales","其他 Others"];
 
+/* ===== 菜品成本表目录（来自 Pending 档案：菜品成本表+单独算）===== */
+const DISH_CATALOG=[
+{code:"A001",cn:"招牌蒸鱼头",en:"Signature",price:35.0,ing:[{item:"松鱼头",type:"主料 Main",qty:1.0,unit:"condition 条",cost:12.1},{item:"蒜蓉",type:"配料 Side",qty:85.0,unit:"G",cost:0.6},{item:"香菜",type:"配料 Side",qty:6.0,unit:"G",cost:0.096},{item:"青葱",type:"配料 Side",qty:7.0,unit:"G",cost:0.028},{item:"黄盖酱油",type:"调味 Season",qty:203.0,unit:"ML",cost:1.22},{item:"葱油",type:"油 Oil",qty:37.5,unit:"ML",cost:0.26},{item:"绍兴酒",type:"调味 Season",qty:46.0,unit:"ML",cost:4.14}]},
+{code:"A002",cn:"酱蒸鱼头（辣椒）",en:"Spicy Paste Bean",price:38.0,ing:[{item:"鱼头",type:"主料 Main",qty:1.0,unit:"condition 条",cost:12.1},{item:"红酱蒸 （辣酱蒸酱）",type:"配料 Side",qty:100.0,unit:"g",cost:1.8},{item:"香菜",type:"配料 Side",qty:15.0,unit:"g",cost:0.2},{item:"食用油",type:"油 Oil",qty:15.0,unit:"ml",cost:0.12}]},
+{code:"A003",cn:"清蒸鱼头",en:"Steamed with Ginger Silk",price:35.0,ing:[]},
+{code:"A004",cn:"炒松鱼头",en:"Stir-Fried",price:38.0,ing:[]},
+{code:"A005",cn:"娘惹蒸鱼头",en:"Steamed Nyonya Style",price:40.0,ing:[]},
+{code:"A006",cn:"豆豉面豉蒸（咸）鱼头",en:"Steamed with Black Bean Taucu",price:38.0,ing:[]},
+{code:"A008",cn:"招牌蒸金凤鱼 （小）",en:"Signature (Small)",price:48.0,ing:[]},
+{code:"A008.1",cn:"招牌蒸金凤鱼 （中）",en:"Signature (Medium)",price:50.0,ing:[]},
+{code:"A008.2",cn:"招牌蒸金凤鱼 （大）",en:"Signature (Large)",price:55.0,ing:[]},
+{code:"A009",cn:"酱蒸金凤鱼（小）",en:"Steamed with Spicy Paste Bean (Small)",price:51.0,ing:[]},
+{code:"A009.1",cn:"酱蒸金凤鱼（中）",en:"Steamed with Spicy Paste Bean (Medium)",price:53.0,ing:[]},
+{code:"A009.2",cn:"酱蒸金凤鱼（大）",en:"Steamed with Spicy Paste Bean (Large)",price:58.0,ing:[]},
+{code:"A010",cn:"清蒸金凤鱼 （小）",en:"Steamed with Ginger Silk (Small)",price:48.0,ing:[]},
+{code:"A010.1",cn:"清蒸金凤鱼 （中）",en:"Steamed with Ginger Silk (Medium)",price:50.0,ing:[]},
+{code:"A010.2",cn:"清蒸金凤鱼 （大）",en:"Steamed with Ginger Silk (Large)",price:55.0,ing:[]},
+{code:"A011",cn:"炒金凤鱼",en:"Stir-Fried",price:55.0,ing:[]},
+{code:"A012",cn:"油浸金凤鱼（小）",en:"Deep-Fried (Small)",price:48.0,ing:[]},
+{code:"A012.1",cn:"油浸金凤鱼（中）",en:"Deep-Fried (Medium)",price:50.0,ing:[]},
+{code:"A012.2",cn:"油浸金凤鱼（大）",en:"Deep-Fried (Large)",price:55.0,ing:[]},
+{code:"A013",cn:"娘惹蒸金凤鱼 （小）",en:"Steamed with Nyonya Style (Small)",price:51.0,ing:[]},
+{code:"A013.1",cn:"娘惹蒸金凤鱼 （中）",en:"Steamed with Nyonya Style (Medium)",price:53.0,ing:[]},
+{code:"A013.2",cn:"娘惹蒸金凤鱼 （大）",en:"Steamed with Nyonya Style (Large)",price:58.0,ing:[]},
+{code:"A014",cn:"娘惹炸金凤鱼 （小）",en:"Deep-Fried with Nyonya Style (Small)",price:51.0,ing:[]},
+{code:"A014.1",cn:"娘惹炸金凤鱼 （中）",en:"Deep-Fried with Nyonya Style (Medium)",price:53.0,ing:[]},
+{code:"A014.2",cn:"娘惹炸金凤鱼 （大）",en:"Deep-Fried with Nyonya Style (Large)",price:58.0,ing:[]},
+{code:"A015",cn:"咖喱金凤鱼",en:"Curry Red Tilapia",price:60.0,ing:[]},
+{code:"A016",cn:"豆豉面豉蒸（咸）金凤鱼 （小）",en:"Steamed with Black Bean Taucu (Small)",price:48.0,ing:[]},
+{code:"A016.1",cn:"豆豉面豉蒸（咸）金凤鱼 （中）",en:"Steamed with Black Bean Taucu (Medium)",price:50.0,ing:[]},
+{code:"A016.2",cn:"豆豉面豉蒸（咸）金凤鱼 （大）",en:"Steamed with Black Bean Taucu (Large)",price:55.0,ing:[]},
+{code:"A018",cn:"咖喱石斑鱼头",en:"Grouper (Curry)",price:58.0,ing:[]},
+{code:"A019",cn:"招牌蒸马友鱼（小）",en:"Threadfin (Signature) (Small)",price:48.0,ing:[]},
+{code:"A019.1",cn:"招牌蒸马友鱼 （大）",en:"Threadfin (Signature) (Large)",price:55.0,ing:[]},
+{code:"A019.2",cn:"清蒸马友鱼（小）",en:"Threadfin (Steamed)(Small)",price:48.0,ing:[]},
+{code:"A019.3",cn:"清蒸马友鱼 （大）",en:"Threadfin (Steamed) (Large)",price:55.0,ing:[]},
+{code:"A019.4",cn:"娘惹炸马友鱼（小）",en:"Threadfin (Nyonya Fried)(Small)",price:48.0,ing:[]},
+{code:"A019.5",cn:"娘惹炸马友鱼 （大）",en:"Threadfin (Nyonya Fried) (Large)",price:55.0,ing:[]},
+{code:"A019.6",cn:"油浸马友鱼（小）",en:"Threadfin (Deep-Fried)(Small)",price:48.0,ing:[]},
+{code:"A019.7",cn:"油浸马友鱼 （大）",en:"Threadfin (Deep-Fried) (Large)",price:55.0,ing:[]},
+{code:"A020",cn:"招牌蒸红尾斑/红尾白须公（小）",en:"Catfish (Signature) (Small)",price:60.0,ing:[]},
+{code:"A020.1",cn:"招牌蒸红尾斑/红尾白须公（大）",en:"Catfish (Signature) (Large)",price:65.0,ing:[]},
+{code:"A020.2",cn:"清蒸红尾斑/红尾白须公（小）",en:"Catfish (Steamed) (Small)",price:60.0,ing:[]},
+{code:"A020.3",cn:"清蒸红尾斑/红尾白须公（大）",en:"Catfish (Steamed) (Large)",price:65.0,ing:[]},
+{code:"A021",cn:"招牌蒸啦啦 （小）",en:"Signature Lala (Small)",price:22.0,ing:[{item:"沙白",type:"主料 Main",qty:500.0,unit:"G",cost:5.0},{item:"蒜米",type:"配料 Side",qty:44.0,unit:"G",cost:0.31},{item:"黄盖酱油",type:"调味 Season",qty:105.5,unit:"G",cost:0.63},{item:"绍兴酒",type:"调味 Season",qty:38.0,unit:"G",cost:3.53},{item:"青葱",type:"配料 Side",qty:3.0,unit:"G",cost:0.012},{item:"葱油",type:"油 Oil",qty:22.0,unit:"ML",cost:0.154}]},
+{code:"A021",cn:"招牌蒸啦啦 （大）",en:"Signature Lala (Large)",price:32.0,ing:[{item:"沙白",type:"主料 Main",qty:750.0,unit:"G",cost:7.5},{item:"蒜米",type:"配料 Side",qty:72.0,unit:"G",cost:0.5},{item:"黄盖酱油",type:"调味 Season",qty:183.0,unit:"G",cost:1.098},{item:"绍兴酒",type:"调味 Season",qty:46.0,unit:"G",cost:4.28},{item:"青葱",type:"配料 Side",qty:7.0,unit:"G",cost:0.028},{item:"葱油",type:"油 Oil",qty:37.5,unit:"ML",cost:0.26}]},
+{code:"A022",cn:"金香啦啦（小）",en:"Kam Heong Lala (Small)",price:25.0,ing:[]},
+{code:"A022",cn:"金香啦啦（大）",en:"Kam Heong Lala (Large)",price:35.0,ing:[]},
+{code:"A023",cn:"招牌三鲜煲",en:"Mixed Seafood Curry",price:88.0,ing:[]},
+{code:"A024",cn:"娘惹蒸苏东",en:"Nyonya Style Squid",price:35.0,ing:[]},
+{code:"A025",cn:"招牌蒸苏东",en:"Signature Squid",price:35.0,ing:[]},
+{code:"A026",cn:"炸苏东 （小）",en:"Deep-Fried Squid (Small)",price:30.0,ing:[]},
+{code:"A026.1",cn:"炸苏东 （大）",en:"Deep-Fried Squid (Large)",price:40.0,ing:[]},
+{code:"A027",cn:"椒盐苏东 （小）",en:"Salt & Pepper Squid (Small)",price:30.0,ing:[]},
+{code:"A027.1",cn:"椒盐苏东 （大）",en:"Salt & Pepper Squid (Large)",price:40.0,ing:[]},
+{code:"A028",cn:"咸蛋苏东 （小）",en:"Salted Egg Yolk Fried Squid (Small)",price:30.0,ing:[]},
+{code:"A028.1",cn:"咸蛋苏东 （大）",en:"Salted Egg Yolk Fried Squid (Large)",price:40.0,ing:[]},
+{code:"A029",cn:"招牌蒸大头虾",en:"Signature King Prawn",price:42.0,ing:[]},
+{code:"A030",cn:"干煎大头虾 （最少两只）",en:"Pan-Fried King Prawn (min. 2只)",price:84.0,ing:[]},
+{code:"A031",cn:"招牌蒸老虎虾",en:"Signature Tiger Prawn",price:60.0,ing:[]},
+{code:"A032",cn:"干煎老虎虾",en:"Pan-Fried Tiger Prawn",price:60.0,ing:[]},
+{code:"A033",cn:"咸蛋炒老虎虾",en:"Salted Egg Yolk Tiger Prawn",price:60.0,ing:[]},
+{code:"A034",cn:"卤猪脚 （小）",en:"Signature Stewed Pork (Small)",price:20.0,ing:[]},
+{code:"A034.1",cn:"卤猪脚 （中）",en:"Signature Stewed Pork (Medium)",price:30.0,ing:[]},
+{code:"A034.2",cn:"卤猪脚 （大）",en:"Signature Stewed Pork (Large)",price:40.0,ing:[]},
+{code:"A035",cn:"五香肉卷",en:"Lo Bak",price:12.0,ing:[]},
+{code:"A036",cn:"南乳炸肉 （小）",en:"Deep-Fried Marinated Pork (Small)",price:20.0,ing:[]},
+{code:"A036.1",cn:"南乳炸肉 （中）",en:"Deep-Fried Marinated Pork (Medium)",price:30.0,ing:[]},
+{code:"A036.2",cn:"南乳炸肉 （大）",en:"Deep-Fried Marinated Pork (Large)",price:40.0,ing:[]},
+{code:"A037",cn:"咕噜肉 （小）",en:"Sweet and Sour Pork (Small)",price:20.0,ing:[{item:"猪肉",type:"主料Main",qty:130.0,unit:"G",cost:2.47},{item:"咕佬肉酱",type:"调味Season",qty:192.0,unit:"G",cost:1.248},{item:"番茄",type:"配料Side",qty:30.5,unit:"G",cost:0.27},{item:"黄瓜",type:"配料Side",qty:34.0,unit:"G",cost:0.136},{item:"灯笼椒",type:"配料Side",qty:9.5,unit:"G",cost:0.114},{item:"大葱",type:"配料Side",qty:19.5,unit:"G",cost:0.052},{item:"油+粘粉+鸡蛋",type:"备料Preparation",qty:0,unit:"",cost:1.15}]},
+{code:"A037.1",cn:"咕噜肉 （中）",en:"Sweet and Sour Pork (Medium)",price:30.0,ing:[{item:"猪肉",type:"主料Main",qty:200.0,unit:"G",cost:3.8},{item:"咕佬肉酱",type:"调味Season",qty:251.5,unit:"G",cost:1.64},{item:"番茄",type:"配料Side",qty:44.0,unit:"G",cost:0.396},{item:"黄瓜",type:"配料Side",qty:47.0,unit:"G",cost:0.19},{item:"灯笼椒",type:"配料Side",qty:14.0,unit:"G",cost:0.168},{item:"大葱",type:"配料Side",qty:36.5,unit:"G",cost:0.1},{item:"油+粘粉+鸡蛋",type:"备料Preparation",qty:0,unit:"",cost:1.15}]},
+{code:"A037.2",cn:"咕噜肉 （大）",en:"Sweet and Sour Pork (Large)",price:40.0,ing:[{item:"猪肉",type:"主料Main",qty:260.0,unit:"G",cost:4.94},{item:"咕佬肉酱",type:"调味Season",qty:310.5,unit:"G",cost:2.01},{item:"番茄",type:"配料Side",qty:54.0,unit:"G",cost:0.486},{item:"黄瓜",type:"配料Side",qty:64.0,unit:"G",cost:0.256},{item:"灯笼椒",type:"配料Side",qty:20.0,unit:"G",cost:0.24},{item:"大葱",type:"配料Side",qty:49.0,unit:"G",cost:0.13},{item:"油+粘粉+鸡蛋",type:"备料Preparation",qty:0,unit:"",cost:1.15}]},
+{code:"A038",cn:"冬菜蒸猪肉 （小）",en:"Dong Choi Steam Meat Patty (Small)",price:18.0,ing:[]},
+{code:"A038.1",cn:"冬菜蒸猪肉 （中）",en:"Dong Choi Steam Meat Patty (Medium)",price:25.0,ing:[]},
+{code:"A038.2",cn:"冬菜蒸猪肉 （大）",en:"Dong Choi Steam Meat Patty (Large)",price:32.0,ing:[]},
+{code:"A039",cn:"咖喱排骨 （小）",en:"Curry Pork Ribs (Small)",price:20.0,ing:[]},
+{code:"A039.1",cn:"咖喱排骨 （中）",en:"Curry Pork Ribs (Medium)",price:30.0,ing:[]},
+{code:"A039.2",cn:"咖喱排骨 （大）",en:"Curry Pork Ribs (Large)",price:40.0,ing:[]},
+{code:"A040",cn:"豉汁排骨 （小）",en:"Black Bean Paste Pork Ribs (Small)",price:20.0,ing:[]},
+{code:"A040.1",cn:"豉汁排骨 （中）",en:"Black Bean Paste Pork Ribs (Medium)",price:30.0,ing:[]},
+{code:"A040.2",cn:"豉汁排骨 （大）",en:"Black Bean Paste Pork Ribs (Large)",price:40.0,ing:[]},
+{code:"A041",cn:"咸鱼花腩煲 （小）",en:"Claypot Pork Belly with Salted Fish (Small)",price:25.0,ing:[]},
+{code:"A041.1",cn:"咸鱼花腩煲 （大）",en:"Claypot Pork Belly with Salted Fish (Large)",price:40.0,ing:[]},
+{code:"A042",cn:"琵琶鸭 （整只）",en:"Pipa Duck",price:80.0,ing:[]},
+{code:"A043",cn:"南乳炸鸡（小）",en:"Deep-Fried Marinated Chicken (Small)",price:18.0,ing:[]},
+{code:"A043.1",cn:"南乳炸鸡（中）",en:"Deep-Fried Marinated Chicken(Medium)",price:28.0,ing:[]},
+{code:"A043.2",cn:"南乳炸鸡（大）",en:"Deep-Fried Marinated Chicken (Large)",price:38.0,ing:[]},
+{code:"A044",cn:"三杯鸡 （小）",en:"Taiwan Style Chicken (Small)",price:28.0,ing:[]},
+{code:"A044",cn:"三杯鸡 （大）",en:"Taiwan Style Chicken (Large)",price:38.0,ing:[]},
+{code:"A045",cn:"飞鸡翼（最少四支）",en:"Chicken Wing with Sauce (min. 4只)",price:20.0,ing:[]},
+{code:"A046",cn:"纪子当归菜园鸡 （整只）",en:"Signature Herb Chicken",price:80.0,ing:[]},
+{code:"A047",cn:"田七 （马来栈-小）",en:"Tien Chi (Belacan-Small)",price:13.0,ing:[{item:"田七",type:"主料 Main",qty:220.0,unit:"G",cost:2.86},{item:"马来栈",type:"调味 Season",qty:32.0,unit:"G",cost:0.8},{item:"食用油",type:"油Oil",qty:22.0,unit:"ML",cost:0.132},{item:"蒜米",type:"配料Side",qty:9.0,unit:"G",cost:0.063}]},
+{code:"A047.1",cn:"田七 （马来栈-大）",en:"Tien Chi (Belacan-Large)",price:18.0,ing:[{item:"田七",type:"主料 Main",qty:300.0,unit:"G",cost:3.9},{item:"马来栈",type:"调味 Season",qty:50.5,unit:"G",cost:1.262},{item:"食用油",type:"油Oil",qty:30.0,unit:"ML",cost:0.18},{item:"蒜米",type:"配料Side",qty:18.5,unit:"G",cost:0.129}]},
+{code:"A047.2",cn:"田七 （腐乳椒仔-小）",en:"Tien Chi (Fermented Beancurd Chili-Small)",price:13.0,ing:[{item:"田七",type:"主料 Main",qty:220.0,unit:"G",cost:2.86}]},
+{code:"A047.3",cn:"田七 （腐乳椒仔-大）",en:"Tien Chi (Fermented Beancurd Chili-Large)",price:18.0,ing:[{item:"田七",type:"主料 Main",qty:300.0,unit:"G",cost:3.9}]},
+{code:"A047.4",cn:"田七 （油菜-小）",en:"Tien Chi (Yau Choy Style-Small)",price:13.0,ing:[{item:"田七",type:"主料 Main",qty:220.0,unit:"G",cost:2.86}]},
+{code:"A047.5",cn:"田七 （油菜-大）",en:"Tien Chi (Yau Choy Style-Large)",price:18.0,ing:[{item:"田七",type:"主料 Main",qty:300.0,unit:"G",cost:3.9}]},
+{code:"A047.6",cn:"田七 （清炒-小）",en:"Tien Chi (Plain Stir-Fry-Small)",price:13.0,ing:[{item:"田七",type:"主料 Main",qty:220.0,unit:"G",cost:2.86},{item:"盐",type:"调味Season",qty:1.5,unit:"G",cost:0.005},{item:"味精",type:"调味Season",qty:2.5,unit:"G",cost:0.035},{item:"绍兴酒",type:"调味Season",qty:15.0,unit:"ML",cost:1.35},{item:"食用油",type:"油Oil",qty:22.0,unit:"ML",cost:0.132},{item:"蒜米",type:"配料Side",qty:9.0,unit:"G",cost:0.063}]},
+{code:"A047.7",cn:"田七 （清炒-大）",en:"Tien Chi (Plain Stir-Fry-Large)",price:18.0,ing:[{item:"田七",type:"主料 Main",qty:300.0,unit:"G",cost:3.9},{item:"盐",type:"调味Season",qty:1.5,unit:"G",cost:0.005},{item:"味精",type:"调味Season",qty:3.0,unit:"G",cost:0.042},{item:"绍兴酒",type:"调味Season",qty:15.0,unit:"ML",cost:1.35},{item:"食用油",type:"油Oil",qty:30.0,unit:"ML",cost:0.18},{item:"蒜米",type:"配料Side",qty:18.5,unit:"G",cost:0.129}]},
+{code:"A047.8",cn:"田七 （虾米椒仔-小）",en:"Tien Chi (Dried Shrimp Chili-Small)",price:13.0,ing:[{item:"田七",type:"主料 Main",qty:220.0,unit:"G",cost:2.86}]},
+{code:"A047.9",cn:"田七 （虾米椒仔-大）",en:"Tien Chi (Dried Shrimp Chili-Large)",price:18.0,ing:[{item:"田七",type:"主料 Main",qty:300.0,unit:"G",cost:3.9}]},
+{code:"A048",cn:"油麦 （马来栈-小）",en:"Yau Mak (Belacan-Small)",price:13.0,ing:[{item:"油麦",type:"主料 Main",qty:270.0,unit:"G",cost:1.89},{item:"马来栈",type:"调味 Season",qty:32.0,unit:"G",cost:0.8},{item:"食用油",type:"油Oil",qty:22.0,unit:"ML",cost:0.132},{item:"蒜米",type:"配料Side",qty:9.0,unit:"G",cost:0.063}]},
+{code:"A048.1",cn:"油麦 （马来栈-大）",en:"Yau Mak (Belacan-Large)",price:18.0,ing:[{item:"油麦",type:"主料 Main",qty:350.0,unit:"G",cost:2.45},{item:"马来栈",type:"调味 Season",qty:50.5,unit:"G",cost:1.262},{item:"食用油",type:"油Oil",qty:30.0,unit:"ML",cost:0.18},{item:"蒜米",type:"配料Side",qty:18.5,unit:"G",cost:0.129}]},
+{code:"A048.2",cn:"油麦 （腐乳椒仔-小）",en:"Yau Mak (Fermented Beancurd Chili-Small)",price:13.0,ing:[{item:"油麦",type:"主料 Main",qty:270.0,unit:"G",cost:1.89}]},
+{code:"A048.3",cn:"油麦 （腐乳椒仔-大）",en:"Yau Mak (Fermented Beancurd Chili-Large)",price:18.0,ing:[{item:"油麦",type:"主料 Main",qty:350.0,unit:"G",cost:2.45}]},
+{code:"A048.4",cn:"油麦 （油菜-小）",en:"Yau Mak (Yau Choy Style-Small)",price:13.0,ing:[{item:"油麦",type:"主料 Main",qty:270.0,unit:"G",cost:1.89}]},
+{code:"A048.5",cn:"油麦 （油菜-大）",en:"Yau Mak (Yau Choy Style-Large)",price:18.0,ing:[{item:"油麦",type:"主料 Main",qty:350.0,unit:"G",cost:2.45}]},
+{code:"A048.6",cn:"油麦 （清炒-小）",en:"Yau Mak (Plain Stir-Fry-Small)",price:13.0,ing:[{item:"油麦",type:"主料 Main",qty:270.0,unit:"G",cost:1.89},{item:"盐",type:"调味Season",qty:1.5,unit:"G",cost:0.005},{item:"味精",type:"调味Season",qty:2.5,unit:"G",cost:0.035},{item:"绍兴酒",type:"调味Season",qty:15.0,unit:"ML",cost:1.35},{item:"食用油",type:"油Oil",qty:22.0,unit:"ML",cost:0.132},{item:"蒜米",type:"配料Side",qty:9.0,unit:"G",cost:0.063}]},
+{code:"A048.7",cn:"油麦 （清炒-大）",en:"Yau Mak (Plain Stir-Fry-Large)",price:18.0,ing:[{item:"油麦",type:"主料 Main",qty:350.0,unit:"G",cost:2.45},{item:"盐",type:"调味Season",qty:1.5,unit:"G",cost:0.005},{item:"味精",type:"调味Season",qty:3.0,unit:"G",cost:0.042},{item:"绍兴酒",type:"调味Season",qty:15.0,unit:"ML",cost:1.35},{item:"食用油",type:"油Oil",qty:30.0,unit:"ML",cost:0.18},{item:"蒜米",type:"配料Side",qty:18.5,unit:"G",cost:0.129}]},
+{code:"A048.8",cn:"油麦 （虾米椒仔-小）",en:"Yau Mak (Dried Shrimp Chili-Small)",price:13.0,ing:[{item:"油麦",type:"主料 Main",qty:270.0,unit:"G",cost:1.89}]},
+{code:"A048.9",cn:"油麦 （虾米椒仔-大）",en:"Yau Mak (Dried Shrimp Chili-Large)",price:18.0,ing:[{item:"油麦",type:"主料 Main",qty:350.0,unit:"G",cost:2.45}]},
+{code:"A049",cn:"蕹菜 （马来栈-小）",en:"Kang Kung (Belacan-Small)",price:13.0,ing:[{item:"蕹菜",type:"主料 Main",qty:200.0,unit:"G",cost:0.7},{item:"马来栈",type:"调味 Season",qty:32.0,unit:"G",cost:0.8},{item:"食用油",type:"油Oil",qty:22.0,unit:"ML",cost:0.132},{item:"蒜米",type:"配料Side",qty:9.0,unit:"G",cost:0.063}]},
+{code:"A049.1",cn:"蕹菜 （马来栈-大）",en:"Kang Kung (Belacan-Large)",price:18.0,ing:[{item:"蕹菜",type:"主料 Main",qty:350.0,unit:"G",cost:1.225},{item:"马来栈",type:"调味 Season",qty:50.5,unit:"G",cost:1.262},{item:"食用油",type:"油Oil",qty:30.0,unit:"ML",cost:0.18},{item:"蒜米",type:"配料Side",qty:18.5,unit:"G",cost:0.129}]},
+{code:"A049.2",cn:"蕹菜 （腐乳椒仔-小）",en:"Kang Kung (Fermented Beancurd Chili-Small)",price:13.0,ing:[{item:"蕹菜",type:"主料 Main",qty:200.0,unit:"G",cost:0.7}]},
+{code:"A049.3",cn:"蕹菜 （腐乳椒仔-大）",en:"Kang Kung (Fermented Beancurd Chili-Large)",price:18.0,ing:[{item:"蕹菜",type:"主料 Main",qty:350.0,unit:"G",cost:1.225}]},
+{code:"A049.4",cn:"蕹菜 （油菜-小）",en:"Kang Kung (Yau Choy Style-Small)",price:13.0,ing:[{item:"蕹菜",type:"主料 Main",qty:200.0,unit:"G",cost:0.7}]},
+{code:"A049.5",cn:"蕹菜 （油菜-大）",en:"Kang Kung (Yau Choy Style-Large)",price:18.0,ing:[{item:"蕹菜",type:"主料 Main",qty:350.0,unit:"G",cost:1.225}]},
+{code:"A049.6",cn:"蕹菜 （清炒-小）",en:"Kang Kung (Plain Stir-Fry-Small)",price:13.0,ing:[{item:"蕹菜",type:"主料 Main",qty:200.0,unit:"G",cost:0.7},{item:"盐",type:"调味Season",qty:1.5,unit:"G",cost:0.005},{item:"味精",type:"调味Season",qty:2.5,unit:"G",cost:0.035},{item:"绍兴酒",type:"调味Season",qty:15.0,unit:"ML",cost:1.35},{item:"食用油",type:"油Oil",qty:22.0,unit:"ML",cost:0.132},{item:"蒜米",type:"配料Side",qty:9.0,unit:"G",cost:0.063}]},
+{code:"A049.7",cn:"蕹菜 （清炒-大）",en:"Kang Kung (Plain Stir-Fry-Large)",price:18.0,ing:[{item:"蕹菜",type:"主料 Main",qty:350.0,unit:"G",cost:1.225},{item:"盐",type:"调味Season",qty:1.5,unit:"G",cost:0.005},{item:"味精",type:"调味Season",qty:3.0,unit:"G",cost:0.042},{item:"绍兴酒",type:"调味Season",qty:15.0,unit:"ML",cost:1.35},{item:"食用油",type:"油Oil",qty:30.0,unit:"ML",cost:0.18},{item:"蒜米",type:"配料Side",qty:18.5,unit:"G",cost:0.129}]},
+{code:"A049.8",cn:"蕹菜 （虾米椒仔-小）",en:"Kang Kung (Dried Shrimp Chili-Small)",price:13.0,ing:[{item:"蕹菜",type:"主料 Main",qty:200.0,unit:"G",cost:0.7}]},
+{code:"A049.9",cn:"蕹菜 （虾米椒仔-大）",en:"Kang Kung (Dried Shrimp Chili-Large)",price:18.0,ing:[{item:"蕹菜",type:"主料 Main",qty:350.0,unit:"G",cost:1.225}]},
+{code:"A050",cn:"番薯叶 （马来栈-小）",en:"Sweet Potato Leaf (Belacan-Small)",price:13.0,ing:[{item:"番薯叶",type:"主料 Main",qty:220.0,unit:"G",cost:0.99},{item:"马来栈",type:"调味 Season",qty:32.0,unit:"G",cost:0.8},{item:"食用油",type:"油Oil",qty:22.0,unit:"ML",cost:0.132},{item:"蒜米",type:"配料Side",qty:9.0,unit:"G",cost:0.063}]},
+{code:"A050.1",cn:"番薯叶 （马来栈-大）",en:"Sweet Potato Leaf (Malay Zha-Large)",price:18.0,ing:[{item:"番薯叶",type:"主料 Main",qty:370.0,unit:"G",cost:1.665},{item:"马来栈",type:"调味 Season",qty:50.5,unit:"G",cost:1.262},{item:"食用油",type:"油Oil",qty:30.0,unit:"ML",cost:0.18},{item:"蒜米",type:"配料Side",qty:18.5,unit:"G",cost:0.129}]},
+{code:"A050.2",cn:"番薯叶 （腐乳椒仔-小）",en:"Sweet Potato Leaf (Fermented Beancurd Chili-Small)",price:13.0,ing:[{item:"番薯叶",type:"主料 Main",qty:220.0,unit:"G",cost:0.99}]},
+{code:"A050.3",cn:"番薯叶 （腐乳椒仔-大）",en:"Sweet Potato Leaf (Fermented Beancurd Chili-Large)",price:18.0,ing:[{item:"番薯叶",type:"主料 Main",qty:370.0,unit:"G",cost:1.665}]},
+{code:"A050.4",cn:"番薯叶 （油菜-小）",en:"Sweet Potato Leaf (Yau Choy Style-Small)",price:13.0,ing:[{item:"番薯叶",type:"主料 Main",qty:220.0,unit:"G",cost:0.99}]},
+{code:"A050.5",cn:"番薯叶 （油菜-大）",en:"Sweet Potato Leaf (Yau Choy Style-Large)",price:18.0,ing:[{item:"番薯叶",type:"主料 Main",qty:370.0,unit:"G",cost:1.665}]},
+{code:"A050.6",cn:"番薯叶 （清炒-小）",en:"Sweet Potato Leaf (Plain Stir-Fry-Small)",price:13.0,ing:[{item:"番薯叶",type:"主料 Main",qty:220.0,unit:"G",cost:0.99},{item:"盐",type:"调味Season",qty:1.5,unit:"G",cost:0.005},{item:"味精",type:"调味Season",qty:2.5,unit:"G",cost:0.035},{item:"绍兴酒",type:"调味Season",qty:15.0,unit:"ML",cost:1.35},{item:"食用油",type:"油Oil",qty:22.0,unit:"ML",cost:0.132},{item:"蒜米",type:"配料Side",qty:9.0,unit:"G",cost:0.063}]},
+{code:"A050.7",cn:"番薯叶 （清炒-大）",en:"Sweet Potato Leaf (Plain Stir-Fry-Large)",price:18.0,ing:[{item:"番薯叶",type:"主料 Main",qty:370.0,unit:"G",cost:1.665},{item:"盐",type:"调味Season",qty:1.5,unit:"G",cost:0.005},{item:"味精",type:"调味Season",qty:3.0,unit:"G",cost:0.042},{item:"绍兴酒",type:"调味Season",qty:15.0,unit:"ML",cost:1.35},{item:"食用油",type:"油Oil",qty:30.0,unit:"ML",cost:0.18},{item:"蒜米",type:"配料Side",qty:18.5,unit:"G",cost:0.129}]},
+{code:"A050.8",cn:"番薯叶 （虾米椒仔-小）",en:"Sweet Potato Leaf (Dried Shrimp Chili-Small)",price:13.0,ing:[{item:"番薯叶",type:"主料 Main",qty:220.0,unit:"G",cost:0.99}]},
+{code:"A050.9",cn:"番薯叶 （虾米椒仔-大）",en:"Sweet Potato Leaf (Dried Shrimp Chili-Large)",price:18.0,ing:[{item:"番薯叶",type:"主料 Main",qty:370.0,unit:"G",cost:1.665}]},
+{code:"A051",cn:"帝王苗 （马来栈-小）",en:"Dai Wong Miu (Belacan-Small)",price:13.0,ing:[{item:"帝王苗",type:"主料 Main",qty:250.0,unit:"G",cost:1.5},{item:"马来栈",type:"调味 Season",qty:32.0,unit:"G",cost:0.8},{item:"食用油",type:"油Oil",qty:22.0,unit:"ML",cost:0.132},{item:"蒜米",type:"配料Side",qty:9.0,unit:"G",cost:0.063}]},
+{code:"A051.1",cn:"帝王苗 （马来栈-大）",en:"Dai Wong Miu (Belacan-Large)",price:18.0,ing:[{item:"帝王苗",type:"主料 Main",qty:320.0,unit:"G",cost:1.92},{item:"马来栈",type:"调味 Season",qty:50.5,unit:"G",cost:1.262},{item:"食用油",type:"油Oil",qty:30.0,unit:"ML",cost:0.18},{item:"蒜米",type:"配料Side",qty:18.5,unit:"G",cost:0.129}]},
+{code:"A051.2",cn:"帝王苗 （腐乳椒仔-小）",en:"Dai Wong Miu (Fermented Beancurd Chili-Small)",price:13.0,ing:[{item:"帝王苗",type:"主料 Main",qty:250.0,unit:"G",cost:1.5}]},
+{code:"A051.3",cn:"帝王苗 （腐乳椒仔-大）",en:"Dai Wong Miu (Fermented Beancurd Chili-Large)",price:18.0,ing:[{item:"帝王苗",type:"主料 Main",qty:320.0,unit:"G",cost:1.92}]},
+{code:"A051.4",cn:"帝王苗 （油菜-小）",en:"Dai Wong Miu (Yau Choy Style-Small)",price:13.0,ing:[{item:"帝王苗",type:"主料 Main",qty:250.0,unit:"G",cost:1.5}]},
+{code:"A051.5",cn:"帝王苗 （油菜-大）",en:"Dai Wong Miu (Yau Choy Style-Large)",price:18.0,ing:[{item:"帝王苗",type:"主料 Main",qty:320.0,unit:"G",cost:1.92}]},
+{code:"A051.6",cn:"帝王苗 （清炒-小）",en:"Dai Wong Miu (Plain Stir-Fry-Small)",price:13.0,ing:[{item:"帝王苗",type:"主料 Main",qty:250.0,unit:"G",cost:1.5},{item:"盐",type:"调味Season",qty:1.5,unit:"G",cost:0.005},{item:"味精",type:"调味Season",qty:2.5,unit:"G",cost:0.035},{item:"绍兴酒",type:"调味Season",qty:15.0,unit:"ML",cost:1.35},{item:"食用油",type:"油Oil",qty:22.0,unit:"ML",cost:0.132},{item:"蒜米",type:"配料Side",qty:9.0,unit:"G",cost:0.063}]},
+{code:"A051.7",cn:"帝王苗 （清炒-大）",en:"Dai Wong Miu (Plain Stir-Fry-Large)",price:18.0,ing:[{item:"帝王苗",type:"主料 Main",qty:320.0,unit:"G",cost:1.92},{item:"盐",type:"调味Season",qty:1.5,unit:"G",cost:0.005},{item:"味精",type:"调味Season",qty:3.0,unit:"G",cost:0.042},{item:"绍兴酒",type:"调味Season",qty:15.0,unit:"ML",cost:1.35},{item:"食用油",type:"油Oil",qty:30.0,unit:"ML",cost:0.18},{item:"蒜米",type:"配料Side",qty:18.5,unit:"G",cost:0.129}]},
+{code:"A051.8",cn:"帝王苗 （虾米椒仔-小）",en:"Dai Wong Miu (Dried Shrimp Chili-Small)",price:13.0,ing:[{item:"帝王苗",type:"主料 Main",qty:250.0,unit:"G",cost:1.5}]},
+{code:"A051.9",cn:"帝王苗 （虾米椒仔-大）",en:"Dai Wong Miu (Dried Shrimp Chili-Large)",price:18.0,ing:[{item:"帝王苗",type:"主料 Main",qty:320.0,unit:"G",cost:1.92}]},
+{code:"A052",cn:"乃白 （马来栈-小）",en:"Nai Bak (Belacan-Small)",price:13.0,ing:[{item:"乃白",type:"主料 Main",qty:320.0,unit:"G",cost:2.72},{item:"马来栈",type:"调味 Season",qty:32.0,unit:"G",cost:0.8},{item:"食用油",type:"油Oil",qty:22.0,unit:"ML",cost:0.132},{item:"蒜米",type:"配料Side",qty:9.0,unit:"G",cost:0.063}]},
+{code:"A052.1",cn:"乃白 （马来栈-大）",en:"Nai Bak (Belacan-Large)",price:18.0,ing:[{item:"乃白",type:"主料 Main",qty:430.0,unit:"G",cost:3.655},{item:"马来栈",type:"调味 Season",qty:50.5,unit:"G",cost:1.262},{item:"食用油",type:"油Oil",qty:30.0,unit:"ML",cost:0.18},{item:"蒜米",type:"配料Side",qty:18.5,unit:"G",cost:0.129}]},
+{code:"A052.2",cn:"乃白 （腐乳椒仔-小）",en:"Nai Bak (Fermented Beancurd Chili-Small)",price:13.0,ing:[{item:"乃白",type:"主料 Main",qty:320.0,unit:"G",cost:2.72}]},
+{code:"A052.3",cn:"乃白 （腐乳椒仔-大）",en:"Nai Bak (Fermented Beancurd Chili-Large)",price:18.0,ing:[{item:"乃白",type:"主料 Main",qty:430.0,unit:"G",cost:3.655}]},
+{code:"A052.4",cn:"乃白 （油菜-小）",en:"Nai Bak (Yau Choy Style-Small)",price:13.0,ing:[{item:"乃白",type:"主料 Main",qty:320.0,unit:"G",cost:2.72}]},
+{code:"A052.5",cn:"乃白 （油菜-大）",en:"Nai Bak (Yau Choy Style-Large)",price:18.0,ing:[{item:"乃白",type:"主料 Main",qty:430.0,unit:"G",cost:3.655}]},
+{code:"A052.6",cn:"乃白 （清炒-小）",en:"Nai Bak (Plain Stir-Fry-Small)",price:13.0,ing:[{item:"乃白",type:"主料 Main",qty:320.0,unit:"G",cost:2.72},{item:"盐",type:"调味Season",qty:1.5,unit:"G",cost:0.005},{item:"味精",type:"调味Season",qty:2.5,unit:"G",cost:0.035},{item:"绍兴酒",type:"调味Season",qty:15.0,unit:"ML",cost:1.35},{item:"食用油",type:"油Oil",qty:22.0,unit:"ML",cost:0.132},{item:"蒜米",type:"配料Side",qty:9.0,unit:"G",cost:0.063}]},
+{code:"A052.7",cn:"乃白 （清炒-大）",en:"Nai Bak (Plain Stir-Fry-Large)",price:18.0,ing:[{item:"乃白",type:"主料 Main",qty:430.0,unit:"G",cost:3.655},{item:"盐",type:"调味Season",qty:1.5,unit:"G",cost:0.005},{item:"味精",type:"调味Season",qty:3.0,unit:"G",cost:0.042},{item:"绍兴酒",type:"调味Season",qty:15.0,unit:"ML",cost:1.35},{item:"食用油",type:"油Oil",qty:30.0,unit:"ML",cost:0.18},{item:"蒜米",type:"配料Side",qty:18.5,unit:"G",cost:0.129}]},
+{code:"A052.8",cn:"乃白 （虾米椒仔-小）",en:"Nai Bak (Dried Shrimp Chili-Small)",price:13.0,ing:[{item:"乃白",type:"主料 Main",qty:320.0,unit:"G",cost:2.72}]},
+{code:"A052.9",cn:"乃白 （虾米椒仔-大）",en:"Nai Bak (Dried Shrimp Chili-Large)",price:18.0,ing:[{item:"乃白",type:"主料 Main",qty:430.0,unit:"G",cost:3.655}]},
+{code:"A053",cn:"芽菜 （马来栈-小）",en:"Bean Sprout (Belacan-Small)",price:13.0,ing:[{item:"芽菜",type:"主料 Main",qty:250.0,unit:"G",cost:0.875},{item:"马来栈",type:"调味 Season",qty:32.0,unit:"G",cost:0.8},{item:"食用油",type:"油Oil",qty:22.0,unit:"ML",cost:0.132},{item:"蒜米",type:"配料Side",qty:9.0,unit:"G",cost:0.063}]},
+{code:"A053.1",cn:"芽菜 （马来栈-大）",en:"Bean Sprout (Belacan-Large)",price:18.0,ing:[{item:"芽菜",type:"主料 Main",qty:330.0,unit:"G",cost:1.155},{item:"马来栈",type:"调味 Season",qty:50.5,unit:"G",cost:1.262},{item:"食用油",type:"油Oil",qty:30.0,unit:"ML",cost:0.18},{item:"蒜米",type:"配料Side",qty:18.5,unit:"G",cost:0.129}]},
+{code:"A053.2",cn:"芽菜 （腐乳椒仔-小）",en:"Bean Sprout (Fermented Beancurd Chili-Small)",price:13.0,ing:[{item:"芽菜",type:"主料 Main",qty:250.0,unit:"G",cost:0.875}]},
+{code:"A053.3",cn:"芽菜 （腐乳椒仔-大）",en:"Bean Sprout (Fermented Beancurd Chili-Large)",price:18.0,ing:[{item:"芽菜",type:"主料 Main",qty:330.0,unit:"G",cost:1.155}]},
+{code:"A053.4",cn:"芽菜 （油菜-小）",en:"Bean Sprout (Yau Choy Style-Small)",price:13.0,ing:[{item:"芽菜",type:"主料 Main",qty:250.0,unit:"G",cost:0.875}]},
+{code:"A053.5",cn:"芽菜 （油菜-大）",en:"Bean Sprout (Yau Choy Style-Large)",price:18.0,ing:[{item:"芽菜",type:"主料 Main",qty:330.0,unit:"G",cost:1.155}]},
+{code:"A053.6",cn:"芽菜 （清炒-小）",en:"Bean Sprout (Plain Stir-Fry-Small)",price:13.0,ing:[{item:"芽菜",type:"主料 Main",qty:250.0,unit:"G",cost:0.875},{item:"盐",type:"调味Season",qty:1.5,unit:"G",cost:0.005},{item:"味精",type:"调味Season",qty:2.5,unit:"G",cost:0.035},{item:"绍兴酒",type:"调味Season",qty:15.0,unit:"ML",cost:1.35},{item:"食用油",type:"油Oil",qty:22.0,unit:"ML",cost:0.132},{item:"蒜米",type:"配料Side",qty:9.0,unit:"G",cost:0.063}]},
+{code:"A053.7",cn:"芽菜 （清炒-大）",en:"Bean Sprout (Plain Stir-Fry-Large)",price:18.0,ing:[{item:"芽菜",type:"主料 Main",qty:330.0,unit:"G",cost:1.155},{item:"盐",type:"调味Season",qty:1.5,unit:"G",cost:0.005},{item:"味精",type:"调味Season",qty:3.0,unit:"G",cost:0.042},{item:"绍兴酒",type:"调味Season",qty:15.0,unit:"ML",cost:1.35},{item:"食用油",type:"油Oil",qty:30.0,unit:"ML",cost:0.18},{item:"蒜米",type:"配料Side",qty:18.5,unit:"G",cost:0.129}]},
+{code:"A053.8",cn:"芽菜 （虾米椒仔-小）",en:"Bean Sprout (Dried Shrimp Chili-Small)",price:13.0,ing:[{item:"芽菜",type:"主料 Main",qty:250.0,unit:"G",cost:0.875}]},
+{code:"A053.9",cn:"芽菜 （虾米椒仔-大）",en:"Bean Sprout (Dried Shrimp Chili-Large)",price:18.0,ing:[{item:"芽菜",type:"主料 Main",qty:330.0,unit:"G",cost:1.155}]},
+{code:"A054",cn:"青龙菜 （马来栈）",en:"Qing Long (Belacan)",price:13.0,ing:[{item:"青龙菜",type:"主料 Main",qty:0,unit:"G",cost:0},{item:"马来栈",type:"调味 Season",qty:50.5,unit:"G",cost:1.262},{item:"食用油",type:"油Oil",qty:30.0,unit:"ML",cost:0.18},{item:"蒜米",type:"配料Side",qty:18.5,unit:"G",cost:0.129}]},
+{code:"A054.1",cn:"青龙菜 （腐乳椒仔）",en:"Qing Long (Fermented Beancurd Chili)",price:13.0,ing:[]},
+{code:"A054.2",cn:"青龙菜 （油菜）",en:"Qing Long (Yau Choy Style)",price:13.0,ing:[]},
+{code:"A054.3",cn:"青龙菜 （清炒）",en:"Qing Long (Plain Stir-Fry)",price:13.0,ing:[]},
+{code:"A054.4",cn:"青龙菜 （虾米椒仔）",en:"Qing Long (Dried Shrimp Chili)",price:13.0,ing:[]},
+{code:"A055",cn:"四大天王 （马来栈-小）",en:"Spicy Mixed Vegetable (Belacan-Small)",price:15.0,ing:[{item:"长豆",type:"主料 Main",qty:70.0,unit:"G",cost:0},{item:"羊角豆",type:"主料 Main",qty:55.0,unit:"G",cost:0},{item:"茄子",type:"主料 Main",qty:47.0,unit:"G",cost:0},{item:"臭豆",type:"主料 Main",qty:30.0,unit:"G",cost:0},{item:"马来栈",type:"调味 Season",qty:32.0,unit:"G",cost:0.8},{item:"食用油",type:"油Oil",qty:22.0,unit:"ML",cost:0.132},{item:"蒜米",type:"配料Side",qty:9.0,unit:"G",cost:0.063}]},
+{code:"A055.1",cn:"四大天王 （马来栈-中）",en:"Spicy Mixed Vegetable (Belacan-Medium)",price:18.0,ing:[{item:"长豆",type:"主料 Main",qty:90.0,unit:"G",cost:0},{item:"羊角豆",type:"主料 Main",qty:100.0,unit:"G",cost:0},{item:"茄子",type:"主料 Main",qty:57.0,unit:"G",cost:0},{item:"臭豆",type:"主料 Main",qty:40.0,unit:"G",cost:0},{item:"马来栈",type:"调味 Season",qty:50.5,unit:"G",cost:1.262},{item:"食用油",type:"油Oil",qty:30.0,unit:"ML",cost:0.18},{item:"蒜米",type:"配料Side",qty:18.5,unit:"G",cost:0.129}]},
+{code:"A055.2",cn:"四大天王 （马来栈-大）",en:"Spicy Mixed Vegetable (Belacan-Large)",price:23.0,ing:[{item:"长豆",type:"主料 Main",qty:90.0,unit:"G",cost:0},{item:"羊角豆",type:"主料 Main",qty:100.0,unit:"G",cost:0},{item:"茄子",type:"主料 Main",qty:57.0,unit:"G",cost:0},{item:"臭豆",type:"主料 Main",qty:40.0,unit:"G",cost:0},{item:"马来栈",type:"调味 Season",qty:50.5,unit:"G",cost:1.262},{item:"食用油",type:"油Oil",qty:30.0,unit:"ML",cost:0.18},{item:"蒜米",type:"配料Side",qty:18.5,unit:"G",cost:0.129}]},
+{code:"A055.3",cn:"四大天王 （腐乳椒仔-小）",en:"Spicy Mixed Vegetable (Fermented Beancurd Chili-Small)",price:15.0,ing:[{item:"长豆",type:"主料 Main",qty:70.0,unit:"G",cost:0},{item:"羊角豆",type:"主料 Main",qty:55.0,unit:"G",cost:0},{item:"茄子",type:"主料 Main",qty:47.0,unit:"G",cost:0},{item:"臭豆",type:"主料 Main",qty:30.0,unit:"G",cost:0}]},
+{code:"A055.4",cn:"四大天王 （腐乳椒仔-中）",en:"Spicy Mixed Vegetable (Fermented Beancurd Chili-Medium)",price:18.0,ing:[{item:"长豆",type:"主料 Main",qty:90.0,unit:"G",cost:0},{item:"羊角豆",type:"主料 Main",qty:100.0,unit:"G",cost:0},{item:"茄子",type:"主料 Main",qty:57.0,unit:"G",cost:0},{item:"臭豆",type:"主料 Main",qty:40.0,unit:"G",cost:0}]},
+{code:"A055.5",cn:"四大天王 （腐乳椒仔-大）",en:"Spicy Mixed Vegetable (Fermented Beancurd Chili-Large)",price:23.0,ing:[{item:"长豆",type:"主料 Main",qty:90.0,unit:"G",cost:0},{item:"羊角豆",type:"主料 Main",qty:100.0,unit:"G",cost:0},{item:"茄子",type:"主料 Main",qty:57.0,unit:"G",cost:0},{item:"臭豆",type:"主料 Main",qty:40.0,unit:"G",cost:0}]},
+{code:"A055.6",cn:"四大天王 （油菜-小）",en:"Spicy Mixed Vegetable (Yau Choy Style-Small)",price:15.0,ing:[{item:"长豆",type:"主料 Main",qty:70.0,unit:"G",cost:0},{item:"羊角豆",type:"主料 Main",qty:55.0,unit:"G",cost:0},{item:"茄子",type:"主料 Main",qty:47.0,unit:"G",cost:0},{item:"臭豆",type:"主料 Main",qty:30.0,unit:"G",cost:0}]},
+{code:"A055.7",cn:"四大天王 （油菜-中）",en:"Spicy Mixed Vegetable (Yau Choy Style-Medium)",price:18.0,ing:[{item:"长豆",type:"主料 Main",qty:90.0,unit:"G",cost:0},{item:"羊角豆",type:"主料 Main",qty:100.0,unit:"G",cost:0},{item:"茄子",type:"主料 Main",qty:57.0,unit:"G",cost:0},{item:"臭豆",type:"主料 Main",qty:40.0,unit:"G",cost:0}]},
+{code:"A055.8",cn:"四大天王 （油菜-大）",en:"Spicy Mixed Vegetable (Yau Choy Style-Large)",price:23.0,ing:[{item:"长豆",type:"主料 Main",qty:90.0,unit:"G",cost:0},{item:"羊角豆",type:"主料 Main",qty:100.0,unit:"G",cost:0},{item:"茄子",type:"主料 Main",qty:57.0,unit:"G",cost:0},{item:"臭豆",type:"主料 Main",qty:40.0,unit:"G",cost:0}]},
+{code:"A055.9",cn:"四大天王 （清炒-小）",en:"Spicy Mixed Vegetable (Plain Stir-Fry-Small)",price:15.0,ing:[{item:"长豆",type:"主料 Main",qty:70.0,unit:"G",cost:0},{item:"羊角豆",type:"主料 Main",qty:55.0,unit:"G",cost:0},{item:"茄子",type:"主料 Main",qty:47.0,unit:"G",cost:0},{item:"臭豆",type:"主料 Main",qty:30.0,unit:"G",cost:0},{item:"盐",type:"调味Season",qty:1.5,unit:"G",cost:0.005},{item:"味精",type:"调味Season",qty:2.5,unit:"G",cost:0.035},{item:"绍兴酒",type:"调味Season",qty:15.0,unit:"ML",cost:1.35},{item:"食用油",type:"油Oil",qty:22.0,unit:"ML",cost:0.132},{item:"蒜米",type:"配料Side",qty:9.0,unit:"G",cost:0.063}]},
+{code:"A055.10",cn:"四大天王 （清炒-中）",en:"Spicy Mixed Vegetable (Plain Stir-Fry-Medium)",price:18.0,ing:[{item:"长豆",type:"主料 Main",qty:90.0,unit:"G",cost:0},{item:"羊角豆",type:"主料 Main",qty:100.0,unit:"G",cost:0},{item:"茄子",type:"主料 Main",qty:57.0,unit:"G",cost:0},{item:"臭豆",type:"主料 Main",qty:40.0,unit:"G",cost:0},{item:"盐",type:"调味Season",qty:1.5,unit:"G",cost:0.005},{item:"味精",type:"调味Season",qty:3.0,unit:"G",cost:0.042},{item:"绍兴酒",type:"调味Season",qty:15.0,unit:"ML",cost:1.35},{item:"食用油",type:"油Oil",qty:30.0,unit:"ML",cost:0.18},{item:"蒜米",type:"配料Side",qty:18.5,unit:"G",cost:0.129}]},
+{code:"A055.11",cn:"四大天王 （清炒-大）",en:"Spicy Mixed Vegetable (Plain Stir-Fry-Large)",price:23.0,ing:[{item:"长豆",type:"主料 Main",qty:90.0,unit:"G",cost:0},{item:"羊角豆",type:"主料 Main",qty:100.0,unit:"G",cost:0},{item:"茄子",type:"主料 Main",qty:57.0,unit:"G",cost:0},{item:"臭豆",type:"主料 Main",qty:40.0,unit:"G",cost:0},{item:"盐",type:"调味Season",qty:1.5,unit:"G",cost:0.005},{item:"味精",type:"调味Season",qty:3.0,unit:"G",cost:0.042},{item:"绍兴酒",type:"调味Season",qty:15.0,unit:"ML",cost:1.35},{item:"食用油",type:"油Oil",qty:30.0,unit:"ML",cost:0.18},{item:"蒜米",type:"配料Side",qty:18.5,unit:"G",cost:0.129}]},
+{code:"A055.12",cn:"四大天王 （虾米椒仔-小）",en:"Spicy Mixed Vegetable (Dried Shrimp Chili-Small)",price:15.0,ing:[{item:"长豆",type:"主料 Main",qty:70.0,unit:"G",cost:0},{item:"羊角豆",type:"主料 Main",qty:55.0,unit:"G",cost:0},{item:"茄子",type:"主料 Main",qty:47.0,unit:"G",cost:0},{item:"臭豆",type:"主料 Main",qty:30.0,unit:"G",cost:0}]},
+{code:"A055.13",cn:"四大天王 （虾米椒仔-中）",en:"Spicy Mixed Vegetable (Dried Shrimp Chili-Medium)",price:18.0,ing:[{item:"长豆",type:"主料 Main",qty:90.0,unit:"G",cost:0},{item:"羊角豆",type:"主料 Main",qty:100.0,unit:"G",cost:0},{item:"茄子",type:"主料 Main",qty:57.0,unit:"G",cost:0},{item:"臭豆",type:"主料 Main",qty:40.0,unit:"G",cost:0}]},
+{code:"A055.14",cn:"四大天王 （虾米椒仔-大）",en:"Spicy Mixed Vegetable (Dried Shrimp Chili-Large)",price:23.0,ing:[{item:"长豆",type:"主料 Main",qty:90.0,unit:"G",cost:0},{item:"羊角豆",type:"主料 Main",qty:100.0,unit:"G",cost:0},{item:"茄子",type:"主料 Main",qty:57.0,unit:"G",cost:0},{item:"臭豆",type:"主料 Main",qty:40.0,unit:"G",cost:0}]},
+{code:"A056",cn:"青龙菜炒芽菜 （马来栈）",en:"Stir-Fried Bean Sprout with Qing Long (Belacan)",price:18.0,ing:[]},
+{code:"A056.1",cn:"青龙菜炒芽菜 （腐乳椒仔）",en:"Stir-Fried Bean Sprout with Qing Long (Fermented Beancurd Chili)",price:18.0,ing:[]},
+{code:"A056.2",cn:"青龙菜炒芽菜 （油菜）",en:"Stir-Fried Bean Sprout with Qing Long (Yau Choy Style)",price:18.0,ing:[]},
+{code:"A056.3",cn:"青龙菜炒芽菜 （清炒）",en:"Stir-Fried Bean Sprout with Qing Long (Plain Stir-Fry)",price:18.0,ing:[]},
+{code:"A056.4",cn:"青龙菜炒芽菜 （虾米椒仔）",en:"Stir-Fried Bean Sprout with Qing Long (Dried Shrimp Chili)",price:18.0,ing:[]},
+{code:"A057",cn:"招牌豆腐 （64片）",en:"Signature Fried Beancurd",price:53.12,ing:[{item:"豆腐",type:"主料 Main",qty:7.0,unit:"BOX",cost:4.9},{item:"味精(RM274/kg)",type:"调味 Season",qty:33.0,unit:"G",cost:9.042},{item:"炸葱",type:"配料 Side",qty:20.0,unit:"G",cost:0.28},{item:"葱油",type:"配料 Side",qty:35.0,unit:"G",cost:0.25},{item:"白胡椒",type:"调味 Season",qty:1.0,unit:"G",cost:0.03},{item:"香菜",type:"配料 Side",qty:8.0,unit:"G",cost:0.176},{item:"咸蛋",type:"配料 Side",qty:7.0,unit:"G",cost:0}]},
+{code:"A057.1",cn:"招牌豆腐 （1片）",en:"Signature Fried Beancurd",price:0.83,ing:[]},
+{code:"A058",cn:"葱油豆腐",en:"Scallion Steamed Beancurd",price:10.0,ing:[{item:"豆腐 Tofu",type:"主料 Main",qty:1.0,unit:"BOX",cost:1.1},{item:"炸葱",type:"配料 Side",qty:15.0,unit:"G",cost:0.21},{item:"葱油",type:"配料 Side",qty:9.0,unit:"G",cost:0.063},{item:"黄盖酱油",type:"调味 Season",qty:43.0,unit:"ML",cost:0.258}]},
+{code:"A059",cn:"铁板豆腐 （小）",en:"Sizzling Beancurd (Small)",price:18.0,ing:[]},
+{code:"A059.1",cn:"铁板豆腐 （大）",en:"Sizzling Beancurd (Large)",price:25.0,ing:[]},
+{code:"A060",cn:"荷包蛋",en:"Fried Egg",price:2.0,ing:[]},
+{code:"A061",cn:"煎蛋",en:"Omelette",price:8.0,ing:[]},
+{code:"A062",cn:"大葱蛋",en:"Onion Omelette",price:12.0,ing:[]},
+{code:"A063",cn:"苦瓜蛋",en:"Bitter Gourd Omelette",price:13.0,ing:[]},
+{code:"A064",cn:"三皇蛋",en:"Three Flavours Steam Egg",price:15.0,ing:[]},
+{code:"A065",cn:"蒸水蛋",en:"Steamed Egg",price:12.0,ing:[{item:"鸡蛋",type:"主料 Main",qty:4.0,unit:"unit",cost:1.8},{item:"炸葱",type:"配料 Side",qty:4.5,unit:"G",cost:0.063},{item:"葱油",type:"配料 Side",qty:4.5,unit:"G",cost:0.003},{item:"黄盖酱油",type:"调味 Season",qty:43.0,unit:"ML",cost:0.258}]},
+{code:"A066",cn:"菜圃蒸蛋",en:"Chai Po Omelette",price:12.0,ing:[]},
+{code:"A067",cn:"虾仁煎蛋",en:"Shrimp Omelette",price:15.0,ing:[]},
+{code:"A068",cn:"老黄瓜炖瘦肉（小）",en:"Chinese Melon Soup (Small)",price:16.0,ing:[]},
+{code:"A068.1",cn:"老黄瓜炖瘦肉（大）",en:"Chinese Melon Soup (Large)",price:25.0,ing:[]},
+{code:"A069",cn:"西洋菜汤炖瘦肉（小）",en:"Watercress Soup (Small)",price:16.0,ing:[]},
+{code:"A069.1",cn:"西洋菜汤炖瘦肉（大）",en:"Watercress Soup (Large)",price:25.0,ing:[]},
+{code:"A070",cn:"花生粉葛汤（小）",en:"Peanuts & Arrowroot Soup (Small)",price:16.0,ing:[]},
+{code:"A070.1",cn:"花生粉葛汤（大）",en:"Peanuts & Arrowroot Soup (Large)",price:25.0,ing:[]},
+{code:"B008",cn:"凉水（热/冷）",en:"Homemade (Hot/Cold)",price:3.0,ing:[]},
+{code:"B009",cn:"竹蔗马蹄",en:"Sugarcane",price:4.5,ing:[]},
+{code:"B010",cn:"洋参菊花",en:"Chrysanthemum",price:4.5,ing:[]},
+{code:"B011",cn:"金玉米",en:"Ai Yu",price:4.5,ing:[]},
+{code:"B012",cn:"100号",en:"100 Plus",price:3.5,ing:[]},
+{code:"B013",cn:"可乐",en:"Coca Cola",price:3.5,ing:[]},
+{code:"B014",cn:"啤酒",en:"Tiger",price:23.0,ing:[]},
+{code:"B015",cn:"黑啤酒",en:"Guinness",price:25.0,ing:[]},
+{code:"B001",cn:"香片",en:"Heong Pin",price:3.0,ing:[]},
+{code:"B002",cn:"普洱",en:"Pou Lei",price:3.0,ing:[]},
+{code:"B003",cn:"铁观音",en:"Tit Koon Yam",price:3.0,ing:[]},
+{code:"B004",cn:"菊普",en:"Guk Pou",price:3.0,ing:[]},
+{code:"B005",cn:"茶王",en:"Cha Wong",price:4.0,ing:[]},
+{code:"B006",cn:"菊花",en:"Chrysanthemum",price:3.0,ing:[]},
+{code:"Z01",cn:"卤猪脚饭",en:"Signature Stewed Pork Rice",price:15.0,ing:[]},
+{code:"Z02",cn:"咕佬肉饭",en:"Sweet and Sour Pork Rice",price:12.0,ing:[]},
+{code:"Z03",cn:"咖喱排骨饭",en:"Curry Pork Rib Rice",price:12.0,ing:[]},
+{code:"Z04",cn:"豉汁排骨饭",en:"Black Bean Paste Pork Rib Rice",price:12.0,ing:[]},
+{code:"Z05",cn:"炒饭",en:"Fried Rice",price:10.0,ing:[]},
+{code:"Z06",cn:"虾仁炒饭",en:"Shrimp Fried Rice",price:12.0,ing:[]},
+{code:"Z07",cn:"叁巴炒饭",en:"Sambal Fried Rice",price:10.0,ing:[]},
+{code:"Z08",cn:"海鲜炒饭",en:"Seafood Fried Rice",price:15.0,ing:[]},
+{code:"Z09",cn:"咸鱼炒饭",en:"Salted Fish Fried Rice",price:11.0,ing:[]},
+{code:"Z11",cn:"冬菜蒸猪肉饭",en:"Dong Choi Steam Meat Patty Rice",price:12.0,ing:[]},
+{code:"Z13",cn:"肉碎豆腐饭",en:"Beancurd w Minced Pork Rice",price:10.0,ing:[]},
+{code:"C01",cn:"咖喱杂菜",en:"Curry Mix Vegetabales",price:28.0,ing:[]},
+{code:"合计 TOTAL",cn:"",en:"",price:5965.45,ing:[]},
+];
+
 const ROLES={
   owner:{name:"老板/人事经理 Owner/HR",en:"Owner / HR Manager",
     can:["dash","sales","inv","proc","transfer","ck","stock","waste","ent","bom","ap","opex","report","hr","attend","schedule","leave","payroll","settings"],
@@ -365,7 +599,8 @@ function seed(outletId){
     {supplier:"合发肉商 Hup Huat Meat",date:"2026-07-31",invoice:"ME-2407-05",code:"PRK-01",item:"猪脚 Pork Trotter",qty:8,weight:8,price:96,note:"7月月末结存"},
     {supplier:"合发肉商 Hup Huat Meat",date:"2026-08-31",invoice:"ME-2408-05",code:"CHK-01",item:"鸡腿肉 Chicken Leg",qty:12,weight:12,price:114,note:"8月月末结存"},
   ];
-  return {items,recipes,subRecipes,moves,vendors,payables,stocktakes,opex,staff,attendance,schedule,leaves,sales,fin,audit,purchases,grn,transfers,staffLoans,wasteLog,offers,monthEnd};
+  const dishCosts=[]; // 可编辑菜品成本表（用户导入/自建）
+  return {items,recipes,subRecipes,moves,vendors,payables,stocktakes,opex,staff,attendance,schedule,leaves,sales,fin,audit,purchases,grn,transfers,staffLoans,wasteLog,offers,monthEnd,dishCosts};
 }
 
 /* ================= 数据持久化：Supabase 云端 ⇄ 本地存储 自动切换 =================
@@ -624,7 +859,7 @@ async function switchOutlet(){curOutlet=document.getElementById('outletSel').val
   render();}
 function switchRole(){curRole=document.getElementById('roleSel').value;if(!pageAllowed(curPage))curPage=firstAllowedPage();render();}
 function toggleLang(){LANG=LANG==="zh"?"en":"zh";render();}
-function nav(p){curPage=p;if(!['purchase','grn','monthend'].includes(p))selSupplier=null;if(p!=='inv')invSupplier=null;const sb=document.getElementById('sidebar');if(sb)sb.classList.remove('open');const bd=document.getElementById('backdrop');if(bd)bd.classList.remove('show');render();window.scrollTo(0,0);}
+function nav(p){curPage=p;if(!['purchase','grn','monthend'].includes(p))selSupplier=null;if(p!=='inv')invSupplier=null;if(p!=='bom')dcSel=null;const sb=document.getElementById('sidebar');if(sb)sb.classList.remove('open');const bd=document.getElementById('backdrop');if(bd)bd.classList.remove('show');render();window.scrollTo(0,0);}
 
 
 /* ================= M1 利润大盘 ================= */
@@ -820,21 +1055,119 @@ function pgAp(){
 }
 async function payAP(id){const p=d().payables.find(x=>x.id===id);if(!p)return;p.status="已付";p.paid=p.amt;auditLog("应付付款",p.vendor+" "+p.po,money(p.amt-(p.paid||0)),"已付清");await save();render();}
 
-/* ================= M7 配方 BOM ================= */
+/* ================= M7 配方成本（可编辑菜品成本表 + 单独算）================= */
+let dcSel=null, dcSearch='';
+function dcTotal(dc){return (dc.ing||[]).reduce((s,i)=>s+(+i.cost||0),0);}
+function dcCostPctColor(pct){return pct<28?'#0891B2':(pct<=35?'var(--green)':'var(--red)');}
+function setDcSel(id){dcSel=id;render();window.scrollTo(0,0);}
+function backDc(){dcSel=null;render();window.scrollTo(0,0);}
+function setDcSearch(v){dcSearch=(v||'').trim();render();}
 function pgBom(){
-  const x=d();
+  const x=d();const zh=LANG==="zh";const w=canW('proc');
+  const list=x.dishCosts||[];
+  // —— 菜品明细（单独算）视图 ——
+  if(dcSel!=null){
+    const dc=list.find(d=>d.id===dcSel);
+    if(!dc){dcSel=null;}else{
+      const tot=dcTotal(dc);const gp=(+dc.price||0)-tot;const cp=dc.price?tot/dc.price*100:0;const gm=dc.price?gp/dc.price*100:0;
+      const rows=(dc.ing||[]).map((ig,idx)=>{const share=tot?(+ig.cost||0)/tot*100:0;return `<tr>
+        <td><b>${ig.item||''}</b></td><td class="mini">${ig.type||'—'}</td><td>${num(ig.qty,2)}</td><td class="mini">${ig.unit||''}</td><td>${money(ig.cost)}</td><td class="mini">${share.toFixed(1)}%</td>
+        ${w?`<td style="white-space:nowrap;"><button class="ib" onclick="formDcIng(${dc.id},${idx})">✏️</button> <button class="ib" onclick="delDcIng(${dc.id},${idx})">🗑️</button></td>`:''}</tr>`;}).join('')||`<tr><td colspan="7" class="empty">${zh?"暂无材料，点『+ 材料』添加":"No ingredients"}</td></tr>`;
+      return `<div class="fb"><h2 class="h" style="margin:0;">🍽 ${dc.cn||dc.code} <span class="tag">${dc.code||''}</span></h2><button class="btn ghost sm" onclick="backDc()">← ${zh?"菜品列表":"Dishes"}</button></div>
+      <div class="mini" style="margin-bottom:8px;">${dc.en||''}</div>
+      <div class="grid g4" style="margin-bottom:10px;">
+        <div class="kpi"><div class="k">${zh?"售价":"Price"}</div><div class="v sm">${money(dc.price)}</div></div>
+        <div class="kpi"><div class="k">${zh?"总成本":"Cost"}</div><div class="v sm">${money(tot)}</div></div>
+        <div class="kpi"><div class="k">${zh?"毛利":"Gross"}</div><div class="v sm ${gp>=0?'pos':'neg'}">${money(gp)}</div></div>
+        <div class="kpi"><div class="k">${zh?"成本率":"Food%"}</div><div class="v sm" style="color:${dcCostPctColor(cp)}">${cp.toFixed(1)}%</div></div>
+      </div>
+      ${w?`<div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;"><button class="btn brand sm" onclick="formDcIng(${dc.id})">+ ${zh?"材料":"Ingredient"}</button><button class="btn ghost sm" onclick="formDish(${dc.id})">✎ ${zh?"编辑菜品/售价":"Edit dish"}</button></div>`:''}
+      <div class="card tbl"><table><thead><tr><th>${zh?"材料/项目":"Item"}</th><th>${zh?"类别":"Type"}</th><th>${zh?"用量":"Qty"}</th><th>${zh?"单位":"Unit"}</th><th>${zh?"成本RM":"Cost"}</th><th>${zh?"占比":"Share"}</th>${w?'<th></th>':''}</tr></thead><tbody>
+        ${rows}
+        <tr style="background:#FAFBFC;font-weight:800;"><td colspan="4">${zh?"总成本":"Total Cost"}</td><td>${money(tot)}</td><td>100%</td>${w?'<td></td>':''}</tr>
+      </tbody></table></div>
+      <div class="hint" style="margin-top:8px;">${zh?"直接填每样材料的成本RM，系统自动算总成本、毛利、成本率与占比。占比=该材料成本÷总成本。":"Enter each ingredient cost; totals auto-calc."}</div>`;
+    }
+  }
+  // —— 菜品成本表 列表 ——
+  const q=dcSearch.toLowerCase();
+  const shown=q?list.filter(d=>((d.code||'')+(d.cn||'')+(d.en||'')).toLowerCase().includes(q)):list;
+  const rows=shown.map(dc=>{const tot=dcTotal(dc);const gp=(+dc.price||0)-tot;const cp=dc.price?tot/dc.price*100:0;const gm=dc.price?gp/dc.price*100:0;
+    return `<tr style="cursor:pointer;" onclick="setDcSel(${dc.id})">
+      <td class="mini">${dc.code||''}</td><td><b>${dc.cn||''}</b><br><span class="mini">${dc.en||''}${(dc.ing||[]).length?` · ${(dc.ing||[]).length}${zh?"料":""}`:''}</span></td>
+      <td>${money(dc.price)}</td><td>${money(tot)}</td><td class="${gp>=0?'pos':'neg'}">${money(gp)}</td>
+      <td style="color:${dcCostPctColor(cp)};font-weight:800;">${dc.price?cp.toFixed(0)+'%':'—'}</td><td class="mini">${dc.price?gm.toFixed(0)+'%':'—'}</td>
+      ${w?`<td style="white-space:nowrap;" onclick="event.stopPropagation();"><button class="ib" onclick="formDish(${dc.id})">✏️</button> <button class="ib" onclick="delDish(${dc.id})">🗑️</button></td>`:''}
+    </tr>`;}).join('')||`<tr><td colspan="8" class="empty">${zh?"暂无菜品，点『导入菜品表』或『+ 菜品』":"No dishes"}</td></tr>`;
   return `
-  <div class="fb"><h2 class="h" style="margin:0;">🍲 ${LANG==="zh"?"配方 BOM 与成本":"Recipe BOM"}</h2>${canW('proc')?`<button class="btn gold sm" onclick="openM('recipe')">+ ${LANG==="zh"?"配方":"Recipe"}</button>`:''}</div>
-  <div class="hint">${LANG==="zh"?"多级 BOM：菜品可用半成品(卤汁)。得率%把毛料换净料。加权单价一变，毛利自动更新，涨幅>15%会预警。":"Multi-level BOM with yield & dynamic margin."}</div>
-  <h2 class="h">🧪 ${LANG==="zh"?"半成品 (Sub-Recipe)":"Sub-Recipes"}</h2>
-  <div class="card tbl"><table><thead><tr><th>${LANG==="zh"?"半成品":"Sub-Recipe"}</th><th>${LANG==="zh"?"产出":"Yield"}</th><th>${LANG==="zh"?"单位成本":"Unit Cost"}</th></tr></thead><tbody>
-  ${x.subRecipes.map(s=>`<tr><td><b>${s.name}</b><br><span class="mini">${s.ing.map(i=>i.n.split(' ')[0]+'×'+i.q).join(' + ')}</span></td><td>${s.yieldQty} ${s.unit}</td><td>${money(subCost(s))}/${s.unit}</td></tr>`).join('')}
+  <div class="fb"><h2 class="h" style="margin:0;">🍲 ${zh?"配方成本 · 菜品成本表":"Recipe Cost"} <span class="tag">${list.length}</span></h2></div>
+  <div class="hint">${zh?"点菜品 → 查看/编辑其材料明细(单独算)。成本率＝总成本÷售价，目标28-35%(青=偏低/绿=达标/红=偏高)。全部可增删改。":"Tap a dish to edit its ingredient costing. Fully editable."}</div>
+  ${w?`<div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;">
+    <button class="btn gold sm" onclick="formDish()">+ ${zh?"菜品":"Dish"}</button>
+    <button class="btn ghost sm" onclick="importDishForm()">📥 ${zh?"导入菜品表":"Import Dishes"}</button>
+    <input onchange="setDcSearch(this.value)" value="${dcSearch}" placeholder="${zh?"搜索菜名/编号":"search"}" style="flex:1;min-width:120px;padding:7px 9px;border:1.5px solid var(--line);border-radius:8px;font-size:12.5px;">
+  </div>`:''}
+  <div class="card tbl"><table><thead><tr><th>${zh?"编号":"Code"}</th><th>${zh?"菜品":"Dish"}</th><th>${zh?"售价":"Price"}</th><th>${zh?"总成本":"Cost"}</th><th>${zh?"毛利":"GP"}</th><th>${zh?"成本率":"Food%"}</th><th>${zh?"毛利率":"GM%"}</th>${w?'<th></th>':''}</tr></thead><tbody>
+  ${rows}
   </tbody></table></div>
-  <h2 class="h">🍽 ${LANG==="zh"?"菜品成本与毛利":"Dish Costing"}</h2>
-  <div class="card tbl"><table><thead><tr><th>${LANG==="zh"?"菜品":"Dish"}</th><th>${LANG==="zh"?"售价":"Price"}</th><th>${LANG==="zh"?"理论成本":"Cost"}</th><th>${LANG==="zh"?"毛利":"GP"}</th><th>${LANG==="zh"?"毛利率":"Margin"}</th>${canW('proc')?`<th>${LANG==="zh"?"操作":"Action"}</th>`:''}</tr></thead><tbody>
-  ${x.recipes.map(r=>{const c=recipeCost(r),gp=r.price-c,gm=r.price?gp/r.price*100:0;const cls=gm>=65?'p-g':gm>=55?'p-a':'p-r';return `<tr><td><b>${r.name}</b><br><span class="mini">${r.ing.map(i=>i.n.split(' ')[0]+(i.sub?'*':'')+'×'+i.q).join(' + ')}</span></td><td>${money(r.price)}</td><td>${money(c)}</td><td>${money(gp)}</td><td><span class="pill ${cls}">${gm.toFixed(0)}%</span></td>${canW('proc')?`<td><button class="ib" onclick="openM('recipe',${r.id})">✏️</button> <button class="ib" onclick="delRecipe(${r.id})">🗑️</button></td>`:''}</tr>`;}).join('')}
-  </tbody></table></div>
-  <div class="mini" style="margin-top:8px;">* ${LANG==="zh"?"代表使用半成品(多级 BOM)":"= uses sub-recipe"}</div>`;
+  <details class="card" style="padding:0;margin-top:12px;"><summary style="padding:13px;font-weight:800;cursor:pointer;">🧪 ${zh?"配方 BOM（联动库存/销售）":"Recipe BOM (inventory-linked)"}</summary><div style="padding:2px 12px 12px;">
+    ${w?`<button class="btn gold sm" style="margin-bottom:8px;" onclick="openM('recipe')">+ ${zh?"BOM配方":"Recipe"}</button>`:''}
+    <div class="mini" style="margin-bottom:6px;">${zh?"此处的 BOM 配方用食材净料成本×用量计算，并驱动销售→库存自动扣减。":"BOM drives sales→inventory deduction."}</div>
+    <div class="card tbl"><table><thead><tr><th>${zh?"菜品":"Dish"}</th><th>${zh?"售价":"Price"}</th><th>${zh?"成本":"Cost"}</th><th>${zh?"毛利率":"Margin"}</th>${w?'<th></th>':''}</tr></thead><tbody>
+    ${x.recipes.map(r=>{const c=recipeCost(r),gp=r.price-c,gm=r.price?gp/r.price*100:0;const cls=gm>=65?'p-g':gm>=55?'p-a':'p-r';return `<tr><td><b>${r.name}</b></td><td>${money(r.price)}</td><td>${money(c)}</td><td><span class="pill ${cls}">${gm.toFixed(0)}%</span></td>${w?`<td><button class="ib" onclick="openM('recipe',${r.id})">✏️</button> <button class="ib" onclick="delRecipe(${r.id})">🗑️</button></td>`:''}</tr>`;}).join('')||`<tr><td colspan="5" class="empty">${zh?"暂无":"None"}</td></tr>`}
+    </tbody></table></div>
+  </div></details>`;
+}
+/* ---- 菜品成本 CRUD ---- */
+function formDish(id){
+  const zh=LANG==="zh";const dc=id!=null?(d().dishCosts||[]).find(x=>x.id===id):null;
+  openForm(`<h3>🍽 ${dc?(zh?"编辑菜品":"Edit Dish"):(zh?"新增菜品":"New Dish")} <span class="x" onclick="closeM()">×</span></h3>
+    <div class="fg2"><div class="fr"><label>${zh?"编号":"Code"}</label><input id="dc_code" value="${dc?(dc.code||''):''}" placeholder="A001"></div>
+      <div class="fr"><label>${zh?"售价RM":"Price"}</label><input id="dc_price" type="number" step="0.01" value="${dc?dc.price:''}"></div></div>
+    <div class="fr"><label>${zh?"菜名(中)":"Name CN"}</label><input id="dc_cn" value="${dc?(dc.cn||''):''}"></div>
+    <div class="fr"><label>${zh?"菜名(英)":"Name EN"}</label><input id="dc_en" value="${dc?(dc.en||''):''}"></div>
+    <button class="btn block brand" onclick="saveDish(${dc?dc.id:'null'})">${zh?"保存":"Save"}</button>`);
+}
+async function saveDish(id){const g=x=>document.getElementById(x);
+  const rec={code:g('dc_code').value.trim(),cn:g('dc_cn').value.trim(),en:g('dc_en').value.trim(),price:+g('dc_price').value||0};
+  if(!d().dishCosts)d().dishCosts=[];
+  if(id!=null){const dc=d().dishCosts.find(x=>x.id===id);if(dc){Object.assign(dc,rec);auditLog("编辑菜品成本",dc.cn||dc.code,"","");}}
+  else{rec.id=Math.max(0,...d().dishCosts.map(x=>x.id||0))+1;rec.ing=[];d().dishCosts.push(rec);auditLog("新增菜品成本",rec.cn||rec.code,"","");}
+  await save();closeM();render();}
+async function delDish(id){if(!confirm(LANG==="zh"?"删除此菜品？":"Delete dish?"))return;const dc=(d().dishCosts||[]).find(x=>x.id===id)||{};d().dishCosts=d().dishCosts.filter(x=>x.id!==id);auditLog("删除菜品成本",dc.cn||dc.code||"","","");await save();render();}
+function formDcIng(dishId,idx){
+  const zh=LANG==="zh";const dc=(d().dishCosts||[]).find(x=>x.id===dishId);if(!dc)return;const ig=idx!=null?(dc.ing||[])[idx]:null;
+  const types=["主料 Main","配料 Side","调味 Season","油 Oil","其他 Other"];
+  openForm(`<h3>🧪 ${ig?(zh?"编辑材料":"Edit Ingredient"):(zh?"新增材料":"New Ingredient")} <span class="x" onclick="closeM()">×</span></h3>
+    <div class="fr"><label>${zh?"材料/项目":"Item"}</label><input id="di_item" value="${ig?(ig.item||''):''}"></div>
+    <div class="fg2"><div class="fr"><label>${zh?"类别":"Type"}</label><select id="di_type">${types.map(t=>`<option ${ig&&ig.type===t?'selected':''}>${t}</option>`).join('')}</select></div>
+      <div class="fr"><label>${zh?"用量":"Qty"}</label><input id="di_qty" type="number" step="0.01" value="${ig?ig.qty:''}"></div></div>
+    <div class="fg2"><div class="fr"><label>${zh?"单位":"Unit"}</label><input id="di_unit" value="${ig?(ig.unit||''):''}" placeholder="G/ML/条"></div>
+      <div class="fr"><label>${zh?"成本RM":"Cost"}</label><input id="di_cost" type="number" step="0.001" value="${ig?ig.cost:''}"></div></div>
+    <button class="btn block brand" onclick="saveDcIng(${dishId},${idx!=null?idx:'null'})">${zh?"保存":"Save"}</button>`);
+}
+async function saveDcIng(dishId,idx){const g=x=>document.getElementById(x);const dc=(d().dishCosts||[]).find(x=>x.id===dishId);if(!dc)return;dc.ing=dc.ing||[];
+  const rec={item:g('di_item').value.trim(),type:g('di_type').value,qty:+g('di_qty').value||0,unit:g('di_unit').value.trim(),cost:+g('di_cost').value||0};
+  if(idx!=null&&dc.ing[idx])dc.ing[idx]=rec;else dc.ing.push(rec);
+  auditLog("编辑配方材料",(dc.cn||dc.code)+" · "+rec.item,"",money(rec.cost));await save();closeM();render();}
+async function delDcIng(dishId,idx){if(!confirm(LANG==="zh"?"删除此材料？":"Delete ingredient?"))return;const dc=(d().dishCosts||[]).find(x=>x.id===dishId);if(!dc)return;dc.ing.splice(idx,1);auditLog("删除配方材料",dc.cn||dc.code,"","");await save();render();}
+/* ---- 导入菜品成本表目录 ---- */
+function importDishForm(){
+  const zh=LANG==="zh";const n=DISH_CATALOG.length;const wi=DISH_CATALOG.filter(x=>x.ing&&x.ing.length).length;
+  openForm(`<h3>📥 ${zh?"导入菜品成本表":"Import Dish Costs"} <span class="x" onclick="closeM()">×</span></h3>
+    <div class="hint">${zh?`将从档案导入 <b>${n}</b> 道菜（其中 ${wi} 道含材料明细/单独算）。之后可自行增删改、调整配方占比与成本。重复编号自动跳过。`:`Import ${n} dishes (${wi} with breakdowns).`}</div>
+    <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin:2px 0 12px;"><input type="checkbox" id="dc_all"> ${zh?"应用到全部分店":"All branches"}</label>
+    <button class="btn block brand" onclick="doImportDish()">${zh?"导入":"Import"}</button>`);
+}
+async function doImportDish(){
+  const zh=LANG==="zh";const all=document.getElementById('dc_all').checked||isAgg();
+  const targets=all?OUTLETS.map(o=>o.id):[curOutlet];const who=curUser?(curUser.name+" ("+curUser.email+")"):ROLES[curRole].name;
+  let tot=0;
+  for(const oid of targets){const db=DB[oid];if(!db)continue;db.dishCosts=db.dishCosts||[];let added=0;let nid=Math.max(0,...db.dishCosts.map(x=>x.id||0));
+    DISH_CATALOG.forEach(x=>{if(db.dishCosts.some(y=>(y.code&&y.code===x.code)||(y.cn&&y.cn===x.cn)))return;nid++;db.dishCosts.push({id:nid,code:x.code,cn:x.cn,en:x.en,price:x.price,ing:(x.ing||[]).map(i=>({...i}))});added++;});
+    if(added){db.audit=db.audit||[];db.audit.unshift({date:TODAY+" "+new Date().toTimeString().slice(0,5),user:who,roleKey:curRole,act:"导入菜品成本表",detail:added+(zh?" 道菜":" dishes"),old:"",new:""});await save(oid);tot+=added;}
+  }
+  _aggCache=null;closeM();render();alert(zh?`已导入 ${tot} 道菜（重复已跳过）。`:`Imported ${tot} dishes.`);
 }
 
 /* ================= M8 OpEx ================= */
