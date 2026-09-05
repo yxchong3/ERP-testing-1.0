@@ -1302,19 +1302,19 @@ async function delMonthSale(month,idx){if(!confirm(LANG==="zh"?"删除此销量�
 function pgOpex(){
   const o=d().opex;
   const groups=[
-    [LANG==="zh"?"人工成本":"Labour",[["salaries","薪资总额","Salaries"],["epf","EPF (13%)","EPF"],["socso","SOCSO","SOCSO"],["levy","外劳人头税 Levy","Levy"],["ot","加班费 OT","Overtime"]]],
+    [LANG==="zh"?"人工成本":"Labour",[["salaries","薪资总额","Salaries"],["epf","EPF (雇主13%)","EPF"],["socso","SOCSO","SOCSO"],["eis","EIS 就业保险","EIS"],["levy","外劳人头税 Levy","Levy"],["ot","加班费 OT","Overtime"]]],
     [LANG==="zh"?"租金":"Rent",[["rent","店面租金","Rent"],["commission","商场抽成","Commission"]]],
     [LANG==="zh"?"水电煤气":"Utilities",[["electricity","电费 TNB","Electricity"],["water","水费","Water"],["gas","煤气","Gas"]]],
     [LANG==="zh"?"日常杂费":"Misc",[["wifi","Wi-Fi","Wifi"],["rubbish","垃圾清理","Rubbish"],["possaas","POS 月租","POS SaaS"],["accounting","会计费","Accounting"],["repair","维修","Repair"]]],
   ];
   const total=Object.values(o).reduce((s,v)=>s+(+v||0),0);
   const hideSalary=!canSeeSalary();
-  const labourKeys=["salaries","epf","socso","levy","ot"];
-  const pl=payrollLabour();const plMap={salaries:pl.salaries,epf:pl.epf,socso:pl.socso,levy:pl.levy,ot:pl.ot};
+  const labourKeys=["salaries","epf","socso","eis","levy","ot"];
+  const pl=payrollLabour();const plMap={salaries:pl.salaries,epf:pl.epf,socso:pl.socso,eis:pl.eis,levy:pl.levy,ot:pl.ot};
   const labourSynced=labourKeys.every(k=>Math.round((+o[k]||0))===Math.round((plMap[k]||0)));
   return `<div class="fb"><h2 class="h" style="margin:0;">💵 ${LANG==="zh"?"运营开销 OpEx":"Operating Expenses"}</h2>${canW('opex')&&canSeeSalary()?`<div style="display:flex;gap:6px;"><button class="btn ghost sm" onclick="syncOpexFromPayroll()">🔗 ${LANG==="zh"?"同步人事薪资":"Sync Payroll"}</button><button class="btn gold sm" onclick="openM('opex')">✎ ${LANG==="zh"?"编辑":"Edit"}</button></div>`:''}</div>
   <div class="hint">${LANG==="zh"?"OpEx 自动带入损益表与净利。人工成本可一键从『人事薪资』同步（也可手动改）。":"Feeds P&L. Labour can sync from Payroll."}${hideSalary?(LANG==="zh"?" ⚠️ 你的角色只能看人工总数。":" ⚠️ Labour total only."):""}</div>
-  ${(!hideSalary&&canSeeSalary())?`<div class="al ${labourSynced?'al-b':'al-a'}" style="margin-bottom:8px;"><div class="t">${labourSynced?('🔗 '+(LANG==="zh"?"人工成本 已与人事薪资一致":"Labour matches payroll")):('⚠️ '+(LANG==="zh"?"人工成本与人事薪资不一致":"Labour differs from payroll"))}</div>${LANG==="zh"?"人事薪资实际：薪资"+money(pl.salaries)+" · OT"+money(pl.ot)+" · EPF"+money(pl.epf)+" · SOCSO"+money(pl.socso)+" · 外劳税"+money(pl.levy)+(labourSynced?"":"　→ 点『🔗同步人事薪资』填入"):""}</div>`:''}
+  ${(!hideSalary&&canSeeSalary())?`<div class="al ${labourSynced?'al-b':'al-a'}" style="margin-bottom:8px;"><div class="t">${labourSynced?('🔗 '+(LANG==="zh"?"人工成本 已与人事薪资一致":"Labour matches payroll")):('⚠️ '+(LANG==="zh"?"人工成本与人事薪资不一致":"Labour differs from payroll"))}</div>${LANG==="zh"?"人事薪资实际：薪资"+money(pl.salaries)+" · OT"+money(pl.ot)+" · EPF"+money(pl.epf)+" · SOCSO"+money(pl.socso)+" · EIS"+money(pl.eis)+" · 外劳税"+money(pl.levy)+(labourSynced?"":"　→ 点『🔗同步人事薪资』填入"):""}</div>`:''}
   ${groups.map(([g,rows])=>{
     const isLabour=rows.some(([k])=>labourKeys.includes(k));
     const gtotal=rows.reduce((s,[k])=>s+(+o[k]||0),0);
@@ -1334,15 +1334,15 @@ function empGross(e){return e.basic+e.allowance+e.ot;}
 function empNet(e){return empGross(e)-e.epf-e.socso-e.eis;}
 /* 人工成本从人事薪资汇总（供 OpEx 联动）*/
 function payrollLabour(){
-  const st=d().staff||[];let salaries=0,ot=0,epf=0,socso=0,levy=0;
-  st.forEach(e=>{salaries+=(+e.basic||0)+(+e.allowance||0);ot+=(+e.ot||0);epf+=(e.local?Math.round((+e.basic||0)*0.13):0);socso+=(+e.socso||0);levy+=(+e.levy||0);});
-  return {salaries,ot,epf,socso,levy};
+  const st=d().staff||[];let salaries=0,ot=0,epf=0,socso=0,eis=0,levy=0;
+  st.forEach(e=>{salaries+=(+e.basic||0)+(+e.allowance||0);ot+=(+e.ot||0);epf+=(e.local?Math.round((+e.basic||0)*0.13):0);socso+=(+e.socso||0);eis+=(+e.eis||0);levy+=(+e.levy||0);});
+  return {salaries,ot,epf,socso,eis,levy};
 }
 function opexTotal(){const o=d().opex||{};return Object.values(o).reduce((s,v)=>s+(+v||0),0);}
 async function syncOpexFromPayroll(){
-  if(!confirm(LANG==="zh"?"用人事薪资的实际数据填入运营开销的人工成本（薪资/EPF/SOCSO/外劳税/OT）？之后仍可手动微调。":"Fill labour OpEx from payroll?"))return;
-  const pl=payrollLabour();const o=d().opex;o.salaries=pl.salaries;o.ot=pl.ot;o.epf=pl.epf;o.socso=pl.socso;o.levy=pl.levy;
-  auditLog("同步人工成本","人事薪资→OpEx","",money(pl.salaries+pl.ot+pl.epf+pl.socso+pl.levy));await save();render();}
+  if(!confirm(LANG==="zh"?"用人事薪资的实际数据填入运营开销的人工成本（薪资/EPF/SOCSO/EIS/外劳税/OT）？之后仍可手动微调。":"Fill labour OpEx from payroll?"))return;
+  const pl=payrollLabour();const o=d().opex;o.salaries=pl.salaries;o.ot=pl.ot;o.epf=pl.epf;o.socso=pl.socso;o.eis=pl.eis;o.levy=pl.levy;
+  auditLog("同步人工成本","人事薪资→OpEx","",money(pl.salaries+pl.ot+pl.epf+pl.socso+pl.eis+pl.levy));await save();render();}
 function pgPayroll(){
   const x=d();const allStaff=x.staff||[];
   const scope=salaryScope(); // full / total / self
