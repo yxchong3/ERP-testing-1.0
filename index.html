@@ -602,7 +602,7 @@ function seed(outletId){
   const dishCosts=[]; // 可编辑菜品成本表（用户导入/自建）
   const monthlySales={}; // 按月销量：{ "2026-09": [{dishId, qty}] }（POS/手动）
   const monthClose={};   // 月度锁定档案：{ "2026-09": {locked,date,avgPrices,dishCost} }
-  return {items,recipes,subRecipes,moves,vendors,payables,stocktakes,opex,staff,attendance,schedule,leaves,sales,fin,audit,purchases,grn,transfers,staffLoans,wasteLog,offers,monthEnd,dishCosts,monthlySales,monthClose};
+  return {items,recipes,subRecipes,moves,vendors,payables,stocktakes,opex,staff,attendance,schedule,leaves,sales,fin,audit,purchases,grn,transfers,staffLoans,wasteLog,offers,monthEnd,dishCosts,monthlySales,monthClose,opexByMonth:{}};
 }
 
 /* ================= 数据持久化：Supabase 云端 ⇄ 本地存储 自动切换 =================
@@ -670,7 +670,7 @@ function buildAggregate(){
   const ids=branchIds();
   const agg={items:[],recipes:[],subRecipes:[],moves:[],vendors:[],payables:[],stocktakes:[],staff:[],sales:[],
     purchases:[],grn:[],transfers:[],staffLoans:[],wasteLog:[],offers:[],monthEnd:[],
-    opex:{rent:0,commission:0,salaries:0,epf:0,socso:0,levy:0,ot:0,electricity:0,water:0,gas:0,wifi:0,rubbish:0,possaas:0,accounting:0,repair:0},
+    opex:{rent:0,commission:0,salaries:0,epf:0,socso:0,eis:0,levy:0,ot:0,electricity:0,water:0,gas:0,wifi:0,rubbish:0,possaas:0,accounting:0,repair:0},
     fin:{posGross:0},audit:[]};
   // 合并库存：同名品项数量与库存值相加，成本用加权
   const itemMap={};const salesMap={};
@@ -890,7 +890,7 @@ function calcFin(){
   const grossProfit=net-cogs;
   const waste=x.moves.filter(m=>m.type==='waste').reduce((s,m)=>s+m.amt,0)*mult;
   const ent=x.moves.filter(m=>m.type==='ent').reduce((s,m)=>s+m.amt,0)*mult;
-  const op=x.opex;const opex=(op.rent+op.commission+op.salaries+op.epf+op.socso+op.levy+op.ot+op.electricity+op.water+op.gas+op.wifi+op.rubbish+op.possaas+op.accounting+op.repair)*mult;
+  const op=x.opex;const opex=Object.values(op||{}).reduce((s,v)=>s+(+v||0),0)*mult;
   const netProfit=grossProfit-waste-ent-opex;
   return {gross,net,sst,cogs,grossProfit,waste,ent,opex,netProfit,foodPct:net?cogs/net*100:0,netPct:net?netProfit/net*100:0};
 }
@@ -1079,7 +1079,7 @@ function setDcSearch(v){dcSearch=(v||'').trim();render();}
 let costMonth = TODAY.slice(0,7);
 function setCostMonth(m){costMonth=m;render();window.scrollTo(0,0);}
 function monthLabel2(m){if(!m)return '';const[y,mm]=m.split('-');return LANG==="zh"?(y+"年"+(+mm)+"月"):m;}
-function availMonths(){const s=new Set([costMonth,TODAY.slice(0,7)]);(d().purchases||[]).forEach(r=>{if(r.date)s.add(r.date.slice(0,7));});Object.keys(d().monthlySales||{}).forEach(m=>s.add(m));Object.keys(d().monthClose||{}).forEach(m=>s.add(m));return [...s].filter(Boolean).sort().reverse();}
+function availMonths(){const s=new Set([costMonth,TODAY.slice(0,7)]);(d().purchases||[]).forEach(r=>{if(r.date)s.add(r.date.slice(0,7));});Object.keys(d().monthlySales||{}).forEach(m=>s.add(m));Object.keys(d().monthClose||{}).forEach(m=>s.add(m));Object.keys(d().opexByMonth||{}).forEach(m=>s.add(m));return [...s].filter(Boolean).sort().reverse();}
 function monthLocked(m){const mc=(d().monthClose||{})[m];return !!(mc&&mc.locked);}
 function monthAvgPrice(month,item){ // 原料当月加权平均进价（锁定后取归档值）
   const mc=(d().monthClose||{})[month];
@@ -1100,7 +1100,7 @@ function monthSales(month){return (d().monthlySales||{})[month]||[];}
 function monthlyPnL(month){ // 月度损益（当月菜品成本×当月销量）
   const dishes=d().dishCosts||[];const ms=monthSales(month);let rev=0,cogs=0;
   ms.forEach(s=>{const dc=dishes.find(x=>x.id===s.dishId);if(!dc)return;const q=+s.qty||0;rev+=(+dc.price||0)*q;cogs+=dishCostForMonth(dc,month)*q;});
-  const gp=rev-cogs;const mc=(d().monthClose||{})[month];const opex=(mc&&mc.locked&&mc.opex!=null)?mc.opex:opexTotal();const net=gp-opex;
+  const gp=rev-cogs;const mc=(d().monthClose||{})[month];const opex=(mc&&mc.locked&&mc.opex!=null)?mc.opex:opexTotal(month);const net=gp-opex;
   return {rev,cogs,gp,opex,net,margin:rev?gp/rev*100:0,foodPct:rev?cogs/rev*100:0,netPct:rev?net/rev*100:0,orders:ms.reduce((a,s)=>a+(+s.qty||0),0)};
 }
 async function lockMonth(month){
@@ -1108,7 +1108,7 @@ async function lockMonth(month){
   const avgPrices={};monthMaterials(month).forEach(x=>{avgPrices[x.item]=+x.avg.toFixed(4);});
   const dishCost={};(d().dishCosts||[]).forEach(dc=>{dishCost[dc.id]=+dishCostForMonth(dc,month).toFixed(4);});
   if(!d().monthClose)d().monthClose={};
-  d().monthClose[month]={locked:true,date:TODAY,avgPrices,dishCost,opex:opexTotal(),pnl:monthlyPnL(month)};
+  d().monthClose[month]={locked:true,date:TODAY,avgPrices,dishCost,opex:opexTotal(month),pnl:monthlyPnL(month)};
   auditLog("月度锁定",monthLabel2(month),"","");await save();render();
 }
 async function unlockMonth(month){if(!confirm(LANG==="zh"?`解锁 ${monthLabel2(month)}？改回按实时采购数据计算。`:`Unlock ${month}?`))return;if(d().monthClose&&d().monthClose[month]){delete d().monthClose[month];auditLog("解锁月度",monthLabel2(month),"","");await save();render();}}
@@ -1300,7 +1300,7 @@ async function delMonthSale(month,idx){if(!confirm(LANG==="zh"?"删除此销量�
 
 /* ================= M8 OpEx ================= */
 function pgOpex(){
-  const o=d().opex;
+  const m=costMonth;const locked=monthLocked(m);const o=curOpex(m);const own=!!(d().opexByMonth&&d().opexByMonth[m]);
   const groups=[
     [LANG==="zh"?"人工成本":"Labour",[["salaries","薪资总额","Salaries"],["epf","EPF (雇主13%)","EPF"],["socso","SOCSO","SOCSO"],["eis","EIS 就业保险","EIS"],["levy","外劳人头税 Levy","Levy"],["ot","加班费 OT","Overtime"]]],
     [LANG==="zh"?"租金":"Rent",[["rent","店面租金","Rent"],["commission","商场抽成","Commission"]]],
@@ -1312,8 +1312,10 @@ function pgOpex(){
   const labourKeys=["salaries","epf","socso","eis","levy","ot"];
   const pl=payrollLabour();const plMap={salaries:pl.salaries,epf:pl.epf,socso:pl.socso,eis:pl.eis,levy:pl.levy,ot:pl.ot};
   const labourSynced=labourKeys.every(k=>Math.round((+o[k]||0))===Math.round((plMap[k]||0)));
-  return `<div class="fb"><h2 class="h" style="margin:0;">💵 ${LANG==="zh"?"运营开销 OpEx":"Operating Expenses"}</h2>${canW('opex')&&canSeeSalary()?`<div style="display:flex;gap:6px;"><button class="btn ghost sm" onclick="syncOpexFromPayroll()">🔗 ${LANG==="zh"?"同步人事薪资":"Sync Payroll"}</button><button class="btn gold sm" onclick="openM('opex')">✎ ${LANG==="zh"?"编辑":"Edit"}</button></div>`:''}</div>
-  <div class="hint">${LANG==="zh"?"OpEx 自动带入损益表与净利。人工成本可一键从『人事薪资』同步（也可手动改）。":"Feeds P&L. Labour can sync from Payroll."}${hideSalary?(LANG==="zh"?" ⚠️ 你的角色只能看人工总数。":" ⚠️ Labour total only."):""}</div>
+  return `<div class="fb"><h2 class="h" style="margin:0;">💵 ${LANG==="zh"?"运营开销 OpEx":"Operating Expenses"} <span class="tag">${monthLabel2(m)}${locked?' 🔒':''}</span></h2>${canW('opex')&&canSeeSalary()&&!locked?`<div style="display:flex;gap:6px;"><button class="btn ghost sm" onclick="syncOpexFromPayroll()">🔗 ${LANG==="zh"?"同步人事薪资":"Sync Payroll"}</button><button class="btn gold sm" onclick="openM('opex')">✎ ${LANG==="zh"?"编辑":"Edit"}</button></div>`:''}</div>
+  <div class="seg" style="margin-bottom:8px;flex-wrap:wrap;">${availMonths().map(mm=>`<button class="${mm===m?'active':''}" onclick="setCostMonth('${mm}')">${monthLabel2(mm)}${monthLocked(mm)?' 🔒':''}</button>`).join('')}</div>
+  <div class="hint">${LANG==="zh"?"运营开销按自然月独立核算，直接带入该月损益与净利。人工成本随『人事薪资』自动联动（也可手动改）。":"Per-month OpEx feeds that month's P&L. Labour auto-links to Payroll."}${hideSalary?(LANG==="zh"?" ⚠️ 你的角色只能看人工总数。":" ⚠️ Labour total only."):""}</div>
+  ${locked?`<div class="al al-b" style="margin-bottom:8px;"><div class="t">🔒 ${LANG==="zh"?monthLabel2(m)+" 已月末锁定":"Locked"}</div>${LANG==="zh"?"该月开销已归档固定；如需修改请到『月度核算』解锁。":"Archived; unlock in Monthly."}</div>`:`<div class="hint" style="margin-bottom:8px;">${own?(LANG==="zh"?"📌 本月为专属开销（与其他月独立）。":"📌 Month-specific."):(LANG==="zh"?"📄 本月沿用默认开销；一旦编辑/同步即建立本月专属副本。":"📄 Using default template.")}</div>`}
   ${(!hideSalary&&canSeeSalary())?`<div class="al ${labourSynced?'al-b':'al-a'}" style="margin-bottom:8px;"><div class="t">${labourSynced?('🔗 '+(LANG==="zh"?"人工成本 已与人事薪资一致":"Labour matches payroll")):('⚠️ '+(LANG==="zh"?"人工成本与人事薪资不一致":"Labour differs from payroll"))}</div>${LANG==="zh"?"人事薪资实际：薪资"+money(pl.salaries)+" · OT"+money(pl.ot)+" · EPF"+money(pl.epf)+" · SOCSO"+money(pl.socso)+" · EIS"+money(pl.eis)+" · 外劳税"+money(pl.levy)+(labourSynced?"":"　→ 点『🔗同步人事薪资』填入"):""}</div>`:''}
   ${groups.map(([g,rows])=>{
     const isLabour=rows.some(([k])=>labourKeys.includes(k));
@@ -1338,11 +1340,35 @@ function payrollLabour(){
   st.forEach(e=>{salaries+=(+e.basic||0)+(+e.allowance||0);ot+=(+e.ot||0);epf+=(e.local?Math.round((+e.basic||0)*0.13):0);socso+=(+e.socso||0);eis+=(+e.eis||0);levy+=(+e.levy||0);});
   return {salaries,ot,epf,socso,eis,levy};
 }
-function opexTotal(){const o=d().opex||{};return Object.values(o).reduce((s,v)=>s+(+v||0),0);}
+/* ---- 按自然月独立的运营开销 ----
+   d().opex 作为「默认模板」（新月份的初始值、大盘/ALL 聚合回退）；
+   d().opexByMonth[YYYY-MM] 为该月专属副本，一旦编辑/同步某月即建立，互不串月。 */
+function opexTemplate(){if(!d().opex)d().opex={};return d().opex;}
+function curOpex(month){month=month||costMonth;const bm=d().opexByMonth;if(bm&&bm[month])return bm[month];return opexTemplate();}
+function materializeOpex(month){ // 首次编辑某月→从"≤当月的最近已建月"或默认模板复制一份
+  month=month||costMonth;
+  if(!d().opexByMonth)d().opexByMonth={};
+  if(!d().opexByMonth[month]){
+    const prev=Object.keys(d().opexByMonth).filter(m=>m<month).sort();
+    const src=prev.length?d().opexByMonth[prev[prev.length-1]]:opexTemplate();
+    d().opexByMonth[month]=JSON.parse(JSON.stringify(src));
+  }
+  return d().opexByMonth[month];
+}
+function opexTotal(month){const o=curOpex(month)||{};return Object.values(o).reduce((s,v)=>s+(+v||0),0);}
+const LABOUR_KEYS=["salaries","ot","epf","socso","eis","levy"];
+function applyLabour(o,pl){o.salaries=pl.salaries;o.ot=pl.ot;o.epf=pl.epf;o.socso=pl.socso;o.eis=pl.eis;o.levy=pl.levy;}
+function autoSyncLabour(){ // 员工薪资变动→自动更新「默认模板 + 当前未锁定月」的人工成本（其他手动项与其它月不动）
+  const pl=payrollLabour();
+  applyLabour(opexTemplate(),pl);
+  const bm=d().opexByMonth;
+  if(bm&&bm[costMonth]&&!monthLocked(costMonth))applyLabour(bm[costMonth],pl);
+}
 async function syncOpexFromPayroll(){
-  if(!confirm(LANG==="zh"?"用人事薪资的实际数据填入运营开销的人工成本（薪资/EPF/SOCSO/EIS/外劳税/OT）？之后仍可手动微调。":"Fill labour OpEx from payroll?"))return;
-  const pl=payrollLabour();const o=d().opex;o.salaries=pl.salaries;o.ot=pl.ot;o.epf=pl.epf;o.socso=pl.socso;o.eis=pl.eis;o.levy=pl.levy;
-  auditLog("同步人工成本","人事薪资→OpEx","",money(pl.salaries+pl.ot+pl.epf+pl.socso+pl.eis+pl.levy));await save();render();}
+  if(monthLocked(costMonth))return alert(LANG==="zh"?"本月已月末锁定，请先解锁再同步。":"Month is locked.");
+  if(!confirm(LANG==="zh"?("用人事薪资的实际数据填入【"+monthLabel2(costMonth)+"】运营开销的人工成本（薪资/EPF/SOCSO/EIS/外劳税/OT）？之后仍可手动微调。"):"Fill labour OpEx from payroll?"))return;
+  const pl=payrollLabour();const o=materializeOpex(costMonth);applyLabour(o,pl);applyLabour(opexTemplate(),pl);
+  auditLog("同步人工成本","人事薪资→OpEx "+monthLabel2(costMonth),"",money(pl.salaries+pl.ot+pl.epf+pl.socso+pl.eis+pl.levy));await save();render();}
 function pgPayroll(){
   const x=d();const allStaff=x.staff||[];
   const scope=salaryScope(); // full / total / self
@@ -1423,12 +1449,13 @@ function renderCharts(f){
   const path=pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');
   const area=path+` L${pts[pts.length-1][0].toFixed(1)} ${H-pad} L${pts[0][0].toFixed(1)} ${H-pad} Z`;
   // 成本结构（本月）
+  const ro=curOpex(costMonth);
   const costParts=[
     [LANG==="zh"?"食材":"COGS",f.cogs,"#B23A3A"],
-    [LANG==="zh"?"人工":"Labour",d().opex.salaries+d().opex.epf+d().opex.socso+d().opex.levy+d().opex.ot,"#2A5FA0"],
-    [LANG==="zh"?"租金":"Rent",d().opex.rent+d().opex.commission,"#C08A2E"],
-    [LANG==="zh"?"水电":"Utils",d().opex.electricity+d().opex.water+d().opex.gas,"#2E7D46"],
-    [LANG==="zh"?"杂费":"Misc",d().opex.wifi+d().opex.rubbish+d().opex.possaas+d().opex.accounting+d().opex.repair,"#6B4E9E"],
+    [LANG==="zh"?"人工":"Labour",(+ro.salaries||0)+(+ro.epf||0)+(+ro.socso||0)+(+ro.eis||0)+(+ro.levy||0)+(+ro.ot||0),"#2A5FA0"],
+    [LANG==="zh"?"租金":"Rent",(+ro.rent||0)+(+ro.commission||0),"#C08A2E"],
+    [LANG==="zh"?"水电":"Utils",(+ro.electricity||0)+(+ro.water||0)+(+ro.gas||0),"#2E7D46"],
+    [LANG==="zh"?"杂费":"Misc",(+ro.wifi||0)+(+ro.rubbish||0)+(+ro.possaas||0)+(+ro.accounting||0)+(+ro.repair||0),"#6B4E9E"],
   ];
   const costTot=costParts.reduce((s,c)=>s+c[1],0);
   // 各店净营业额对比
@@ -1906,8 +1933,9 @@ function openM(type,editId){
       <div class="fr"><label>OT</label><input id="em_ot" type="number" value="0"></div></div>
       <div class="hint">${LANG==="zh"?"EPF/SOCSO/EIS 会依身份自动估算（本地有EPF，外劳计人头税）。":"Deductions auto-estimated."}</div>
       <button class="btn block brand" onclick="saveEmp()">${LANG==="zh"?"保存员工":"Save"}</button>`,
-    opex:`<h3>✎ ${LANG==="zh"?"编辑运营开销":"Edit OpEx"} <span class="x" onclick="closeM()">×</span></h3>
-      ${Object.entries(d().opex).map(([k,v])=>`<div class="fr"><label>${k}</label><input id="ox_${k}" type="number" value="${v}"></div>`).join('')}
+    opex:`<h3>✎ ${LANG==="zh"?"编辑运营开销":"Edit OpEx"} <span class="tag">${monthLabel2(costMonth)}</span> <span class="x" onclick="closeM()">×</span></h3>
+      <div class="hint" style="margin-bottom:6px;">${LANG==="zh"?"仅修改本月（"+monthLabel2(costMonth)+"）的开销，其他月份不受影响。":"Edits this month only."}</div>
+      ${Object.entries(curOpex(costMonth)).map(([k,v])=>`<div class="fr"><label>${k}</label><input id="ox_${k}" type="number" value="${v}"></div>`).join('')}
       <button class="btn block brand" onclick="saveOpex()">${LANG==="zh"?"保存":"Save"}</button>`,
     suggest:`<h3>🤖 ${LANG==="zh"?"建议订货清单":"Suggested Reorder"} <span class="x" onclick="closeM()">×</span></h3>
       <div class="hint">${LANG==="zh"?"依「安全库存×1.5 − 现有」自动算建议量。":"Par×1.5 − on-hand."}</div>
@@ -2018,7 +2046,7 @@ async function saveStock(){
 }
 async function delItem(id){const it=d().items.find(i=>i.id===id);if(!it)return;if(!confirm((LANG==="zh"?"确定删除品项：":"Delete item: ")+it.name+"？"))return;d().items=d().items.filter(i=>i.id!==id);auditLog("删除品项",it.name,"","");await save();render();}
 async function delRecipe(id){const r=d().recipes.find(x=>x.id===id);if(!r)return;if(!confirm((LANG==="zh"?"确定删除配方：":"Delete recipe: ")+r.name+"？"))return;d().recipes=d().recipes.filter(x=>x.id!==id);auditLog("删除配方",r.name,"","");await save();render();}
-async function delEmp(id){const e=(d().staff||[]).find(x=>x.id===id);if(!e)return;if(!confirm((LANG==="zh"?"确定删除员工：":"Delete employee: ")+e.name+"？"))return;d().staff=d().staff.filter(x=>x.id!==id);auditLog("删除员工",e.name,"","");await save();render();}
+async function delEmp(id){const e=(d().staff||[]).find(x=>x.id===id);if(!e)return;if(!confirm((LANG==="zh"?"确定删除员工：":"Delete employee: ")+e.name+"？"))return;d().staff=d().staff.filter(x=>x.id!==id);auditLog("删除员工",e.name,"","");autoSyncLabour();await save();render();}
 async function delVendor(id){const v=d().vendors.find(x=>x.id===id);if(!v)return;if(!confirm((LANG==="zh"?"确定删除供应商：":"Delete vendor: ")+v.name+"？"))return;d().vendors=d().vendors.filter(x=>x.id!==id);auditLog("删除供应商",v.name,"","");await save();render();}
 async function delPayable(id){const p=d().payables.find(x=>x.id===id);if(!p)return;if(!confirm((LANG==="zh"?"确定删除应付账款？":"Delete payable?")))return;d().payables=d().payables.filter(x=>x.id!==id);auditLog("删除应付",p.vendor,"","");await save();render();}
 async function delMove(idx){if(!confirm(LANG==="zh"?"确定删除这笔记录？(不会自动还原库存)":"Delete this record?"))return;d().moves.splice(idx,1);auditLog("删除记录","作业记录","","");await save();render();}
@@ -2046,6 +2074,7 @@ async function saveEmp(){
   if(!d().staff)d().staff=[];
   if(_editId){const e=d().staff.find(x=>x.id===_editId);if(e){Object.assign(e,obj);auditLog("编辑员工",n,"","");}}
   else{d().staff.push({id:Date.now(),...obj});auditLog("新增员工",n+" "+money(basic),"","");}
+  autoSyncLabour(); // 薪资变动→自动联动当月运营开销的人工成本
   await save();closeM();render();
 }
 async function saveSales(){
@@ -2068,8 +2097,10 @@ async function saveLeaveApp(){
   auditLog("请假申请","","","待批准");await save();closeM();render();
 }
 async function saveOpex(){
-  Object.keys(d().opex).forEach(k=>{const el=document.getElementById('ox_'+k);if(el)d().opex[k]=+el.value||0;});
-  auditLog("修改OpEx","运营开销更新","","");await save();closeM();render();
+  if(monthLocked(costMonth))return alert(LANG==="zh"?"本月已锁定。":"Locked.");
+  const o=materializeOpex(costMonth);
+  Object.keys(o).forEach(k=>{const el=document.getElementById('ox_'+k);if(el)o[k]=+el.value||0;});
+  auditLog("修改OpEx","运营开销更新 "+monthLabel2(costMonth),"","");await save();closeM();render();
 }
 function exportCSV(){
   const rows=[["品名 Item","分类 Cat","库存 Qty","单位 Unit","加权单价 W.Cost","净料成本 NetCost","库存值 Value","安全库存 Par","得率% Yield","状态 Status"]];
