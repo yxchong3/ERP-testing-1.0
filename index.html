@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>明记家乡小食店 · 多分店进销存系统</title>
+<title>牛室炙烤牛排 · 多分店进销存系统</title>
 <style>
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
   :root{
@@ -136,7 +136,7 @@
 </head>
 <body>
 <div class="top">
-  <div class="l"><button class="menu-btn" onclick="toggleSide()">☰</button><span class="brand-logo" title="明记家乡小食店"><svg width="32" height="32" viewBox="0 0 100 100" aria-label="明记"><rect x="4" y="4" width="92" height="92" rx="16" fill="#7C1619"/><rect x="4" y="4" width="92" height="92" rx="16" fill="none" stroke="#F2B417" stroke-width="7"/><text x="50" y="33" text-anchor="middle" dominant-baseline="central" font-family="'Microsoft YaHei','PingFang SC',sans-serif" font-weight="800" font-size="40" fill="#F2B417">明</text><text x="50" y="70" text-anchor="middle" dominant-baseline="central" font-family="'Microsoft YaHei','PingFang SC',sans-serif" font-weight="800" font-size="40" fill="#F2B417">记</text></svg></span><h1 id="appTitle">明记家乡小食店</h1></div>
+  <div class="l"><button class="menu-btn" onclick="toggleSide()">☰</button><span class="brand-logo" title="牛室炙烤牛排 Beef House"><svg width="32" height="32" viewBox="0 0 100 100" aria-label="Beef House"><rect x="2" y="2" width="96" height="96" rx="18" fill="#1F3D5C"/><path d="M30 30 Q20 14 33 12 Q40 20 39 30 Z" fill="#F3E6C4" stroke="#0E1E2E" stroke-width="4" stroke-linejoin="round"/><path d="M70 30 Q80 14 67 12 Q60 20 61 30 Z" fill="#F3E6C4" stroke="#0E1E2E" stroke-width="4" stroke-linejoin="round"/><ellipse cx="24" cy="44" rx="12" ry="8" fill="#B0895A" stroke="#0E1E2E" stroke-width="4" transform="rotate(-24 24 44)"/><ellipse cx="76" cy="44" rx="12" ry="8" fill="#B0895A" stroke="#0E1E2E" stroke-width="4" transform="rotate(24 76 44)"/><path d="M27 42 Q50 30 73 42 Q80 64 68 78 Q50 90 32 78 Q20 64 27 42 Z" fill="#B0895A" stroke="#0E1E2E" stroke-width="4" stroke-linejoin="round"/><path d="M40 66 Q50 60 60 66 Q64 76 56 82 Q50 86 44 82 Q36 76 40 66 Z" fill="#F3E6C4" stroke="#0E1E2E" stroke-width="4" stroke-linejoin="round"/><circle cx="42" cy="54" r="3.2" fill="#0E1E2E"/><circle cx="58" cy="54" r="3.2" fill="#0E1E2E"/><ellipse cx="46" cy="73" rx="2" ry="2.8" fill="#0E1E2E"/><ellipse cx="54" cy="73" rx="2" ry="2.8" fill="#0E1E2E"/></svg></span><h1 id="appTitle">牛室炙烤牛排</h1></div>
   <div class="r">
     <button class="lang" onclick="toggleLang()" id="langBtn">EN</button>
     <select class="sel" id="roleSel" onchange="switchRole()"></select>
@@ -154,22 +154,12 @@
 <div class="mbg" id="mbg"><div class="m" id="mbox"></div></div>
 
 <script>
-/* ================= 明记餐饮 ERP v2.0 — 完整应用逻辑 ================= */
+/* ================= 牛室炙烤牛排 ERP v2.0 — 完整应用逻辑 ================= */
 /* 数据持久化：window.storage。涵盖 FSD v2.0 十大模块。 */
 
 const OUTLETS=[
   {id:"ck",name:"中央厨房",en:"Central Kitchen",ck:true,lat:3.0738,lng:101.5183},
   {id:"b1",name:"分店 1",en:"Branch 1",lat:3.0821,lng:101.5312},
-  {id:"b2",name:"分店 2",en:"Branch 2",lat:3.1073,lng:101.6067},
-  {id:"b3",name:"分店 3",en:"Branch 3",lat:3.1390,lng:101.6869},
-  {id:"b4",name:"分店 4",en:"Branch 4",lat:3.0490,lng:101.5851},
-  {id:"b5",name:"分店 5",en:"Branch 5",lat:3.1569,lng:101.7123},
-  {id:"b6",name:"分店 6",en:"Branch 6",lat:3.0333,lng:101.4500},
-  {id:"b7",name:"分店 7",en:"Branch 7",lat:3.2000,lng:101.6500},
-  {id:"b8",name:"分店 8",en:"Branch 8",lat:3.0800,lng:101.6100},
-  {id:"b9",name:"分店 9",en:"Branch 9",lat:2.9900,lng:101.6200},
-  {id:"b10",name:"分店 10",en:"Branch 10",lat:3.1100,lng:101.5500},
-  {id:"b11",name:"分店 11",en:"Branch 11",lat:3.1700,lng:101.6000},
 ];
 /* ===== 从营运档案提取的供应商→品项目录 + ENT菜单（可在库存/供应商里再增删）===== */
 const SUPPLIER_CATALOG={
@@ -463,7 +453,7 @@ let USERS=[];       // 白名单/用户目录缓存（erp_users）
 /* ---------- i18n ---------- */
 const T={
   zh:{dash:"利润大盘",inv:"库存",proc:"采购进销",ap:"应付账款",ck:"中央厨房",stock:"盘点",waste:"损耗",ent:"招待",bom:"配方成本",opex:"运营开销",payroll:"人事薪资",report:"报表",settings:"设置&审计",
-    appTitle:"明记家乡小食店"},
+    appTitle:"牛室炙烤牛排"},
   en:{dash:"Dashboard",inv:"Inventory",proc:"Procurement",ap:"Payables",ck:"Central Kitchen",stock:"Stock Take",waste:"Wastage",ent:"Offers",bom:"Recipe Cost",opex:"OpEx",payroll:"Payroll",report:"Reports",settings:"Settings",
     appTitle:"Meng Kee Eatery"}
 };
@@ -2106,7 +2096,7 @@ function exportCSV(){
   const rows=[["品名 Item","分类 Cat","库存 Qty","单位 Unit","加权单价 W.Cost","净料成本 NetCost","库存值 Value","安全库存 Par","得率% Yield","状态 Status"]];
   d().items.forEach(i=>{const b=(i.batches||[])[0];const dd=b?days(TODAY,b.in):0;rows.push([i.name,i.cat,i.qty,i.unit,i.cost,netCost(i).toFixed(2),(i.qty*i.cost).toFixed(2),i.par,i.yield,stTxt(statusOf(dd))]);});
   const csv='\uFEFF'+rows.map(r=>r.join(',')).join('\n');
-  const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);a.download='明记ERP_'+outletObj().name+'_'+TODAY+'.csv';a.click();
+  const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);a.download='牛室ERP_'+outletObj().name+'_'+TODAY+'.csv';a.click();
 }
 
 /* ================================================================
@@ -2494,8 +2484,8 @@ function showAuthLogin(msg){
   const sb=document.getElementById('sidebar');if(sb)sb.style.display='none';
   document.getElementById('pageHost').innerHTML=`
   <div style="width:calc(100% - 32px);max-width:380px;position:fixed;left:50%;top:6vh;transform:translateX(-50%);max-height:88vh;overflow:auto;padding:28px 22px;background:#fff;border:1px solid var(--line);border-radius:16px;text-align:center;">
-    <div style="font-size:30px;margin-bottom:6px;">🍜</div>
-    <div style="font-weight:800;font-size:19px;color:var(--ink);">明记家乡小食店</div>
+    <div style="margin-bottom:6px;"><svg width="52" height="52" viewBox="0 0 100 100" aria-label="Beef House"><rect x="2" y="2" width="96" height="96" rx="18" fill="#1F3D5C"/><path d="M30 30 Q20 14 33 12 Q40 20 39 30 Z" fill="#F3E6C4" stroke="#0E1E2E" stroke-width="4" stroke-linejoin="round"/><path d="M70 30 Q80 14 67 12 Q60 20 61 30 Z" fill="#F3E6C4" stroke="#0E1E2E" stroke-width="4" stroke-linejoin="round"/><ellipse cx="24" cy="44" rx="12" ry="8" fill="#B0895A" stroke="#0E1E2E" stroke-width="4" transform="rotate(-24 24 44)"/><ellipse cx="76" cy="44" rx="12" ry="8" fill="#B0895A" stroke="#0E1E2E" stroke-width="4" transform="rotate(24 76 44)"/><path d="M27 42 Q50 30 73 42 Q80 64 68 78 Q50 90 32 78 Q20 64 27 42 Z" fill="#B0895A" stroke="#0E1E2E" stroke-width="4" stroke-linejoin="round"/><path d="M40 66 Q50 60 60 66 Q64 76 56 82 Q50 86 44 82 Q36 76 40 66 Z" fill="#F3E6C4" stroke="#0E1E2E" stroke-width="4" stroke-linejoin="round"/><circle cx="42" cy="54" r="3.2" fill="#0E1E2E"/><circle cx="58" cy="54" r="3.2" fill="#0E1E2E"/><ellipse cx="46" cy="73" rx="2" ry="2.8" fill="#0E1E2E"/><ellipse cx="54" cy="73" rx="2" ry="2.8" fill="#0E1E2E"/></svg></div>
+    <div style="font-weight:800;font-size:19px;color:var(--ink);">牛室炙烤牛排</div>
     <div class="mini" style="margin:4px 0 16px;">${LANG==="zh"?"多分店进销存系统 · 请登录":"Please sign in"}</div>
     ${msg?`<div class="al al-r" style="text-align:left;">${msg}</div>`:''}
     <div class="fr" style="text-align:left;margin-bottom:8px;"><label>${LANG==="zh"?"邮箱":"Email"}</label><input id="au_email" type="email" placeholder="you@example.com" autocomplete="username"></div>
@@ -2560,8 +2550,8 @@ function showLogin(){
   const sb=document.getElementById('sidebar');if(sb)sb.style.display='none';
   document.getElementById('pageHost').innerHTML=`
   <div style="width:calc(100% - 32px);max-width:380px;position:fixed;left:50%;top:6vh;transform:translateX(-50%);max-height:88vh;overflow:auto;padding:28px 22px;background:#fff;border:1px solid var(--line);border-radius:16px;text-align:center;">
-    <div style="font-size:30px;margin-bottom:6px;">🍜</div>
-    <div style="font-weight:800;font-size:19px;color:var(--ink);">明记家乡小食店</div>
+    <div style="margin-bottom:6px;"><svg width="52" height="52" viewBox="0 0 100 100" aria-label="Beef House"><rect x="2" y="2" width="96" height="96" rx="18" fill="#1F3D5C"/><path d="M30 30 Q20 14 33 12 Q40 20 39 30 Z" fill="#F3E6C4" stroke="#0E1E2E" stroke-width="4" stroke-linejoin="round"/><path d="M70 30 Q80 14 67 12 Q60 20 61 30 Z" fill="#F3E6C4" stroke="#0E1E2E" stroke-width="4" stroke-linejoin="round"/><ellipse cx="24" cy="44" rx="12" ry="8" fill="#B0895A" stroke="#0E1E2E" stroke-width="4" transform="rotate(-24 24 44)"/><ellipse cx="76" cy="44" rx="12" ry="8" fill="#B0895A" stroke="#0E1E2E" stroke-width="4" transform="rotate(24 76 44)"/><path d="M27 42 Q50 30 73 42 Q80 64 68 78 Q50 90 32 78 Q20 64 27 42 Z" fill="#B0895A" stroke="#0E1E2E" stroke-width="4" stroke-linejoin="round"/><path d="M40 66 Q50 60 60 66 Q64 76 56 82 Q50 86 44 82 Q36 76 40 66 Z" fill="#F3E6C4" stroke="#0E1E2E" stroke-width="4" stroke-linejoin="round"/><circle cx="42" cy="54" r="3.2" fill="#0E1E2E"/><circle cx="58" cy="54" r="3.2" fill="#0E1E2E"/><ellipse cx="46" cy="73" rx="2" ry="2.8" fill="#0E1E2E"/><ellipse cx="54" cy="73" rx="2" ry="2.8" fill="#0E1E2E"/></svg></div>
+    <div style="font-weight:800;font-size:19px;color:var(--ink);">牛室炙烤牛排</div>
     <div class="mini" style="margin:4px 0 20px;">${LANG==="zh"?"多分店进销存系统 · 演示登录（未连云端）":"Demo login (no cloud)"}</div>
     <div class="fr" style="text-align:left;"><label>${LANG==="zh"?"选择登录角色（演示）":"Login as (demo)"}</label>
       <select id="loginRole">${Object.entries(ROLES).map(([k,v])=>`<option value="${k}">${LANG==="zh"?v.name:v.en}</option>`).join('')}</select></div>
