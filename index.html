@@ -2500,6 +2500,8 @@ function showAuthLogin(msg){
     ${msg?`<div class="al al-r" style="text-align:left;">${msg}</div>`:''}
     <div class="fr" style="text-align:left;margin-bottom:8px;"><label>${LANG==="zh"?"邮箱":"Email"}</label><input id="au_email" type="email" placeholder="you@example.com" autocomplete="username"></div>
     <div class="fr" style="text-align:left;"><label>${LANG==="zh"?"密码":"Password"}</label><input id="au_pw" type="password" placeholder="••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doAuthLogin()"></div>
+    <div class="fr" style="text-align:left;margin-top:8px;">
+<label>${LANG==="zh"?"邀请码 / 角色口令 (注册必填)":"Invite Code (Sign Up Only)"}</label> <input id="au_code" type="text" placeholder="${LANG==='zh'?'店长填 MJMGR888 / 店员填MJSTAFF123':'Enter invite code'}" autocomplete="off"></div>
     <button class="btn block brand" style="margin-top:6px;" onclick="doAuthLogin()">🔓 ${LANG==="zh"?"登录":"Sign In"}</button>
     <button class="btn block ghost" style="margin-top:8px;" onclick="doAuthSignup()">🆕 ${LANG==="zh"?"首次使用？注册账号":"First time? Sign Up"}</button>
     <div id="au_msg" class="mini" style="margin-top:10px;min-height:16px;"></div>
@@ -2516,6 +2518,38 @@ async function doAuthLogin(){
   }catch(e){if(m)m.innerHTML='❌ '+(e.message||e);}
 }
 async function doAuthSignup(){
+  const email=fv('au_email'), pw=fv('au_pw');
+  const code=(document.getElementById('au_code')?.value || '').trim();
+  const m=document.getElementById('au_msg');
+
+  if(!email||!pw){
+    if(m)m.innerHTML='▲ '+(LANG==="zh"?"请输入邮箱和密码（至少6位）":"Enter email & password (>6)");
+    return;
+  }
+  if(!code){
+    if(m)m.innerHTML='▲ '+(LANG==="zh"?"请输入入职邀请码以分配岗位":"Please enter invite code");
+    return;
+  }
+
+  if(m)m.textContent=LANG==="zh"?"注册中...":"Signing up...";
+
+  try{
+    const {data,error}=await _sb.auth.signUp({
+      email,
+      password:pw,
+      options:{
+        emailRedirectTo:'https://yxchong3.github.io/ERP-testing-1.0/',
+        data:{
+          invite_code: code
+        }
+      }
+    });
+
+    if(error){if(m)m.innerHTML='✕ '+error.message;return;}
+    if(data.session&&data.user){await afterAuth(data.user);}
+    else{if(m)m.innerHTML='✓ '+(LANG==="zh"?"注册成功。若开启了邮箱确认，请查收邮件确认后再登录。":"Signed up. Confirm email if required, then sign in.");}
+  }catch(e){if(m)m.innerHTML='✕ '+(e.message||e);}
+}
   const email=fv('au_email'),pw=fv('au_pw');const m=document.getElementById('au_msg');
   if(!email||!pw){if(m)m.innerHTML='⚠️ '+(LANG==="zh"?"请输入邮箱和密码（至少6位）":"Enter email & password (≥6)");return;}
   if(m)m.textContent=LANG==="zh"?"注册中…":"Signing up…";
