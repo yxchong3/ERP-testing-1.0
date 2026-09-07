@@ -654,8 +654,41 @@ async function loadDB(){
     catch(e){DB[o.id]=seed(o.id);}
   }
 }
-async function save(oid){try{await Store.set('erpv2:'+(oid||curOutlet),JSON.stringify(DB[oid||curOutlet]));}catch(e){}}
-async function reloadOutlet(oid){try{const r=await Store.get('erpv2:'+oid);if(r)DB[oid]=JSON.parse(r.value);}catch(e){}}
+/* ---- 保存优化：本地即时写入 + 云端后台合并同步 ----
+   旧写法每次操作都 await 一次 Supabase 网络往返，界面要等网络回来才刷新（手机上明显卡顿）。
+   现在：localStorage 同步写入（瞬间完成）→ 界面立即刷新；云端上传在后台去抖+合并（同一分店连续操作只上传最后一次）。
+   数据安全：本地始终是最新；云端读取前会先 flush 待同步项；切后台/关闭页面时立即 flush，避免丢云端。 */
+const _pendingSync={}, _syncTimers={};
+async function _doCloudSet(key){
+  if(!CLOUD)return;
+  if(_syncTimers[key]){clearTimeout(_syncTimers[key]);_syncTimers[key]=null;}
+  const val=_pendingSync[key];if(val==null)return;
+  delete _pendingSync[key];
+  try{const {error}=await _sb.from(CLOUD_TABLE).upsert({key,value:JSON.parse(val),updated_at:new Date().toISOString()},{onConflict:'key'});if(error)throw error;}
+  catch(e){if(_pendingSync[key]==null)_pendingSync[key]=val;} // 失败保留待重传（本地已存）
+}
+function _scheduleCloud(key){
+  if(!CLOUD)return;
+  if(_syncTimers[key])clearTimeout(_syncTimers[key]);
+  _syncTimers[key]=setTimeout(()=>{_syncTimers[key]=null;_doCloudSet(key);},350);
+}
+async function flushSync(key){ // 立即把待同步写上云；无参=全部
+  if(!CLOUD)return;
+  if(key){if(_pendingSync[key]!=null)await _doCloudSet(key);}
+  else{for(const k of Object.keys(_pendingSync))await _doCloudSet(k);}
+}
+async function save(oid){
+  const key='erpv2:'+(oid||curOutlet);
+  let val;try{val=JSON.stringify(DB[oid||curOutlet]);}catch(e){return;}
+  try{localStorage.setItem(key,val);}catch(e){}
+  if(CLOUD){_pendingSync[key]=val;_scheduleCloud(key);}
+}
+async function reloadOutlet(oid){await flushSync('erpv2:'+oid);try{const r=await Store.get('erpv2:'+oid);if(r)DB[oid]=JSON.parse(r.value);}catch(e){}}
+if(typeof document!=='undefined'){
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')flushSync();});
+  window.addEventListener('pagehide',()=>{flushSync();});
+  window.addEventListener('beforeunload',()=>{flushSync();});
+}
 /* ---- 角色权限：全局配置，持久化到云端/本地，所有分店同步 ---- */
 const ROLE_DEFAULTS=Object.fromEntries(Object.keys(ROLES).map(k=>[k,ROLES[k].can.slice()]));
 async function loadRolePerms(){
@@ -2576,7 +2609,7 @@ async function afterAuth(user){
   const sb=document.getElementById('sidebar');if(sb)sb.style.display='';
   curPage=firstAllowedPage();render();
 }
-async function authLogout(){try{if(AUTH())await _sb.auth.signOut();}catch(e){}curUser=null;showAuthLogin();}
+async function authLogout(){try{await flushSync();}catch(e){}try{if(AUTH())await _sb.auth.signOut();}catch(e){}curUser=null;showAuthLogin();}
 
 /* ================= 演示登录（无云端时回退）================= */
 function showLogin(){
