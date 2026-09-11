@@ -58,39 +58,27 @@
   td{padding:9px 11px;border-bottom:1px solid var(--soft);vertical-align:middle;}
   tr:last-child td{border-bottom:none;}
   .mini{font-size:10.5px;color:var(--grey);font-weight:400;}
-  /* ===== Excel 式采购网格 ===== */
-  .xgwrap{overflow:auto;max-height:72vh;border:2px solid #222;border-radius:4px;position:relative;-webkit-overflow-scrolling:touch;background:#fff;}
-  .xg{border-collapse:separate;border-spacing:0;white-space:nowrap;font-size:12px;color:#111;}
-  .xg th,.xg td{border-right:1px solid #555;border-bottom:1px solid #555;background:#fff;padding:0;text-align:center;box-sizing:border-box;}
-  .xg thead th{position:sticky;top:0;z-index:5;background:#E7F0EC;color:#123;font-weight:800;font-size:10.5px;letter-spacing:0;text-transform:none;padding:3px 4px;white-space:normal;line-height:1.15;}
-  .xg thead th .sub{font-size:9px;color:#567;font-weight:600;display:block;}
-  .xg .xf{position:sticky;z-index:4;background:#fff;}
-  .xg thead .xf{z-index:7;background:#DCE9E2;}
-  .xg tfoot .xf{z-index:6;}
-  .xg .xcode{font-size:9px;color:#8a8f96;display:block;line-height:1.05;padding:2px 3px 0;}
-  .xg input{width:100%;border:none;background:transparent;font:inherit;font-size:12px;text-align:center;padding:5px 3px;box-sizing:border-box;color:#111;outline:none;}
-  .xg input.qty{font-variant-numeric:tabular-nums;}
-  .xg input:focus{background:#FFF7DA;box-shadow:inset 0 0 0 2px #C9A227;position:relative;z-index:3;}
-  .xg td.name input{text-align:left;font-weight:700;padding-left:6px;}
-  .xg td.name input::placeholder{font-weight:400;color:#bbb;}
-  .xg .amt{font-size:9px;color:#2E7D46;line-height:1;display:block;padding:0 3px 3px;min-height:9px;}
-  .xg .amt.zero{color:#cbd0d6;}
-  .xg tfoot td{position:sticky;bottom:0;z-index:5;background:#F3F0E4;font-weight:800;padding:5px 4px;}
-  .xg .rowtot,.xg .daytot,.xg .gtot{font-weight:800;background:#FCFBF3;font-variant-numeric:tabular-nums;padding:4px;}
-  .xg .delrow{cursor:pointer;color:#B23A3A;font-weight:800;font-size:13px;}
-  .xg .invrow input{font-size:10px;color:#334;background:#F7FAF9;font-weight:600;}
-  .xg thead .invh{width:100%;border:none;background:#F2F7F5;font-size:9px;font-weight:600;color:#3a4a55;text-align:center;padding:2px;border-bottom:1px solid #cdd;}
-  .xg thead .dh{font-size:11px;font-weight:800;padding:2px 0;color:#123;}
-  .xg .ih{display:flex;flex-direction:column;}
-  .xg .ih>input,.xg .ihn input{border-bottom:1px solid #dfe6e2;text-align:center;padding:3px 2px;}
-  .xg .ih>input:last-child{border-bottom:none;}
-  .xg .ihn{display:flex;align-items:center;}
-  .xg .ihn input{flex:1;}
-  .xg td.datec{font-weight:700;font-size:11px;color:#234;background:#F7FAF9;}
-  .xg td.datec .sub{color:#8a97a0;}
-  .xmtabs{display:flex;gap:4px;flex-wrap:wrap;align-items:center;margin-bottom:8px;}
-  .xmtabs button{border:1px solid #bcd;background:#fff;color:#245;font-weight:700;font-size:12px;padding:5px 10px;border-radius:7px;cursor:pointer;}
-  .xmtabs button.active{background:#0F5C4E;color:#fff;border-color:#0F5C4E;}
+  /* ===== 按供应商·按月 整表录入(网格) — 对齐 BeefHouse 风格 ===== */
+  .gwrap{max-height:72vh;overflow:auto;border:1px solid #333;border-radius:6px;}
+  .gtbl{border-collapse:separate;border-spacing:0;font-size:12px;background:#fff;}
+  .gtbl th,.gtbl td{border-right:1px solid #333;border-bottom:1px solid #333;padding:0;white-space:nowrap;background:#fff;}
+  .gtbl thead th{position:sticky;top:0;z-index:3;background:#E8EDF3;color:#12203A;font-weight:700;padding:5px 6px;border-bottom:2px solid #333;text-align:center;}
+  .gtbl input{width:100%;box-sizing:border-box;border:0;padding:7px 6px;font-size:12px;background:transparent;text-align:center;font-family:inherit;}
+  .gtbl input:focus{outline:2px solid var(--gold);outline-offset:-2px;background:#FFFBEB;}
+  .gtbl .gcell{min-width:74px;}
+  .gtbl .gcell input{padding:5px 4px 1px;}
+  .camt{font-size:10px;line-height:1;color:#0a7d3c;text-align:center;padding:0 2px 3px;min-height:11px;font-weight:600;}
+  .gtbl td.gcode,.gtbl th.gcode{position:sticky;left:0;z-index:2;min-width:74px;max-width:74px;}
+  .gtbl td.gname,.gtbl th.gname{position:sticky;left:74px;z-index:2;text-align:left;font-weight:700;padding:7px 8px;min-width:180px;max-width:180px;box-shadow:1px 0 0 #333;}
+  .gtbl td.gunit,.gtbl th.gunit{position:sticky;left:254px;z-index:2;min-width:56px;max-width:56px;}
+  .gtbl td.gpack,.gtbl th.gpack{position:sticky;left:310px;z-index:2;min-width:120px;max-width:120px;}
+  .gtbl td.gprice,.gtbl th.gprice{position:sticky;left:430px;z-index:2;min-width:76px;max-width:76px;box-shadow:1px 0 0 #333;}
+  .gtbl thead th.gcode{z-index:4;background:#E8EDF3;}
+  .gtbl thead th.gname,.gtbl thead th.gunit,.gtbl thead th.gpack,.gtbl thead th.gprice{z-index:4;background:#E8EDF3;}
+  .gtbl td.gtot{background:#FAFBFC;font-weight:700;text-align:right;padding:6px 8px;}
+  .gtbl tr.gsum td{background:#F2F4F7;font-weight:800;padding:6px 8px;}
+  .gtbl td.gdate,.gtbl th.gdate{position:sticky;left:0;z-index:2;min-width:64px;max-width:64px;text-align:center;box-shadow:1px 0 0 #333;background:#fff;}
+  .gtbl thead th.gdate{z-index:4;background:#E8EDF3;}
   .pill{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;}
   .p-g{background:#E4F2E8;color:var(--green);}.p-a{background:#FaF0DA;color:var(--amber);}
   .p-r{background:#F7E4E4;color:var(--red);}.p-n{background:#ECEFF3;color:var(--grey);}
@@ -635,7 +623,7 @@ function seed(outletId){
   const dishCosts=[]; // 可编辑菜品成本表（用户导入/自建）
   const monthlySales={}; // 按月销量：{ "2026-09": [{dishId, qty}] }（POS/手动）
   const monthClose={};   // 月度锁定档案：{ "2026-09": {locked,date,avgPrices,dishCost} }
-  return {items,recipes,subRecipes,moves,vendors,payables,stocktakes,opex,staff,attendance,schedule,leaves,sales,fin,audit,purchases,grn,transfers,staffLoans,wasteLog,offers,monthEnd,dishCosts,monthlySales,monthClose,opexByMonth:{},procGrid:{}};
+  return {items,recipes,subRecipes,moves,vendors,payables,stocktakes,opex,staff,attendance,schedule,leaves,sales,fin,audit,purchases,grn,transfers,staffLoans,wasteLog,offers,monthEnd,dishCosts,monthlySales,monthClose,opexByMonth:{},gridCat:{},gridMonths:null,gridInv:{},gridExtra:{}};
 }
 
 /* ================= 数据持久化：Supabase 云端 ⇄ 本地存储 自动切换 =================
@@ -2187,148 +2175,94 @@ function monthLabel(ymk){if(ymk==='all')return LANG==="zh"?"全部月份":"All m
 const PROC_SUB={purchase:'proc',grn:'proc',transfer:'transfer',waste2:'waste',offer:'ent',monthend:'stock'};
 function subCan(p){return PROC_SUB[p]?can(PROC_SUB[p]):can(p);}   // 子页读权限
 function subCanW(p){return PROC_SUB[p]?canW(PROC_SUB[p]):canW(p);}// 子页写权限（汇总视图只读）
-function setSupplier(n){selSupplier=n;ledgerMonth='all';gridMonth=null;gridStyleOv=null;render();window.scrollTo(0,0);}
-function backSupplier(){selSupplier=null;ledgerMonth='all';gridMonth=null;gridStyleOv=null;render();window.scrollTo(0,0);}
+function setSupplier(n){selSupplier=n;ledgerMonth='all';render();window.scrollTo(0,0);}
+function backSupplier(){selSupplier=null;ledgerMonth='all';render();window.scrollTo(0,0);}
 function goProcSub(p){selSupplier=null;nav(p);}
 
-/* ================= 采购进货 · Excel 式每日网格 =================
-   d().procGrid[supplier][YYYY-MM] = { items:[{id,code,name,uom,price,spec}], inv:{[day]:发票号}, cells:{[itemId]:{[day]:数量}} }
-   · 品名/单价冻结在左侧，横向可随时滑动看各日期；每格数量实时算金额（不整页重渲染，绝不卡顿）
-   · 每月独立；去抖保存时摊平回写 d().purchases（src:'grid'），月度均价/报表/分类等既有功能照常读到 */
-let gridMonth=null, _gridSaveTimer=null, gridStyleOv=null; // gridStyleOv: null=自动 / 's1'=横排 / 's2'=竖排
-function setGridStyle(v){gridStyleOv=v;render();window.scrollTo(0,0);}
-function xgEsc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+/* ===== 按供应商·按月 整表录入(网格) — 移植自 BeefHouse ERP，风格/逻辑一致，数据用明记自己的 =====
+   数据直接落在 d().purchases（每格=一条 {supplier,item,date,qty,unitPrice,price,code,uom,invoice}）；
+   每个供应商的品名/单价/单位/规格标准档存 d().gridCat[sup]（首次自 SUPPLIER_CATALOG 铺好你原本的品名）；
+   月份 d().gridMonths（默认 2026-06 至当月）；发票 d().gridInv。输入即时算金额、只改合计不重画。 */
+function gEsc(s){return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'");}
 function daysInMonth(ym){const[y,m]=ym.split('-').map(Number);return new Date(y,m,0).getDate();}
-function n2(x){return (Math.round((x||0)*100)/100).toFixed(2);}
-function procGridRoot(){if(!d().procGrid)d().procGrid={};return d().procGrid;}
-function procGridMonths(sup){const r=procGridRoot()[sup]||{};return Object.keys(r).filter(k=>/^\d{4}-\d{2}$/.test(k)).sort();}
-function _gid(){return 'g'+Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
-function procGridSeedItems(sup){ // 用供应商目录的原始品名铺好（你原本的数据）
-  const cat=(typeof SUPPLIER_CATALOG!=='undefined'&&SUPPLIER_CATALOG[sup])?SUPPLIER_CATALOG[sup]:[];
-  return cat.map(nm=>({id:_gid(),code:'',name:nm,uom:'',price:0,spec:''}));
+function monthsFrom(start){const res=[];let[y,m]=start.split('-').map(Number);const now=new Date();const ey=now.getFullYear(),em=now.getMonth()+1;let guard=0;while((y<ey||(y===ey&&m<=em))&&guard<240){res.push(y+'-'+String(m).padStart(2,'0'));m++;if(m>12){m=1;y++;}guard++;}return res;}
+function ensureGridCat(sup){d().gridCat=d().gridCat||{};if(!d().gridCat[sup]){let names=(typeof SUPPLIER_CATALOG!=='undefined'&&SUPPLIER_CATALOG[sup])?SUPPLIER_CATALOG[sup].slice():[];d().gridCat[sup]=names.map(n=>{const it=findItem(n);return {name:n,code:'',uom:it?it.unit:'',spec:'',price:it?+it.cost||0:0};});}d().gridCat[sup].forEach(c=>{if(c.uom==null){const it=findItem(c.name);c.uom=it?it.unit:'';}if(c.spec==null)c.spec='';});return d().gridCat[sup];}
+function ensureGridMonths(){if(!Array.isArray(d().gridMonths))d().gridMonths=monthsFrom('2026-06');return d().gridMonths;}
+async function addGridMonth(){const m=(prompt(LANG==="zh"?"添加月份 (YYYY-MM)：":"Add month (YYYY-MM):",TODAY.slice(0,7))||'').trim();if(!/^\d{4}-\d{2}$/.test(m))return;const gm=ensureGridMonths();if(!gm.includes(m))gm.push(m);await save();render();}
+async function delGridMonth(m){const gm=ensureGridMonths();const i=gm.indexOf(m);if(i>=0)gm.splice(i,1);await save();render();}
+async function setGridSpec(mod,sup,item,val){const c=ensureGridCat(sup).find(x=>x.name===item);if(c)c.spec=val;(d()[ledgerCfg(mod).arr]||[]).forEach(r=>{if(r.supplier===sup&&r.item===item)r.spec=val;});save();}
+function gridInv(mod,sup,date){const k=mod+'|'+sup+'|'+date;if(d().gridInv&&d().gridInv[k]!=null)return d().gridInv[k];const r=(d()[ledgerCfg(mod).arr]||[]).find(x=>x.supplier===sup&&x.date===date&&x.invoice);return r?r.invoice:'';}
+async function setGridInv(mod,sup,date,val){const k=mod+'|'+sup+'|'+date;d().gridInv=d().gridInv||{};d().gridInv[k]=val;(d()[ledgerCfg(mod).arr]||[]).forEach(r=>{if(r.supplier===sup&&r.date===date)r.invoice=val;});save();}
+async function setGridUom(mod,sup,item,val){const c=ensureGridCat(sup).find(x=>x.name===item);if(c)c.uom=val;(d()[ledgerCfg(mod).arr]||[]).forEach(r=>{if(r.supplier===sup&&r.item===item)r.uom=val;});save();}
+async function setGridName(mod,sup,oldName,val){const nn=(val||'').trim();if(!nn||nn===oldName)return;const cat=ensureGridCat(sup);if(cat.some(c=>c.name===nn))return alert(LANG==="zh"?"已有同名品项":"Name exists");const c=cat.find(x=>x.name===oldName);if(c)c.name=nn;(d()[ledgerCfg(mod).arr]||[]).forEach(r=>{if(r.supplier===sup&&r.item===oldName)r.item=nn;});await save();render();}
+async function setGridCode(mod,sup,item,val){const c=ensureGridCat(sup).find(x=>x.name===item);if(c)c.code=(val||'').trim();(d()[ledgerCfg(mod).arr]||[]).forEach(r=>{if(r.supplier===sup&&r.item===item)r.code=(val||'').trim();});save();}
+function gridDates(mod,sup,month){const[y,m]=month.split('-').map(Number);const last=new Date(y,m,0).getDate();const res=[];for(let dd=1;dd<=last;dd++)res.push(month+'-'+String(dd).padStart(2,'0'));return res;}
+function gridRec(mod,sup,item,date){const arr=d()[ledgerCfg(mod).arr]||[];return arr.find(r=>r.supplier===sup&&r.item===item&&r.date===date);}
+function gridRecalc(mod,sup){
+  const month=ledgerMonth;const cat=ensureGridCat(sup);const items=cat.map(c=>c.name);const dates=gridDates(mod,sup,month);
+  const price=it=>{const c=cat.find(x=>x.name===it);return c?+c.price||0:0;};
+  const q=(it,dt)=>{const r=gridRec(mod,sup,it,dt);return r?(+r.qty||0):0;};
+  const dayTot=new Array(dates.length).fill(0);let grand=0;
+  items.forEach((it,i)=>{const pr=price(it);let tq=0;
+    dates.forEach((dt,j)=>{const qq=q(it,dt);tq+=qq;const amt=qq*pr;dayTot[j]+=amt;
+      const ca=document.getElementById('ca-'+i+'-'+j);if(ca)ca.textContent=qq>0?money(amt):'';});
+    const amt=tq*pr;grand+=amt;
+    const eq=document.getElementById('gtq-'+i);if(eq)eq.textContent=num(tq,2);
+    const ea=document.getElementById('gta-'+i);if(ea)ea.textContent=money(amt);});
+  dates.forEach((dt,j)=>{const ed=document.getElementById('gtd-'+j);if(ed)ed.textContent=money(dayTot[j]);});
+  const gg=document.getElementById('gtg');if(gg)gg.textContent=money(grand);
+  const sm=document.getElementById('gridSummary');if(sm)sm.innerHTML=gridSummaryHTML(mod,sup,month);
 }
-function procGridEnsure(sup,ym){
-  const root=procGridRoot();if(!root[sup])root[sup]={};
-  let m=root[sup][ym];
-  if(!m){
-    // 新建月份：优先复制"≤当月的最近已建月"的品项（含单价/单位/规格，清空数量），否则用供应商目录原始品名
-    const prev=Object.keys(root[sup]).filter(k=>/^\d{4}-\d{2}$/.test(k)&&k<ym).sort();
-    let items;
-    if(prev.length){const src=root[sup][prev[prev.length-1]];items=(src.items||[]).map(it=>({id:_gid(),code:it.code||'',name:it.name||'',uom:it.uom||'',price:+it.price||0,spec:it.spec||''}));}
-    else items=procGridSeedItems(sup);
-    const cells={};items.forEach(it=>cells[it.id]={});
-    root[sup][ym]=m={items,inv:{},cells};
-  }else if((!m.items||m.items.length===0)&&!m._noSeed){
-    // 既有空月份（旧版本遗留）→ 自动补入你原本的目录品名
-    const items=procGridSeedItems(sup);
-    if(items.length){m.items=items;m.cells={};items.forEach(it=>m.cells[it.id]={});}
+async function setGridQty(mod,sup,item,date,val){
+  const qty=+val||0;const cfg=ledgerCfg(mod);d()[cfg.arr]=d()[cfg.arr]||[];const arr=d()[cfg.arr];
+  const cat=ensureGridCat(sup).find(c=>c.name===item);const unit=cat?+cat.price||0:0;
+  let rec=arr.find(r=>r.supplier===sup&&r.item===item&&r.date===date);const oldQty=rec?+rec.qty||0:0;
+  if(qty<=0){if(rec){if(mod==='purchase')invUnreceive(item,oldQty);arr.splice(arr.indexOf(rec),1);}}
+  else{if(!rec){rec={supplier:sup,date,item,code:cat?cat.code:'',qty:0,weight:0,unitPrice:unit,price:0,note:''};arr.push(rec);}
+    rec.unitPrice=unit;rec.qty=qty;rec.price=+(qty*unit).toFixed(2);if(cat){rec.code=cat.code;rec.uom=cat.uom||'';}rec.invoice=gridInv(mod,sup,date);
+    if(mod==='purchase'){const dq=qty-oldQty;if(dq>0)invReceive(item,dq,dq*unit,null,null,date);else if(dq<0)invUnreceive(item,-dq);}}
+  gridRecalc(mod,sup);save();
+}
+async function setGridPrice(mod,sup,item,val){const price=+val||0;const c=ensureGridCat(sup).find(x=>x.name===item);if(c)c.price=price;const arr=d()[ledgerCfg(mod).arr]||[];arr.forEach(r=>{if(r.supplier===sup&&r.item===item){r.unitPrice=price;r.price=+((+r.qty||0)*price).toFixed(2);}});gridRecalc(mod,sup);save();}
+async function addGridItem(sup){const n=(prompt(LANG==="zh"?"新增品项名称：":"New item name:")||'').trim();if(!n)return;const cat=ensureGridCat(sup);if(!cat.some(c=>c.name===n)){const it=findItem(n);cat.push({name:n,code:'',uom:it?it.unit:'',spec:'',price:it?+it.cost||0:0});}await save();render();}
+async function delGridItem(mod,sup,item,month){if(!confirm((LANG==="zh"?"移除品项『"+item+"』？会删除它本月的录入。":"Remove item "+item+"?")))return;const cat=ensureGridCat(sup);const i=cat.findIndex(c=>c.name===item);if(i>=0)cat.splice(i,1);const arr=d()[ledgerCfg(mod).arr]||[];for(let k=arr.length-1;k>=0;k--){const r=arr[k];if(r.supplier===sup&&r.item===item&&(r.date||'').slice(0,7)===month){if(mod==='purchase')invUnreceive(item,+r.qty||0);arr.splice(k,1);}}await save();render();}
+async function addGridDate(mod,sup,month){const def=(TODAY.slice(0,7)===month)?TODAY:(month+'-01');const dt=(prompt(LANG==="zh"?"添加日期 (YYYY-MM-DD)：":"Add date (YYYY-MM-DD):",def)||'').trim();if(!/^\d{4}-\d{2}-\d{2}$/.test(dt))return;if(dt.slice(0,7)!==month)return alert(LANG==="zh"?"日期必须在本月内":"Date must be in this month");const key=mod+'|'+sup+'|'+month;d().gridExtra=d().gridExtra||{};d().gridExtra[key]=d().gridExtra[key]||[];if(!d().gridExtra[key].includes(dt))d().gridExtra[key].push(dt);await save();render();}
+async function delGridDate(mod,sup,month,date){if(!confirm((LANG==="zh"?"删除日期列 "+date+"？":"Delete date "+date+"?")))return;const arr=d()[ledgerCfg(mod).arr]||[];for(let k=arr.length-1;k>=0;k--){const r=arr[k];if(r.supplier===sup&&r.date===date){if(mod==='purchase')invUnreceive(r.item,+r.qty||0);arr.splice(k,1);}}const key=mod+'|'+sup+'|'+month;if(d().gridExtra&&d().gridExtra[key])d().gridExtra[key]=d().gridExtra[key].filter(x=>x!==date);await save();render();}
+function gridTable(mod,sup,month){
+  const zh=LANG==="zh";const w=subCanW(mod);
+  const cat=ensureGridCat(sup);const items=cat.map(c=>c.name);const dates=gridDates(mod,sup,month);
+  const price=it=>{const c=cat.find(x=>x.name===it);return c?+c.price||0:0;};
+  const q=(it,dt)=>{const r=gridRec(mod,sup,it,dt);return r?(+r.qty||0):'';};
+  const rQty=it=>dates.reduce((s,dt)=>s+(+q(it,dt)||0),0);
+  const rAmt=it=>rQty(it)*price(it);
+  const grand=items.reduce((s,it)=>s+rAmt(it),0);
+  const uom=it=>{const c=cat.find(x=>x.name===it);return c?(c.uom||''):'';};
+  const inv=dt=>gridInv(mod,sup,dt);
+  const spec=it=>{const c=cat.find(x=>x.name===it);return c?(c.spec||''):'';};
+  const controls=w?`<div style="display:flex;gap:6px;margin:8px 0;flex-wrap:wrap;"><button class="btn gold sm" onclick="addGridItem('${gEsc(sup)}')">+ ${zh?"品项":"Item"}</button></div>`:'';
+  if(items.length>10){
+    const head=`<th class="gcode">Code</th><th class="gname">${zh?"品名":"Item"}</th><th class="gunit">${zh?"单位":"Unit"}</th><th class="gpack">${zh?"规格/送货":"Pack"}</th><th class="gprice">${zh?"单价":"Price"}</th>`+dates.map(dt=>`<th class="gcell">${w?`<input placeholder="Invoice No." value="${inv(dt)}" onchange="setGridInv('${mod}','${gEsc(sup)}','${dt}',this.value)">`:`<span class="mini">${inv(dt)||'—'}</span>`}<div class="mini" style="margin-top:2px;">${dt.slice(5)}</div></th>`).join('')+`<th>${zh?"合计量":"Total Qty"}</th><th>${zh?"合计RM":"Total RM"}</th>${w?'<th></th>':''}`;
+    const body=items.map((it,i)=>`<tr><td class="gcode"><input value="${(cat.find(x=>x.name===it)||{}).code||''}" ${w?'':'disabled'} onchange="setGridCode('${mod}','${gEsc(sup)}','${gEsc(it)}',this.value)"></td><td class="gname"><input style="text-align:left;font-weight:700;" value="${it}" ${w?'':'disabled'} onchange="setGridName('${mod}','${gEsc(sup)}','${gEsc(it)}',this.value)"></td><td class="gunit"><input value="${uom(it)}" ${w?'':'disabled'} onchange="setGridUom('${mod}','${gEsc(sup)}','${gEsc(it)}',this.value)"></td><td class="gpack"><input placeholder="10kg x 6/ctn" value="${spec(it)}" ${w?'':'disabled'} onchange="setGridSpec('${mod}','${gEsc(sup)}','${gEsc(it)}',this.value)"></td><td class="gprice"><input type="number" step="0.01" value="${price(it)}" ${w?'':'disabled'} onchange="setGridPrice('${mod}','${gEsc(sup)}','${gEsc(it)}',this.value)"></td>${dates.map((dt,j)=>`<td class="gcell"><input type="number" step="0.01" value="${q(it,dt)}" ${w?'':'disabled'} oninput="setGridQty('${mod}','${gEsc(sup)}','${gEsc(it)}','${dt}',this.value)"><div class="camt" id="ca-${i}-${j}">${(+q(it,dt)||0)>0?money((+q(it,dt))*price(it)):''}</div></td>`).join('')}<td class="gtot" id="gtq-${i}">${num(rQty(it),2)}</td><td class="gtot" id="gta-${i}">${money(rAmt(it))}</td>${w?`<td style="text-align:center;"><span class="ib" onclick="delGridItem('${mod}','${gEsc(sup)}','${gEsc(it)}','${month}')">🗑️</span></td>`:''}</tr>`).join('')||`<tr><td colspan="${7+dates.length}" class="empty">${zh?"点『+ 品项』添加":"Add items"}</td></tr>`;
+    const dailyRow=`<tr class="gsum"><td class="gcode"></td><td class="gname">${zh?"每日合计RM":"Daily Total"}</td><td class="gunit"></td><td class="gpack"></td><td class="gprice"></td>${dates.map((dt,j)=>`<td id="gtd-${j}">${money(items.reduce((s,it)=>s+(+q(it,dt)||0)*price(it),0))}</td>`).join('')}<td></td><td></td>${w?'<td></td>':''}</tr>`;
+    return `${controls}<div class="gwrap"><table class="gtbl"><thead><tr>${head}</tr></thead><tbody>${body}<tr class="gsum"><td class="gcode"></td><td class="gname">${zh?"本月合计":"Month Total"}</td><td class="gunit"></td><td class="gpack"></td><td class="gprice"></td>${dates.map(()=>'<td></td>').join('')}<td></td><td id="gtg">${money(grand)}</td>${w?'<td></td>':''}</tr>${dailyRow}</tbody></table></div>`;
   }
-  return m;
+  const head=`<th class="gdate">${zh?"日期":"Date"}</th><th>Invoice No.</th>`+items.map(it=>`<th>${w?`<input style="font-weight:700;min-width:90px;" value="${it}" onchange="setGridName('${mod}','${gEsc(sup)}','${gEsc(it)}',this.value)"> <span class="ib" onclick="delGridItem('${mod}','${gEsc(sup)}','${gEsc(it)}','${month}')">×</span>`:it}</th>`).join('')+`<th>${zh?"当日RM":"Amt"}</th>`;
+  const codeRow=`<tr><td class="gdate" style="font-weight:700;">Code</td><td></td>${items.map(it=>`<td><input value="${(cat.find(x=>x.name===it)||{}).code||''}" ${w?'':'disabled'} onchange="setGridCode('${mod}','${gEsc(sup)}','${gEsc(it)}',this.value)"></td>`).join('')}<td></td></tr>`;
+  const priceRow=`<tr><td class="gdate" style="font-weight:700;">${zh?"单价RM":"Price"}</td><td></td>${items.map(it=>`<td><input type="number" step="0.01" value="${price(it)}" ${w?'':'disabled'} onchange="setGridPrice('${mod}','${gEsc(sup)}','${gEsc(it)}',this.value)"></td>`).join('')}<td></td></tr>`;
+  const uomRow=`<tr><td class="gdate" style="font-weight:700;">${zh?"单位":"Unit"}</td><td></td>${items.map(it=>`<td><input value="${uom(it)}" ${w?'':'disabled'} onchange="setGridUom('${mod}','${gEsc(sup)}','${gEsc(it)}',this.value)"></td>`).join('')}<td></td></tr>`;
+  const specRow=`<tr><td class="gdate" style="font-weight:700;">${zh?"规格":"Pack"}</td><td></td>${items.map(it=>`<td><input placeholder="10kg x 6/ctn" value="${spec(it)}" ${w?'':'disabled'} onchange="setGridSpec('${mod}','${gEsc(sup)}','${gEsc(it)}',this.value)"></td>`).join('')}<td></td></tr>`;
+  const body=dates.map((dt,j)=>{const dayAmt=items.reduce((s,it)=>s+(+q(it,dt)||0)*price(it),0);return `<tr><td class="gdate">${dt.slice(5)}</td><td>${w?`<input placeholder="Invoice No." value="${inv(dt)}" onchange="setGridInv('${mod}','${gEsc(sup)}','${dt}',this.value)">`:(inv(dt)||'—')}</td>${items.map((it,i)=>`<td class="gcell"><input type="number" step="0.01" value="${q(it,dt)}" ${w?'':'disabled'} oninput="setGridQty('${mod}','${gEsc(sup)}','${gEsc(it)}','${dt}',this.value)"><div class="camt" id="ca-${i}-${j}">${(+q(it,dt)||0)>0?money((+q(it,dt))*price(it)):''}</div></td>`).join('')}<td class="gtot" id="gtd-${j}">${money(dayAmt)}</td></tr>`;}).join('')||`<tr><td colspan="${items.length+3}" class="empty">${zh?"点『+ 品项』添加品项":"Add items"}</td></tr>`;
+  return `${controls}<div class="gwrap"><table class="gtbl"><thead><tr>${head}</tr></thead><tbody>${items.length?codeRow+priceRow+uomRow+specRow:''}${body}<tr class="gsum"><td class="gdate">${zh?"合计":"Total"}</td><td></td>${items.map((it,i)=>`<td id="gta-${i}">${money(rAmt(it))}</td>`).join('')}<td id="gtg">${money(grand)}</td></tr></tbody></table></div>`;
 }
-async function loadCatalogItems(){ // 手动补入供应商目录里还没在表内的品名
-  const g=_pg();if(!g)return;const cat=(typeof SUPPLIER_CATALOG!=='undefined'&&SUPPLIER_CATALOG[selSupplier])||[];
-  if(!cat.length)return alert(LANG==="zh"?"该供应商目录暂无品名可载入。":"No catalog items for this supplier.");
-  const have=new Set((g.items||[]).map(it=>(it.name||'').trim()));let added=0;
-  cat.forEach(nm=>{if(!have.has((nm||'').trim())){const it={id:_gid(),code:'',name:nm,uom:'',price:0,spec:''};g.items.push(it);g.cells[it.id]={};added++;}});
-  g._noSeed=false;await gridSaveNow();render();
-  if(!added)alert(LANG==="zh"?"目录品名已全部在表内。":"All catalog items already present.");
+function gridSummaryHTML(mod,sup,month){
+  const arr=(d()[ledgerCfg(mod).arr]||[]).filter(r=>r.supplier===sup&&(r.date||'').slice(0,7)===month);
+  const mTot=sumField(arr,'price');const summ=itemSummary(arr);
+  if(!summ.length)return '';
+  return `<h2 class="h">📦 ${LANG==="zh"?"各货物本月总计":"Per-Item Totals"} <span class="tag">${monthLabel(month)}</span></h2>
+    <div class="card tbl" style="overflow-x:auto;"><table><thead><tr><th>${LANG==="zh"?"品名":"Item"}</th><th>${LANG==="zh"?"总数量":"Qty"}</th><th>${LANG==="zh"?"总价钱":"Total"}</th></tr></thead><tbody>
+    ${summ.map(s=>`<tr><td><b>${s.item}</b></td><td>${num(s.qty,2)}</td><td>${money(s.price)}</td></tr>`).join('')}
+    <tr style="background:#FAFBFC;font-weight:800;"><td colspan="2">${LANG==="zh"?"本月合计":"Month Total"}</td><td>${money(mTot)}</td></tr></tbody></table></div>`;
 }
-function _pg(){const r=procGridRoot()[selSupplier]||{};return r[gridMonth];}
-function gridSupplierTotal(sup){const r=procGridRoot()[sup]||{};let s=0;Object.keys(r).forEach(ym=>{if(!/^\d{4}-\d{2}$/.test(ym))return;const g=r[ym],dim=daysInMonth(ym);(g.items||[]).forEach(it=>{const p=+it.price||0,c=g.cells[it.id]||{};for(let dd=1;dd<=dim;dd++)s+=(+c[dd]||0)*p;});});return s;}
-/* ---- 实时计算（仅改内存 + 直接改受影响单元格的文字，不整页重渲染）---- */
-function pcNum(el){const v=parseFloat(el.value);return isNaN(v)?0:v;}
-function rowSum(itemId){const g=_pg();if(!g)return 0;const c=g.cells[itemId]||{};let s=0;for(const k in c)s+=(+c[k]||0);return s;}
-function daySum(day){const g=_pg();if(!g)return 0;let s=0;g.items.forEach(it=>{s+=(+(g.cells[it.id]||{})[day]||0)*(+it.price||0);});return s;}
-function gridGrand(){const g=_pg();if(!g)return 0;let s=0;g.items.forEach(it=>{s+=rowSum(it.id)*(+it.price||0);});return s;}
-function recalcRow(itemId){const g=_pg();const it=g.items.find(x=>x.id===itemId);const el=document.getElementById('prt_'+itemId);if(el)el.textContent=n2(rowSum(itemId)*(it?(+it.price||0):0));}
-function recalcDay(day){const el=document.getElementById('pdt_'+day);if(el)el.textContent=n2(daySum(day));}
-function recalcGrand(){const el=document.getElementById('pgt');if(el)el.textContent=n2(gridGrand());}
-function pcCell(itemId,day,el){const g=_pg();if(!g)return;const q=pcNum(el);(g.cells[itemId]=g.cells[itemId]||{})[day]=q;const it=g.items.find(x=>x.id===itemId);const price=it?(+it.price||0):0;const a=document.getElementById('pa_'+itemId+'_'+day);if(a){const v=q*price;a.textContent=v?n2(v):'';a.classList.toggle('zero',!v);}recalcRow(itemId);recalcDay(day);recalcGrand();scheduleGridSave();}
-function pcPrice(itemId,el){const g=_pg();const it=g.items.find(x=>x.id===itemId);if(!it)return;it.price=pcNum(el);const dim=daysInMonth(gridMonth),c=g.cells[itemId]||{};for(let dd=1;dd<=dim;dd++){const a=document.getElementById('pa_'+itemId+'_'+dd);if(a){const v=(+c[dd]||0)*it.price;a.textContent=v?n2(v):'';a.classList.toggle('zero',!v);}recalcDay(dd);}recalcRow(itemId);recalcGrand();scheduleGridSave();}
-function pcMeta(itemId,field,el){const g=_pg();const it=g.items.find(x=>x.id===itemId);if(!it)return;it[field]=el.value;scheduleGridSave();}
-function pcInv(day,el){const g=_pg();if(!g)return;g.inv[day]=el.value;scheduleGridSave();}
-function scheduleGridSave(){if(_gridSaveTimer)clearTimeout(_gridSaveTimer);_gridSaveTimer=setTimeout(gridSaveNow,450);}
-async function gridSaveNow(){if(_gridSaveTimer){clearTimeout(_gridSaveTimer);_gridSaveTimer=null;}syncGridToPurchases();await save();}
-function syncGridToPurchases(){const root=procGridRoot();const keep=(d().purchases||[]).filter(r=>r.src!=='grid');const out=[];
-  Object.keys(root).forEach(sup=>{const sm=root[sup]||{};Object.keys(sm).forEach(ym=>{if(!/^\d{4}-\d{2}$/.test(ym))return;const g=sm[ym],dim=daysInMonth(ym);
-    (g.items||[]).forEach(it=>{const price=+it.price||0,c=g.cells[it.id]||{};for(let dd=1;dd<=dim;dd++){const q=+c[dd]||0;if(!q)continue;const date=ym+'-'+String(dd).padStart(2,'0');
-      out.push({id:'PG-'+ym+'-'+dd+'-'+it.id,src:'grid',supplier:sup,code:it.code||'',item:it.name||'',uom:it.uom||'',spec:it.spec||'',date,qty:q,weight:0,unit:price,price:+(q*price).toFixed(2),invoice:g.inv[dd]||'',note:''});}});
-  });});
-  d().purchases=keep.concat(out);}
-/* ---- 品项 / 月份 增删 ---- */
-async function addGridItem(){const g=_pg();if(!g)return;const it={id:'g'+Date.now().toString(36)+Math.random().toString(36).slice(2,5),code:'',name:'',uom:'',price:0,spec:''};g.items.push(it);g.cells[it.id]={};await gridSaveNow();render();}
-async function delGridItem(itemId){if(!confirm(LANG==="zh"?"删除此品项（含本月所有数量）？":"Delete this item?"))return;const g=_pg();if(!g)return;g.items=g.items.filter(x=>x.id!==itemId);delete g.cells[itemId];if(!g.items.length)g._noSeed=true;await gridSaveNow();render();}
-function setGridMonth(ym){gridMonth=ym;procGridEnsure(selSupplier,ym);render();window.scrollTo(0,0);}
-async function addGridMonth(){const ms=procGridMonths(selSupplier);let def='2026-06';if(ms.length){const[y,m]=ms[ms.length-1].split('-').map(Number);def=new Date(y,m,1).toISOString().slice(0,7);}
-  const ym=prompt(LANG==="zh"?"新增月份 (YYYY-MM)，例如 2026-07：":"Add month (YYYY-MM):",def);if(!ym)return;const v=ym.trim();if(!/^\d{4}-\d{2}$/.test(v))return alert(LANG==="zh"?"格式须为 YYYY-MM":"Format YYYY-MM");procGridEnsure(selSupplier,v);gridMonth=v;await gridSaveNow();render();}
-async function delGridMonth(ym){if(!confirm(LANG==="zh"?`删除整个 ${ym} 月的采购网格？`:`Delete month ${ym}?`))return;const root=procGridRoot();if(root[selSupplier])delete root[selSupplier][ym];gridMonth=null;await gridSaveNow();render();}
-/* ---- 网格 HTML ---- */
-function gridActiveStyle(g){if(gridStyleOv==='s1'||gridStyleOv==='s2')return gridStyleOv;return ((g.items||[]).length>10)?'s1':'s2';}
-function gridTableHtml(sup,ym,writable){const g=procGridEnsure(sup,ym);return gridActiveStyle(g)==='s1'?gridS1(sup,ym,g,writable):gridS2(sup,ym,g,writable);}
-
-/* ===== 风格一：行=品项，列=日期（品项 >10 时）===== */
-function gridS1(sup,ym,g,writable){
-  const dim=daysInMonth(ym);const[Y,M]=ym.split('-').map(Number);
-  const wd=LANG==="zh"?['日','一','二','三','四','五','六']:['Su','Mo','Tu','We','Th','Fr','Sa'];
-  const ro=writable?'':' readonly';
-  const W={code:54,name:150,uom:44,spec:104,price:64,day:72,tot:96};
-  const L={code:0,name:54,uom:204,spec:248,price:352}; // 冻结列累计左偏移
-  let cols=`<col style="width:${W.code}px"><col style="width:${W.name}px"><col style="width:${W.uom}px"><col style="width:${W.spec}px"><col style="width:${W.price}px">`;
-  for(let dd=1;dd<=dim;dd++)cols+=`<col style="width:${W.day}px">`;
-  cols+=`<col style="width:${W.tot}px">`;
-  let h=`<th class="xf" style="left:${L.code}px">CODE</th><th class="xf" style="left:${L.name}px">${LANG==="zh"?"品名":"Item"}</th><th class="xf" style="left:${L.uom}px">${LANG==="zh"?"单位":"UOM"}</th><th class="xf" style="left:${L.spec}px">${LANG==="zh"?"规格/送货":"Spec"}</th><th class="xf" style="left:${L.price}px">${LANG==="zh"?"单价":"U/Price"}</th>`;
-  for(let dd=1;dd<=dim;dd++){const w=new Date(Y,M-1,dd).getDay();const ds=String(dd).padStart(2,'0');h+=`<th><input class="invh"${ro} value="${xgEsc(g.inv[dd]||'')}" oninput="pcInv(${dd},this)" placeholder="Invoice No."><div class="dh">${M}-${ds}<span class="sub">${wd[w]}</span></div></th>`;}
-  h+=`<th>${LANG==="zh"?"本月合计":"Item Total"}</th>`;
-  const body=(g.items||[]).map(it=>{const c=g.cells[it.id]||{};const price=+it.price||0;
-    let cells='';for(let dd=1;dd<=dim;dd++){const q=+c[dd]||0,a=q*price;cells+=`<td><input class="qty" inputmode="decimal"${ro} value="${q||''}" oninput="pcCell('${it.id}',${dd},this)" onfocus="this.select()"><span class="amt${a?'':' zero'}" id="pa_${it.id}_${dd}">${a?n2(a):''}</span></td>`;}
-    const del=writable?`<span class="delrow" onclick="delGridItem('${it.id}')">✕</span>`:'';
-    return `<tr>
-      <td class="xf" style="left:${L.code}px"><input${ro} value="${xgEsc(it.code)}" oninput="pcMeta('${it.id}','code',this)" placeholder="—" style="font-size:10px;color:#789;text-align:left;padding-left:5px;"></td>
-      <td class="xf name" style="left:${L.name}px">${del}<input${ro} value="${xgEsc(it.name)}" oninput="pcMeta('${it.id}','name',this)" placeholder="${LANG==="zh"?"品名":"Item"}"></td>
-      <td class="xf" style="left:${L.uom}px"><input${ro} value="${xgEsc(it.uom)}" oninput="pcMeta('${it.id}','uom',this)" placeholder="kg" style="font-size:10px;"></td>
-      <td class="xf" style="left:${L.spec}px"><input${ro} value="${xgEsc(it.spec)}" oninput="pcMeta('${it.id}','spec',this)" placeholder="10kg×6/ctn" style="font-size:10px;text-align:left;padding-left:5px;"></td>
-      <td class="xf" style="left:${L.price}px"><input class="qty"${ro} inputmode="decimal" value="${price||''}" oninput="pcPrice('${it.id}',this)" placeholder="RM" style="font-weight:700;"></td>
-      ${cells}
-      <td class="rowtot" id="prt_${it.id}">${n2(rowSum(it.id)*price)}</td>
-    </tr>`;
-  }).join('')||`<tr><td class="xf" style="left:0" colspan="5">—</td><td colspan="${dim+1}" style="text-align:left;padding:10px;color:#999;">${LANG==="zh"?"点『+ 加品项』开始录入":"Add an item"}</td></tr>`;
-  let f=`<td class="xf" style="left:${L.code}px"></td><td class="xf" style="left:${L.name}px">${LANG==="zh"?"每日合计RM":"Day Total"}</td><td class="xf" style="left:${L.uom}px"></td><td class="xf" style="left:${L.spec}px"></td><td class="xf" style="left:${L.price}px"></td>`;
-  for(let dd=1;dd<=dim;dd++)f+=`<td class="daytot" id="pdt_${dd}">${n2(daySum(dd))}</td>`;
-  f+=`<td class="gtot" id="pgt">${n2(gridGrand())}</td>`;
-  return `<div class="xgwrap"><table class="xg s1"><colgroup>${cols}</colgroup><thead><tr>${h}</tr></thead><tbody>${body}</tbody><tfoot><tr>${f}</tr></tfoot></table></div>`;
-}
-
-/* ===== 风格二：行=日期，列=品项（品项 ≤10 时）===== */
-function gridS2(sup,ym,g,writable){
-  const dim=daysInMonth(ym);const[Y,M]=ym.split('-').map(Number);
-  const wd=LANG==="zh"?['日','一','二','三','四','五','六']:['Su','Mo','Tu','We','Th','Fr','Sa'];
-  const ro=writable?'':' readonly';const items=g.items||[];
-  const W={date:66,inv:104,item:128,tot:88};const L={date:0,inv:66};
-  let cols=`<col style="width:${W.date}px"><col style="width:${W.inv}px">`;
-  items.forEach(()=>cols+=`<col style="width:${W.item}px">`);
-  cols+=`<col style="width:${W.tot}px">`;
-  // 单行表头：每个品项 th 内堆叠 品名/单位/规格/单价
-  const itemHead=items.map(it=>{const del=writable?`<span class="delrow" onclick="delGridItem('${it.id}')">✕</span>`:'';
-    return `<th><div class="ih"><div class="ihn">${del}<input${ro} value="${xgEsc(it.name)}" oninput="pcMeta('${it.id}','name',this)" placeholder="${LANG==="zh"?"品名":"Item"}" style="font-weight:800;"></div><input${ro} value="${xgEsc(it.uom)}" oninput="pcMeta('${it.id}','uom',this)" placeholder="kg" style="font-size:9px;color:#456;"><input${ro} value="${xgEsc(it.spec)}" oninput="pcMeta('${it.id}','spec',this)" placeholder="10kg×6/ctn" style="font-size:9px;color:#678;"><input class="qty"${ro} inputmode="decimal" value="${(+it.price||0)||''}" oninput="pcPrice('${it.id}',this)" placeholder="RM/单价" style="font-weight:700;color:#124;"></div></th>`;}).join('')
-    ||`<th style="min-width:160px;color:#999;font-weight:400;padding:10px;">${LANG==="zh"?"点『+ 加品项』开始录入":"Add an item"}</th>`;
-  const h=`<th class="xf" style="left:${L.date}px">${LANG==="zh"?"日期":"Date"}</th><th class="xf" style="left:${L.inv}px">INVOICE NO.</th>${itemHead}<th>${LANG==="zh"?"当日RM":"Day RM"}</th>`;
-  let body='';
-  for(let dd=1;dd<=dim;dd++){const w=new Date(Y,M-1,dd).getDay();const ds=String(dd).padStart(2,'0');
-    let cells=items.map(it=>{const q=+(g.cells[it.id]||{})[dd]||0,price=+it.price||0,a=q*price;
-      return `<td><input class="qty" inputmode="decimal"${ro} value="${q||''}" oninput="pcCell('${it.id}',${dd},this)" onfocus="this.select()"><span class="amt${a?'':' zero'}" id="pa_${it.id}_${dd}">${a?n2(a):''}</span></td>`;}).join('')
-      ||`<td style="color:#ccc;">—</td>`;
-    body+=`<tr>
-      <td class="xf datec" style="left:${L.date}px">${M}-${ds}<span class="sub">${wd[w]}</span></td>
-      <td class="xf" style="left:${L.inv}px"><input class="invh"${ro} value="${xgEsc(g.inv[dd]||'')}" oninput="pcInv(${dd},this)" placeholder="Invoice No."></td>
-      ${cells}
-      <td class="daytot" id="pdt_${dd}">${n2(daySum(dd))}</td>
-    </tr>`;}
-  let f=`<td class="xf" style="left:${L.date}px">${LANG==="zh"?"合计":"Total"}</td><td class="xf" style="left:${L.inv}px"></td>`;
-  f+=items.map(it=>`<td class="rowtot" id="prt_${it.id}">${n2(rowSum(it.id)*(+it.price||0))}</td>`).join('')||`<td></td>`;
-  f+=`<td class="gtot" id="pgt">${n2(gridGrand())}</td>`;
-  return `<div class="xgwrap"><table class="xg s2"><colgroup>${cols}</colgroup><thead><tr>${h}</tr></thead><tbody>${body}</tbody><tfoot><tr>${f}</tr></tfoot></table></div>`;
-}
-
 /* ---- 简易表单弹窗（复用既有 #mbox/#mbg，不干扰 openM）---- */
 function openForm(html){document.getElementById('mbox').innerHTML=html;document.getElementById('mbg').classList.add('show');}
 
@@ -2455,6 +2389,17 @@ function pgLedger(mod){
       <div class="hint">${LANG==="zh"?"点选供应商 → 先看每月汇总，再点月份看该月每日明细。":"Tap a supplier → monthly breakdown → tap a month for its daily list."}</div>
       ${writable?`<div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;"><button class="btn gold sm" onclick="addSupplier()">+ ${LANG==="zh"?"新增供应商":"Add Supplier"}</button><button class="btn ghost sm" onclick="bulkAddForm('supplier')">📋 ${LANG==="zh"?"批量导入":"Bulk Import"}</button>${sups.length?`<button class="btn ghost sm" onclick="clearSuppliers()">🗑️ ${LANG==="zh"?"清空全部":"Clear All"}</button>`:''}</div>`:''}
       ${cards}`;
+  }
+  // —— 采购进货：按月整表录入（网格，风格同 BeefHouse）——
+  if(mod==='purchase'){
+    const arrAll=arr.filter(r=>r.supplier===selSupplier);
+    const dataMonths=[...new Set(arrAll.map(r=>(r.date||'').slice(0,7)).filter(Boolean))];
+    const months=[...new Set([...ensureGridMonths(),...dataMonths])].sort().reverse();
+    const curM=(ledgerMonth!=='all'&&months.includes(ledgerMonth))?ledgerMonth:(months.includes(TODAY.slice(0,7))?TODAY.slice(0,7):months[0]);
+    const supHead=`<div class="fb"><h2 class="h" style="margin:0;">${cfg.icon} ${selSupplier}</h2><button class="btn ghost sm" onclick="backSupplier()">← ${LANG==="zh"?"供应商列表":"Suppliers"}</button></div>`;
+    const tabs=`<div class="seg" style="flex-wrap:wrap;margin-bottom:8px;">${months.map(m=>`<button class="${m===curM?'active':''}" onclick="setLedgerMonth('${m}')">${monthLabel(m)}${writable&&!dataMonths.includes(m)?` <span class="ib" title="${LANG==="zh"?'从列表移除(空月)':'remove'}" onclick="event.stopPropagation();delGridMonth('${m}')">×</span>`:''}</button>`).join('')}${writable?`<button onclick="addGridMonth()">+ ${LANG==="zh"?"月份":"Month"}</button>`:''}</div>`;
+    const hint=`<div class="hint">${LANG==="zh"?"选月份 → 直接在表格里填『数量』(输入即时算金额、即时更新总计)。品项>10个用『行=品项 列=日期』，≤10个用『行=日期 列=品项』。品名/单价/单位/规格随时改，用 ×/🗑️ 删除。":"Pick a month, type quantities in the grid."}</div>`;
+    return `${supHead}${tabs}${hint}${gridTable(mod,selSupplier,curM)}<div id="gridSummary">${gridSummaryHTML(mod,selSupplier,curM)}</div>`;
   }
   // —— 单一供应商：月份 breakdown → 点月份看该月每日列表 ——
   const rs=arr.filter(r=>r.supplier===selSupplier).slice();
@@ -2661,47 +2606,8 @@ async function saveOffer(editIdx){const g=id=>document.getElementById(id);
   await save();closeM();render();}
 async function delOffer(gi){if(!confirm(LANG==="zh"?"删除此招待？":"Delete?"))return;const old=d().offers[gi]||{};d().offers.splice(gi,1);auditLog("删除招待",(old.type||'')+" "+(old.item||''),money(old.total),"");await save();render();}
 
-/* 路由封装：三个供应商账册 */
-function pgPurchase(){
-  const writable=subCanW('purchase')&&!isAgg();
-  const back=`<button class="btn ghost sm" onclick="nav('proc')">← ${LANG==="zh"?"进销存作业":"Operations"}</button>`;
-  // —— 供应商列表 ——
-  if(!selSupplier){
-    const sups=supplierList();
-    const cards=sups.map(v=>{const months=procGridMonths(v.name);const tot=gridSupplierTotal(v.name);const nm2=v.name.replace(/'/g,"\\'");
-      return `<div class="card" style="padding:13px;margin-bottom:9px;cursor:pointer;" onclick="setSupplier('${nm2}')">
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-          <div><div style="font-weight:800;font-size:15px;">🏢 ${v.name}</div>
-          <div class="mini">${months.length} ${LANG==="zh"?"个月网格":"months"} · ${LANG==="zh"?"账期":"Terms"} ${v.terms}${LANG==="zh"?"天":"d"}</div></div>
-          <div style="text-align:right;"><div style="font-weight:800;">${money(tot)}</div>
-          <div style="white-space:nowrap;">${writable?`<button class="ib" onclick="event.stopPropagation();renameSupplier(${v.id})">✏️</button> <button class="ib" onclick="event.stopPropagation();delSupplier(${v.id})">🗑️</button> `:''}<span class="mini">›</span></div></div>
-        </div></div>`;
-    }).join('')||`<div class="empty">${LANG==="zh"?"暂无供应商，点『新增供应商』开始添加。":"No suppliers — tap Add Supplier."}</div>`;
-    return `<div class="fb"><h2 class="h" style="margin:0;">📥 ${LANG==="zh"?"采购进货":"Purchases"} <span class="tag">${nm(outletObj())}</span></h2>${back}</div>
-      <div class="hint">${LANG==="zh"?"点供应商 → 打开该供应商的每日采购网格（Excel 式，按月分开）。":"Tap a supplier → daily purchase grid (Excel-style, by month)."}</div>
-      ${writable?`<div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;"><button class="btn gold sm" onclick="addSupplier()">+ ${LANG==="zh"?"新增供应商":"Add Supplier"}</button><button class="btn ghost sm" onclick="bulkAddForm('supplier')">📋 ${LANG==="zh"?"批量导入":"Bulk Import"}</button></div>`:''}
-      ${cards}`;
-  }
-  // —— 选中供应商：月份 Tab + Excel 网格 ——
-  const sup=selSupplier;let months=procGridMonths(sup);
-  if(!gridMonth||!/^\d{4}-\d{2}$/.test(gridMonth))gridMonth=months.length?months[months.length-1]:(TODAY.slice(0,7)<'2026-06'?'2026-06':TODAY.slice(0,7));
-  procGridEnsure(sup,gridMonth);months=procGridMonths(sup);
-  const g=_pg();const itemCount=(g.items||[]).length;
-  const tabs=months.map(m=>`<button class="${m===gridMonth?'active':''}" onclick="setGridMonth('${m}')">${monthLabel(m)}</button>`).join('');
-  const supHead=`<div class="fb"><h2 class="h" style="margin:0;">📥 ${sup}</h2><button class="btn ghost sm" onclick="backSupplier()">← ${LANG==="zh"?"供应商列表":"Suppliers"}</button></div>`;
-  const curStyle=gridActiveStyle(g);
-  const monthBar=`<div class="xmtabs">${tabs}${writable?`<button onclick="addGridMonth()" style="border-style:dashed;color:#0F5C4E;">+ ${LANG==="zh"?"月份":"Month"}</button>`:''}${writable&&months.length>1?`<button onclick="delGridMonth('${gridMonth}')" style="border-color:#e0b4b4;color:#B23A3A;">🗑 ${monthLabel(gridMonth)}</button>`:''}</div>`;
-  const styleSeg=`<div class="seg" style="margin-left:auto;">
-    <button class="${gridStyleOv===null?'active':''}" onclick="setGridStyle(null)" title="${LANG==="zh"?"依品项数自动":"Auto"}">${LANG==="zh"?"自动":"Auto"}</button>
-    <button class="${gridStyleOv==='s1'?'active':''}" onclick="setGridStyle('s1')">${LANG==="zh"?"行=品项":"Items↓"}</button>
-    <button class="${gridStyleOv==='s2'?'active':''}" onclick="setGridStyle('s2')">${LANG==="zh"?"行=日期":"Dates↓"}</button>
-  </div>`;
-  const catN=((typeof SUPPLIER_CATALOG!=='undefined'&&SUPPLIER_CATALOG[sup])||[]).length;
-  const loadBtn=(writable&&catN)?`<button class="btn ghost sm" onclick="loadCatalogItems()" title="${LANG==="zh"?"把供应商目录里的品名补进表内":"Load supplier catalog names"}">↺ ${LANG==="zh"?"载入品名":"Catalog"} (${catN})</button>`:'';
-  const toolbar=writable?`<div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;align-items:center;"><button class="btn brand sm" onclick="addGridItem()">+ ${LANG==="zh"?"品项":"Add Item"}</button>${loadBtn}<span class="mini">${itemCount} ${LANG==="zh"?"品项":"items"} · ${curStyle==='s1'?(LANG==="zh"?"行=品项 列=日期":"rows=items"):(LANG==="zh"?"行=日期 列=品项":"rows=dates")}</span>${styleSeg}</div>`:`<div style="display:flex;margin-bottom:8px;">${styleSeg}</div>`;
-  const hint=`<div class="hint">${LANG==="zh"?"选月份 → 直接在表格里填『数量』（每格自动算金额）。品项>10个用『行=品项 列=日期』，≤10个用『行=日期 列=品项』（可用右上『自动/行』切换）。品名/单价/单位/规格随时改，用 ✕ 删品项、月份 × 删整月。":"Fill quantity; amount auto. >10 items → items as rows, else dates as rows."}</div>`;
-  return `${supHead}${monthBar}${toolbar}${hint}${gridTableHtml(sup,gridMonth,writable)}`;
-}
+/* 路由封装：三个供应商账册（purchase 走 BeefHouse 式整表网格，见 pgLedger）*/
+function pgPurchase(){return pgLedger('purchase');}
 function pgGRN(){return pgLedger('grn');}
 function pgMonthEnd(){return pgLedger('monthend');}
 
