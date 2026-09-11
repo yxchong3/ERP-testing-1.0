@@ -2202,7 +2202,37 @@ function daysInMonth(ym){const[y,m]=ym.split('-').map(Number);return new Date(y,
 function n2(x){return (Math.round((x||0)*100)/100).toFixed(2);}
 function procGridRoot(){if(!d().procGrid)d().procGrid={};return d().procGrid;}
 function procGridMonths(sup){const r=procGridRoot()[sup]||{};return Object.keys(r).filter(k=>/^\d{4}-\d{2}$/.test(k)).sort();}
-function procGridEnsure(sup,ym){const root=procGridRoot();if(!root[sup])root[sup]={};if(!root[sup][ym])root[sup][ym]={items:[],inv:{},cells:{}};return root[sup][ym];}
+function _gid(){return 'g'+Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
+function procGridSeedItems(sup){ // 用供应商目录的原始品名铺好（你原本的数据）
+  const cat=(typeof SUPPLIER_CATALOG!=='undefined'&&SUPPLIER_CATALOG[sup])?SUPPLIER_CATALOG[sup]:[];
+  return cat.map(nm=>({id:_gid(),code:'',name:nm,uom:'',price:0,spec:''}));
+}
+function procGridEnsure(sup,ym){
+  const root=procGridRoot();if(!root[sup])root[sup]={};
+  let m=root[sup][ym];
+  if(!m){
+    // 新建月份：优先复制"≤当月的最近已建月"的品项（含单价/单位/规格，清空数量），否则用供应商目录原始品名
+    const prev=Object.keys(root[sup]).filter(k=>/^\d{4}-\d{2}$/.test(k)&&k<ym).sort();
+    let items;
+    if(prev.length){const src=root[sup][prev[prev.length-1]];items=(src.items||[]).map(it=>({id:_gid(),code:it.code||'',name:it.name||'',uom:it.uom||'',price:+it.price||0,spec:it.spec||''}));}
+    else items=procGridSeedItems(sup);
+    const cells={};items.forEach(it=>cells[it.id]={});
+    root[sup][ym]=m={items,inv:{},cells};
+  }else if((!m.items||m.items.length===0)&&!m._noSeed){
+    // 既有空月份（旧版本遗留）→ 自动补入你原本的目录品名
+    const items=procGridSeedItems(sup);
+    if(items.length){m.items=items;m.cells={};items.forEach(it=>m.cells[it.id]={});}
+  }
+  return m;
+}
+async function loadCatalogItems(){ // 手动补入供应商目录里还没在表内的品名
+  const g=_pg();if(!g)return;const cat=(typeof SUPPLIER_CATALOG!=='undefined'&&SUPPLIER_CATALOG[selSupplier])||[];
+  if(!cat.length)return alert(LANG==="zh"?"该供应商目录暂无品名可载入。":"No catalog items for this supplier.");
+  const have=new Set((g.items||[]).map(it=>(it.name||'').trim()));let added=0;
+  cat.forEach(nm=>{if(!have.has((nm||'').trim())){const it={id:_gid(),code:'',name:nm,uom:'',price:0,spec:''};g.items.push(it);g.cells[it.id]={};added++;}});
+  g._noSeed=false;await gridSaveNow();render();
+  if(!added)alert(LANG==="zh"?"目录品名已全部在表内。":"All catalog items already present.");
+}
 function _pg(){const r=procGridRoot()[selSupplier]||{};return r[gridMonth];}
 function gridSupplierTotal(sup){const r=procGridRoot()[sup]||{};let s=0;Object.keys(r).forEach(ym=>{if(!/^\d{4}-\d{2}$/.test(ym))return;const g=r[ym],dim=daysInMonth(ym);(g.items||[]).forEach(it=>{const p=+it.price||0,c=g.cells[it.id]||{};for(let dd=1;dd<=dim;dd++)s+=(+c[dd]||0)*p;});});return s;}
 /* ---- 实时计算（仅改内存 + 直接改受影响单元格的文字，不整页重渲染）---- */
@@ -2227,7 +2257,7 @@ function syncGridToPurchases(){const root=procGridRoot();const keep=(d().purchas
   d().purchases=keep.concat(out);}
 /* ---- 品项 / 月份 增删 ---- */
 async function addGridItem(){const g=_pg();if(!g)return;const it={id:'g'+Date.now().toString(36)+Math.random().toString(36).slice(2,5),code:'',name:'',uom:'',price:0,spec:''};g.items.push(it);g.cells[it.id]={};await gridSaveNow();render();}
-async function delGridItem(itemId){if(!confirm(LANG==="zh"?"删除此品项（含本月所有数量）？":"Delete this item?"))return;const g=_pg();if(!g)return;g.items=g.items.filter(x=>x.id!==itemId);delete g.cells[itemId];await gridSaveNow();render();}
+async function delGridItem(itemId){if(!confirm(LANG==="zh"?"删除此品项（含本月所有数量）？":"Delete this item?"))return;const g=_pg();if(!g)return;g.items=g.items.filter(x=>x.id!==itemId);delete g.cells[itemId];if(!g.items.length)g._noSeed=true;await gridSaveNow();render();}
 function setGridMonth(ym){gridMonth=ym;procGridEnsure(selSupplier,ym);render();window.scrollTo(0,0);}
 async function addGridMonth(){const ms=procGridMonths(selSupplier);let def='2026-06';if(ms.length){const[y,m]=ms[ms.length-1].split('-').map(Number);def=new Date(y,m,1).toISOString().slice(0,7);}
   const ym=prompt(LANG==="zh"?"新增月份 (YYYY-MM)，例如 2026-07：":"Add month (YYYY-MM):",def);if(!ym)return;const v=ym.trim();if(!/^\d{4}-\d{2}$/.test(v))return alert(LANG==="zh"?"格式须为 YYYY-MM":"Format YYYY-MM");procGridEnsure(selSupplier,v);gridMonth=v;await gridSaveNow();render();}
@@ -2666,7 +2696,9 @@ function pgPurchase(){
     <button class="${gridStyleOv==='s1'?'active':''}" onclick="setGridStyle('s1')">${LANG==="zh"?"行=品项":"Items↓"}</button>
     <button class="${gridStyleOv==='s2'?'active':''}" onclick="setGridStyle('s2')">${LANG==="zh"?"行=日期":"Dates↓"}</button>
   </div>`;
-  const toolbar=writable?`<div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;align-items:center;"><button class="btn brand sm" onclick="addGridItem()">+ ${LANG==="zh"?"品项":"Add Item"}</button><span class="mini">${itemCount} ${LANG==="zh"?"品项":"items"} · ${curStyle==='s1'?(LANG==="zh"?"行=品项 列=日期":"rows=items"):(LANG==="zh"?"行=日期 列=品项":"rows=dates")}</span>${styleSeg}</div>`:`<div style="display:flex;margin-bottom:8px;">${styleSeg}</div>`;
+  const catN=((typeof SUPPLIER_CATALOG!=='undefined'&&SUPPLIER_CATALOG[sup])||[]).length;
+  const loadBtn=(writable&&catN)?`<button class="btn ghost sm" onclick="loadCatalogItems()" title="${LANG==="zh"?"把供应商目录里的品名补进表内":"Load supplier catalog names"}">↺ ${LANG==="zh"?"载入品名":"Catalog"} (${catN})</button>`:'';
+  const toolbar=writable?`<div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;align-items:center;"><button class="btn brand sm" onclick="addGridItem()">+ ${LANG==="zh"?"品项":"Add Item"}</button>${loadBtn}<span class="mini">${itemCount} ${LANG==="zh"?"品项":"items"} · ${curStyle==='s1'?(LANG==="zh"?"行=品项 列=日期":"rows=items"):(LANG==="zh"?"行=日期 列=品项":"rows=dates")}</span>${styleSeg}</div>`:`<div style="display:flex;margin-bottom:8px;">${styleSeg}</div>`;
   const hint=`<div class="hint">${LANG==="zh"?"选月份 → 直接在表格里填『数量』（每格自动算金额）。品项>10个用『行=品项 列=日期』，≤10个用『行=日期 列=品项』（可用右上『自动/行』切换）。品名/单价/单位/规格随时改，用 ✕ 删品项、月份 × 删整月。":"Fill quantity; amount auto. >10 items → items as rows, else dates as rows."}</div>`;
   return `${supHead}${monthBar}${toolbar}${hint}${gridTableHtml(sup,gridMonth,writable)}`;
 }
